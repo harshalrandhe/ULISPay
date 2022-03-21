@@ -1,4 +1,4 @@
-package com.ulisfintech.artha;
+package com.ulisfintech.artha.helper;
 
 public interface PaymentListener {
     void paymentSuccess();

@@ -1,4 +1,4 @@
-package com.ulisfintech.artha;
+package com.ulisfintech.artha.helper;
 
 public class PaymentData {
 
@@ -41,4 +41,6 @@ public class PaymentData {
     public void setPrice(double price) {
         this.price = price;
     }
+
+
 }

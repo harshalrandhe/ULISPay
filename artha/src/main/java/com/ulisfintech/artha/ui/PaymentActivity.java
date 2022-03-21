@@ -1,12 +1,15 @@
-package com.ulisfintech.artha;
+package com.ulisfintech.artha.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
 
 
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
+import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.hostservice.KHostApduService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,9 +30,14 @@ public class PaymentActivity extends AbsActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+
+        if (!intent.hasExtra(intent.getStringExtra(ArthaConstants.NDEF_MESSAGE))) {
+            Log.e(this.getClass().getName(),"NDEF_MESSAGE not found!");
+        }
+
         JSONObject data;
         try {
-            data = new JSONObject(intent.getStringExtra(AppConstants.NDEF_MESSAGE));
+            data = new JSONObject(intent.getStringExtra(ArthaConstants.NDEF_MESSAGE));
             String vendorName = data.getString("vendorName");
             String vendorMobile = data.getString("vendorMobile");
             String product = data.getString("product");
@@ -43,7 +51,7 @@ public class PaymentActivity extends AbsActivity {
             binding.tvProductPrice.setText("₹" + price);
 
             Intent payIntent = new Intent(this, KHostApduService.class);
-            payIntent.putExtra(AppConstants.NDEF_MESSAGE, intent.getStringExtra(AppConstants.NDEF_MESSAGE));
+            payIntent.putExtra(ArthaConstants.NDEF_MESSAGE, intent.getStringExtra(ArthaConstants.NDEF_MESSAGE));
             startService(payIntent);
 
         } catch (JSONException e) {

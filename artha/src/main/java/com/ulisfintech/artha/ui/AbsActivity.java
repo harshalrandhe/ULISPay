@@ -1,4 +1,4 @@
-package com.ulisfintech.artha;
+package com.ulisfintech.artha.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +7,10 @@ import android.content.IntentFilter;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.helper.PaymentListener;
+import com.ulisfintech.artha.hostservice.KHostApduService;
 
 public abstract class AbsActivity extends AppCompatActivity implements PaymentListener {
 
@@ -19,7 +23,7 @@ public abstract class AbsActivity extends AppCompatActivity implements PaymentLi
     protected void onResume() {
         super.onResume();
         if (transactionNotifier == null) transactionNotifier = new TransactionNotifier();
-        registerReceiver(transactionNotifier, new IntentFilter(AppConstants.ACTION_TRANSACTION));
+        registerReceiver(transactionNotifier, new IntentFilter(ArthaConstants.ACTION_TRANSACTION));
     }
 
     @Override
@@ -46,7 +50,7 @@ public abstract class AbsActivity extends AppCompatActivity implements PaymentLi
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction().equals(AppConstants.ACTION_TRANSACTION)) {
+            if (intent != null && intent.getAction().equals(ArthaConstants.ACTION_TRANSACTION)) {
                 paymentSuccess();
             }
         }

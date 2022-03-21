@@ -1,9 +1,5 @@
 package com.ulisfintech.myapplication.ui.products;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -11,11 +7,15 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.bumptech.glide.Glide;
-import com.google.gson.Gson;
-import com.ulisfintech.artha.AppConstants;
-import com.ulisfintech.artha.PaymentActivity;
-import com.ulisfintech.artha.PaymentData;
+import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.helper.JSONConvector;
+import com.ulisfintech.artha.helper.PaymentData;
+import com.ulisfintech.artha.ui.PaymentActivity;
 import com.ulisfintech.myapplication.R;
 import com.ulisfintech.myapplication.databinding.ActivityProductDetailsBinding;
 
@@ -69,7 +69,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 paymentData.setProduct(productBean.getName());
                 paymentData.setPrice(productBean.getPrice());
                 Intent intent = new Intent(this, PaymentActivity.class);
-                intent.putExtra(AppConstants.NDEF_MESSAGE, new Gson().toJson(paymentData));
+                intent.putExtra(ArthaConstants.NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
                 startActivity(intent);
             }else{
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();

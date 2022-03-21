@@ -8,7 +8,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
-import com.ulisfintech.artha.AppConstants;
+import com.ulisfintech.myapplication.communication.local.AppConstants;
 
 import org.jetbrains.annotations.NotNull;
 

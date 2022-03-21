@@ -1,4 +1,4 @@
-package com.ulisfintech.artha
+package com.ulisfintech.artha.hostservice
 
 import android.app.Service
 import android.content.Intent
@@ -7,6 +7,7 @@ import android.nfc.NdefRecord
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
+import com.ulisfintech.artha.helper.ArthaConstants
 import java.io.UnsupportedEncodingException
 import java.math.BigInteger
 import java.util.*
@@ -111,12 +112,12 @@ class KHostApduService : HostApduService() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         this.intent = intent
 
-        if (intent.hasExtra(AppConstants.NDEF_MESSAGE)) {
+        if (intent.hasExtra(ArthaConstants.NDEF_MESSAGE)) {
             NDEF_URI =
                 NdefMessage(
                     createTextRecord(
                         "en",
-                        intent.getStringExtra(AppConstants.NDEF_MESSAGE).toString(), NDEF_ID
+                        intent.getStringExtra(ArthaConstants.NDEF_MESSAGE).toString(), NDEF_ID
                     )
                 )
 
@@ -234,8 +235,8 @@ class KHostApduService : HostApduService() {
         Log.i(TAG, "onDeactivated() Fired! Reason: $reason")
 
         val intent = Intent()
-        intent.action = AppConstants.ACTION_TRANSACTION
-        intent.putExtra(AppConstants.REASON, reason)
+        intent.action = ArthaConstants.ACTION_TRANSACTION
+        intent.putExtra(ArthaConstants.REASON, reason)
         sendBroadcast(intent)
 
     }
