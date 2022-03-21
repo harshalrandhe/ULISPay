@@ -5,10 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.ViewModelProvider;
 
 
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
 import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.helper.JSONConvector;
 import com.ulisfintech.artha.hostservice.KHostApduService;
 
 import org.json.JSONException;
@@ -17,14 +19,43 @@ import org.json.JSONObject;
 public class PaymentActivity extends AbsActivity {
 
     private ActivityPaymentBinding binding;
+    private PaymentViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPaymentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        onNewIntent(getIntent());
         binding.btnCancel.setOnClickListener(view -> finish());
+
+        viewModel = getDefaultViewModelProviderFactory().create(PaymentViewModel.class);
+        viewModel.getPaymentDataMutableLiveData().observe(this, paymentData -> {
+            if (paymentData == null) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Error")
+                        .setMessage("Payments details are not available!")
+                        .setPositiveButton("Okay", (dialogInterface, i) -> {
+                            dialogInterface.dismiss();
+                            onBackPressed();
+                        }).show();
+                return;
+            }
+
+            String mobile = paymentData.getVendorMobile();
+            String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
+
+            binding.tvVendorName.setText(paymentData.getVendorName());
+            binding.tvVendorMobile.setText(strMobile);
+            binding.tvProductName.setText(paymentData.getProduct());
+            binding.tvProductPrice.setText("₹" + paymentData.getPrice());
+
+            //Intent
+            Intent payIntent = new Intent(this, KHostApduService.class);
+            payIntent.putExtra(ArthaConstants.NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
+            startService(payIntent);
+        });
+
+        onNewIntent(getIntent());
     }
 
     @Override
@@ -32,38 +63,10 @@ public class PaymentActivity extends AbsActivity {
         super.onNewIntent(intent);
 
         if (!intent.hasExtra(intent.getStringExtra(ArthaConstants.NDEF_MESSAGE))) {
-            Log.e(this.getClass().getName(),"NDEF_MESSAGE not found!");
+            Log.e(this.getClass().getName(), "NDEF_MESSAGE not found!");
         }
 
-        JSONObject data;
-        try {
-            data = new JSONObject(intent.getStringExtra(ArthaConstants.NDEF_MESSAGE));
-            String vendorName = data.getString("vendorName");
-            String vendorMobile = data.getString("vendorMobile");
-            String product = data.getString("product");
-            String price = data.getString("price");
-
-            String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
-
-            binding.tvVendorName.setText(vendorName);
-            binding.tvVendorMobile.setText(strMobile);
-            binding.tvProductName.setText(product);
-            binding.tvProductPrice.setText("₹" + price);
-
-            Intent payIntent = new Intent(this, KHostApduService.class);
-            payIntent.putExtra(ArthaConstants.NDEF_MESSAGE, intent.getStringExtra(ArthaConstants.NDEF_MESSAGE));
-            startService(payIntent);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            new AlertDialog.Builder(this)
-                    .setTitle("Error")
-                    .setMessage("Payments details are not available!")
-                    .setPositiveButton("Okay", (dialogInterface, i) -> {
-                        dialogInterface.dismiss();
-                        onBackPressed();
-                    }).show();
-        }
+        viewModel.setIntent(intent);
     }
 
     @Override

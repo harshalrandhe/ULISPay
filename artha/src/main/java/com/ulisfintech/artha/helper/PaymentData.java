@@ -10,6 +10,13 @@ public class PaymentData {
     public PaymentData() {
     }
 
+    public PaymentData(String vendorName, String vendorMobile, String product, double price) {
+        this.vendorName = vendorName;
+        this.vendorMobile = vendorMobile;
+        this.product = product;
+        this.price = price;
+    }
+
     public String getVendorName() {
         return vendorName;
     }
