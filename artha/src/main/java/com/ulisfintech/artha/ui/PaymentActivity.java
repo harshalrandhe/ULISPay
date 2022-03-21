@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 
 
+import com.ulisfintech.artha.BuildConfig;
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
 import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.JSONConvector;

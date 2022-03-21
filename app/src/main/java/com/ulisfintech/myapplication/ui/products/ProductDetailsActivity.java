@@ -16,6 +16,7 @@ import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.JSONConvector;
 import com.ulisfintech.artha.helper.PaymentData;
 import com.ulisfintech.artha.ui.PaymentActivity;
+import com.ulisfintech.myapplication.BuildConfig;
 import com.ulisfintech.myapplication.R;
 import com.ulisfintech.myapplication.databinding.ActivityProductDetailsBinding;
 
@@ -63,14 +64,22 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
         binding.btnPay.setOnClickListener(view -> {
             if (binding.radioArtha.isChecked()) {
+
+
+                // inside of any of your application's code
+                String consumerKey = BuildConfig.CONSUMER_KEY;
+                String consumerSecret = BuildConfig.CONSUMER_SECRET;
+
                 PaymentData paymentData = new PaymentData();
                 paymentData.setVendorName("ABC Vendor");
                 paymentData.setVendorMobile("1122334455");
                 paymentData.setProduct(productBean.getName());
                 paymentData.setPrice(productBean.getPrice());
+
                 Intent intent = new Intent(this, PaymentActivity.class);
                 intent.putExtra(ArthaConstants.NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
                 startActivity(intent);
+
             }else{
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();
             }
