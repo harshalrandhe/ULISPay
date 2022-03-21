@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="app/src/main/res/drawable/btn_selector.xml" value="0.25435897435897437" />
+        <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.13802083333333334" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_product_details.xml" value="0.15806159420289856" />
+        <entry key="app/src/main/res/layout/activity_splash.xml" value="0.15806159420289856" />
+        <entry key="app/src/main/res/layout/product_adapter_item.xml" value="0.15806159420289856" />
+        <entry key="app/src/main/res/layout/progrss_dialog_indicator.xml" value="0.11778115501519756" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.13802083333333334" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2518518518518518" />
+        <entry key="artha/src/main/res/drawable/ic_launcher_background.xml" value="1.1333333333333333" />
+        <entry key="artha/src/main/res/drawable/info_layout_shape.xml" value="0.2518518518518518" />
+        <entry key="artha/src/main/res/drawable/text_shape.xml" value="0.2518518518518518" />
+        <entry key="artha/src/main/res/layout/activity_payment.xml" value="0.25" />
+        <entry key="artha/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2518518518518518" />
+        <entry key="aurtha/src/main/res/xml/apdu_service.xml" value="0.21784420289855072" />
+        <entry key="ulisgatway/src/main/res/layout/activity_payment.xml" value="0.21784420289855072" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
