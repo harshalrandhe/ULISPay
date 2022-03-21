@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -70,6 +71,8 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 Intent intent = new Intent(this, PaymentActivity.class);
                 intent.putExtra(AppConstants.NDEF_MESSAGE, new Gson().toJson(paymentData));
                 startActivity(intent);
+            }else{
+                Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 
+
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
 
 import org.json.JSONException;
@@ -20,6 +21,7 @@ public class PaymentActivity extends AbsActivity {
         binding = ActivityPaymentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         onNewIntent(getIntent());
+        binding.btnCancel.setOnClickListener(view -> finish());
     }
 
     @Override
@@ -58,6 +60,14 @@ public class PaymentActivity extends AbsActivity {
 
     @Override
     protected void handleResponse() {
+
+        new AlertDialog.Builder(this)
+                .setTitle("SUCCESS")
+                .setMessage("Transaction is successful!")
+                .setPositiveButton("Okay", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    onBackPressed();
+                }).show();
 
     }
 }

@@ -3,4 +3,5 @@
     <string name="service_desc">Aurtha Payment Service</string>
     <string name="aid_description">Customer App</string>
     <string name="tap_and_pay">Please hold your mobile phone on back side of this device to pay.</string>
+    <string name="label_btn_cancel">Cancel Transaction</string>
 </resources>

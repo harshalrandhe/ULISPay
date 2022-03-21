@@ -162,6 +162,15 @@
             android:gravity="center"
             android:text="@string/tap_and_pay"
             android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/text_shape"
+            android:textColor="@color/white"
+            android:text="@string/label_btn_cancel"/>
     </RelativeLayout>
 
 
