@@ -8,6 +8,8 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -15,12 +17,17 @@ import com.bumptech.glide.Glide;
 import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.JSONConvector;
 import com.ulisfintech.artha.helper.PaymentData;
+import com.ulisfintech.artha.ui.BaseResponse;
+import com.ulisfintech.artha.ui.Gateway;
+import com.ulisfintech.artha.ui.GatewayMap;
+import com.ulisfintech.artha.ui.GatewaySecureCallback;
 import com.ulisfintech.artha.ui.PaymentActivity;
 import com.ulisfintech.myapplication.BuildConfig;
 import com.ulisfintech.myapplication.R;
 import com.ulisfintech.myapplication.databinding.ActivityProductDetailsBinding;
 
-public class ProductDetailsActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+public class ProductDetailsActivity extends AppCompatActivity implements CompoundButton
+        .OnCheckedChangeListener, GatewaySecureCallback {
 
     private ActivityProductDetailsBinding binding;
 
@@ -33,7 +40,6 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
         Toolbar toolbar = binding.toolbar;
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
-//        toolbar.setNavigationIcon(getDrawable(R.drawable.ic_back));
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -57,16 +63,20 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(binding.ivProductPoster);
 
+        /**
+         * Button
+         */
         binding.btnBuyNow.setOnClickListener(view -> {
             binding.paymentLayout.setVisibility(View.VISIBLE);
             view.setVisibility(View.GONE);
         });
 
+        /**
+         * Button
+         */
         binding.btnPay.setOnClickListener(view -> {
             if (binding.radioArtha.isChecked()) {
-
-
-                // inside of any of your application's code
+                // inside
                 String consumerKey = BuildConfig.CONSUMER_KEY;
                 String consumerSecret = BuildConfig.CONSUMER_SECRET;
 
@@ -76,15 +86,20 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 paymentData.setProduct(productBean.getName());
                 paymentData.setPrice(productBean.getPrice());
 
-                Intent intent = new Intent(this, PaymentActivity.class);
-                intent.putExtra(ArthaConstants.NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
-                startActivity(intent);
+                Gateway.startReceivingPaymentActivity(this, JSONConvector.toJSON(paymentData));
 
-            }else{
+            } else {
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();
             }
 
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //After Result
+        Gateway.handleSecureResult(requestCode, resultCode, data,this);
     }
 
     @Override
@@ -104,4 +119,25 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
         compoundButton.setChecked(check);
     }
 
+    @Override
+    public void onSecureComplete(BaseResponse txnResult) {
+        new AlertDialog.Builder(this)
+                .setTitle("SUCCESS")
+                .setMessage(txnResult.getMessage())
+                .setPositiveButton("Okay", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    onBackPressed();
+                }).show();
+    }
+
+    @Override
+    public void onSecureCancel(BaseResponse txnResult) {
+        new AlertDialog.Builder(this)
+                .setTitle("CANCEL")
+                .setMessage(txnResult.getMessage())
+                .setPositiveButton("Okay", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    onBackPressed();
+                }).show();
+    }
 }

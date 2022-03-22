@@ -26,7 +26,7 @@ public class PaymentViewModel extends ViewModel {
     public void setIntent(Intent intent) {
         JSONObject data;
         try {
-            data = new JSONObject(intent.getStringExtra(ArthaConstants.NDEF_MESSAGE));
+            data = new JSONObject(intent.getStringExtra(PaymentActivity.NDEF_MESSAGE));
             String vendorName = data.getString("vendorName");
             String vendorMobile = data.getString("vendorMobile");
             String product = data.getString("product");

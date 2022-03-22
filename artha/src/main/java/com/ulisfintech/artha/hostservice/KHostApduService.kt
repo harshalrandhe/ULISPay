@@ -8,6 +8,7 @@ import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
 import com.ulisfintech.artha.helper.ArthaConstants
+import com.ulisfintech.artha.ui.PaymentActivity
 import java.io.UnsupportedEncodingException
 import java.math.BigInteger
 import java.util.*
@@ -112,12 +113,12 @@ class KHostApduService : HostApduService() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         this.intent = intent
 
-        if (intent.hasExtra(ArthaConstants.NDEF_MESSAGE)) {
+        if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
             NDEF_URI =
                 NdefMessage(
                     createTextRecord(
                         "en",
-                        intent.getStringExtra(ArthaConstants.NDEF_MESSAGE).toString(), NDEF_ID
+                        intent.getStringExtra(PaymentActivity.NDEF_MESSAGE).toString(), NDEF_ID
                     )
                 )
 

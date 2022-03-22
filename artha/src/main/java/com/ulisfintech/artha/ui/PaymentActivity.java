@@ -19,6 +19,16 @@ import org.json.JSONObject;
 
 public class PaymentActivity extends AbsActivity {
 
+    public static final String NDEF_MESSAGE = "com.ulisfintech.artha.android.ndefMessage";
+    /**
+     * The ACS Result data after performing 3DS
+     */
+    public static final String EXTRA_TXN_RESULT = "com.ulisfintech.artha.android.TXN_RESULT";
+
+    public static final int SUCCESS = 200;
+    public static final int ERROR = 400;
+    public static final int CANCEL = 500;
+
     private ActivityPaymentBinding binding;
     private PaymentViewModel viewModel;
 
@@ -52,7 +62,7 @@ public class PaymentActivity extends AbsActivity {
 
             //Intent
             Intent payIntent = new Intent(this, KHostApduService.class);
-            payIntent.putExtra(ArthaConstants.NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
+            payIntent.putExtra(NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
             startService(payIntent);
         });
 
@@ -63,7 +73,7 @@ public class PaymentActivity extends AbsActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (!intent.hasExtra(intent.getStringExtra(ArthaConstants.NDEF_MESSAGE))) {
+        if (!intent.hasExtra(intent.getStringExtra(NDEF_MESSAGE))) {
             Log.e(this.getClass().getName(), "NDEF_MESSAGE not found!");
         }
 
@@ -71,15 +81,10 @@ public class PaymentActivity extends AbsActivity {
     }
 
     @Override
-    protected void handleResponse() {
-
-        new AlertDialog.Builder(this)
-                .setTitle("SUCCESS")
-                .setMessage("Transaction is successful!")
-                .setPositiveButton("Okay", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    onBackPressed();
-                }).show();
-
+    protected void handleResponse(BaseResponse result) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_TXN_RESULT, result);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }
