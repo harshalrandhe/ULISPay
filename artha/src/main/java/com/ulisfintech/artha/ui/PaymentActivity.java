@@ -62,7 +62,7 @@ public class PaymentActivity extends AbsActivity {
 
             //Intent
             Intent payIntent = new Intent(this, KHostApduService.class);
-            payIntent.putExtra(NDEF_MESSAGE, JSONConvector.toJSON(paymentData));
+            payIntent.putExtra(NDEF_MESSAGE, paymentData);
             startService(payIntent);
         });
 
@@ -73,7 +73,7 @@ public class PaymentActivity extends AbsActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (!intent.hasExtra(intent.getStringExtra(NDEF_MESSAGE))) {
+        if (!intent.hasExtra(NDEF_MESSAGE)) {
             Log.e(this.getClass().getName(), "NDEF_MESSAGE not found!");
         }
 

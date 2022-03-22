@@ -1,5 +1,7 @@
 package com.ulisfintech.artha.helper;
 
+import com.google.gson.annotations.Expose;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,17 +32,41 @@ public class JSONConvector {
         System.out.println(jsonObject.toString());
         return jsonObject.toString();
     }
-
-    public static String toJSON(List list) {
-        JSONArray jsonArray = new JSONArray();
-        for (Object i : list) {
-            String jstr = toJSON(i);
+    public static String toJSONExcludeWithoutExposeFields(Object object){
+        Class aClass = object.getClass();
+        JSONObject jsonObject = new JSONObject();
+        for (Field field : aClass.getDeclaredFields()) {
+            if(!field.isAnnotationPresent(Expose.class)){
+                continue;
+            }
+            field.setAccessible(true);
+            String name = field.getName();
+            String value = null;
             try {
-                JSONObject jsonObject = new JSONObject(jstr);
+                value = String.valueOf(field.get(object));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            try {
+                jsonObject.put(name, value);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            jsonArray.put(jsonArray);
+        }
+        System.out.println(jsonObject.toString());
+        return jsonObject.toString();
+    }
+
+    public static String toJSON(List list) {
+        JSONArray jsonArray = new JSONArray();
+        for (Object obj : list) {
+            String jsonString = toJSON(obj);
+            try {
+                JSONObject jsonObject = new JSONObject(jsonString);
+                jsonArray.put(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         return jsonArray.toString();
     }

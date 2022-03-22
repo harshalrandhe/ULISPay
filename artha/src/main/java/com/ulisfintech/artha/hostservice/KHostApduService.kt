@@ -8,6 +8,8 @@ import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
 import com.ulisfintech.artha.helper.ArthaConstants
+import com.ulisfintech.artha.helper.JSONConvector
+import com.ulisfintech.artha.helper.PaymentData
 import com.ulisfintech.artha.ui.PaymentActivity
 import java.io.UnsupportedEncodingException
 import java.math.BigInteger
@@ -114,11 +116,12 @@ class KHostApduService : HostApduService() {
         this.intent = intent
 
         if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
+            var paymentdata: PaymentData? = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)
             NDEF_URI =
                 NdefMessage(
                     createTextRecord(
                         "en",
-                        intent.getStringExtra(PaymentActivity.NDEF_MESSAGE).toString(), NDEF_ID
+                        JSONConvector.toJSONExcludeWithoutExposeFields(paymentdata), NDEF_ID
                     )
                 )
 

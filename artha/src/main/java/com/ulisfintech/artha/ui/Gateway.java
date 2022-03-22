@@ -3,13 +3,20 @@ package com.ulisfintech.artha.ui;
 import android.app.Activity;
 import android.content.Intent;
 
+import com.google.gson.Gson;
+import com.ulisfintech.artha.helper.PaymentData;
+
 public class Gateway {
 
     static final int REQUEST_SECURE = 10000;
+    String merchantId;
 
-    public static void startReceivingPaymentActivity(Activity activity, String param) {
+    public Gateway() {
+    }
+
+    public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) {
         Intent intent = new Intent(activity, PaymentActivity.class);
-        intent.putExtra(PaymentActivity.NDEF_MESSAGE, param);
+        intent.putExtra(PaymentActivity.NDEF_MESSAGE, paymentData);
         activity.startActivityForResult(intent, REQUEST_SECURE);
     }
 
@@ -34,4 +41,29 @@ public class Gateway {
         return false;
     }
 
+    /**
+     * Gets the current Merchant ID
+     *
+     * @return The current Merchant ID
+     */
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    /**
+     * Sets the current Merchant ID
+     *
+     * @param merchantId A valid Merchant ID
+     * @return The <tt>Gateway</tt> instance
+     * @throws IllegalArgumentException If the provided Merchant ID is null
+     */
+    public Gateway setMerchantId(String merchantId) {
+        if (merchantId == null) {
+            throw new IllegalArgumentException("Merchant ID may not be null");
+        }
+
+        this.merchantId = merchantId;
+
+        return this;
+    }
 }

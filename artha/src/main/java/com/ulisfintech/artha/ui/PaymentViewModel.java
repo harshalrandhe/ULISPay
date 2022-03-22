@@ -24,21 +24,16 @@ public class PaymentViewModel extends ViewModel {
     }
 
     public void setIntent(Intent intent) {
-        JSONObject data;
-        try {
-            data = new JSONObject(intent.getStringExtra(PaymentActivity.NDEF_MESSAGE));
-            String vendorName = data.getString("vendorName");
-            String vendorMobile = data.getString("vendorMobile");
-            String product = data.getString("product");
-            double price = data.getDouble("price");
 
-            String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
+        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
+        String vendorName = paymentData.getVendorName();
+        String vendorMobile = paymentData.getVendorMobile();
+        String product = paymentData.getProduct();
+        double price = paymentData.getPrice();
 
-            paymentDataMutableLiveData.setValue(new PaymentData(vendorName, strMobile, product, price))
-            ;
-        } catch (JSONException e) {
-            e.printStackTrace();
-            paymentDataMutableLiveData.setValue(null);
-        }
+        String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
+
+        paymentDataMutableLiveData.setValue(new PaymentData(vendorName, strMobile, product, price))
+        ;
     }
 }

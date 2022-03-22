@@ -76,9 +76,6 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
          */
         binding.btnPay.setOnClickListener(view -> {
             if (binding.radioArtha.isChecked()) {
-                // inside
-                String consumerKey = BuildConfig.CONSUMER_KEY;
-                String consumerSecret = BuildConfig.CONSUMER_SECRET;
 
                 PaymentData paymentData = new PaymentData();
                 paymentData.setVendorName("ABC Vendor");
@@ -86,7 +83,13 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 paymentData.setProduct(productBean.getName());
                 paymentData.setPrice(productBean.getPrice());
 
-                Gateway.startReceivingPaymentActivity(this, JSONConvector.toJSON(paymentData));
+                paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
+                paymentData.setMerchantKey(BuildConfig.MERCHANT_SECRET);
+
+                /**
+                 * Start payment receiver
+                 */
+                Gateway.startReceivingPaymentActivity(this, paymentData);
 
             } else {
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();
