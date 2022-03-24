@@ -9,5 +9,5 @@ class GatewayRequest {
     String URL;
     String method;
     Map<String, String> extraHeaders = new HashMap<>();
-    OrderPayload payload;
+    Object payload;
 }

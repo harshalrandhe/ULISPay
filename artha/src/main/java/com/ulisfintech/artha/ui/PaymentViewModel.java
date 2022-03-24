@@ -65,8 +65,10 @@ public class PaymentViewModel extends ViewModel {
         orderBean.setCustomer_mobile("0987654321");
         orderBean.setReturn_url("https://ulis.co.uk/payment_status");
         orderBean.setResource("API");
-        orderBean.setX_KEY(paymentData.getMerchantKey());
-        orderBean.setX_PASSWORD(paymentData.getMerchantSecret());
+        HeaderBean headerBean = new HeaderBean();
+        headerBean.setX_KEY(paymentData.getMerchantKey());
+        headerBean.setX_PASSWORD(paymentData.getMerchantSecret());
+        orderBean.setHeaders(headerBean);
 
         Gateway gateway = new Gateway();
         GatewayRequest request = gateway.buildGatewayRequest(orderBean);
@@ -78,6 +80,26 @@ public class PaymentViewModel extends ViewModel {
                 Gson gson = new Gson();
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
                 orderResponseMutableLiveData.setValue(orderResponse);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Log.e("API>>", throwable.getMessage());
+            }
+        });
+    }
+
+    void checkOrderStatusAsync(HeaderBean headerBean) {
+        Gateway gateway = new Gateway();
+        GatewayRequest request = gateway.buildOrderStatusRequest("", headerBean);
+        request.URL += "Details";
+        gateway.call(request, new GatewayCallback() {
+            @Override
+            public void onSuccess(GatewayMap response) {
+                Log.e("API>>", response.toString());
+                Gson gson = new Gson();
+//                OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
+//                orderResponseMutableLiveData.setValue(orderResponse);
             }
 
             @Override

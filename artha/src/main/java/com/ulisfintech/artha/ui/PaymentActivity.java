@@ -32,6 +32,7 @@ public class PaymentActivity extends AbsActivity {
 
     private ActivityPaymentBinding binding;
     private PaymentViewModel viewModel;
+    private PaymentData paymentData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class PaymentActivity extends AbsActivity {
             binding.tvProductName.setText(paymentData.getProduct());
             binding.tvProductPrice.setText("₹" + paymentData.getPrice());
 
+            this.paymentData = paymentData;
         });
 
         /**
@@ -72,6 +74,16 @@ public class PaymentActivity extends AbsActivity {
             Intent payIntent = new Intent(this, KHostApduService.class);
             payIntent.putExtra(NDEF_MESSAGE, orderResponse);
             startService(payIntent);
+
+            /**
+             * Check Order Status
+             */
+            if (paymentData != null) {
+                HeaderBean headerBean = new HeaderBean();
+                headerBean.setX_KEY(paymentData.getMerchantKey());
+                headerBean.setX_PASSWORD(paymentData.getMerchantSecret());
+                viewModel.checkOrderStatusAsync(headerBean);
+            }
         });
 
         onNewIntent(getIntent());

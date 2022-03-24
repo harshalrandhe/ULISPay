@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +30,8 @@ public class Gateway<T> {
     static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
     static final String API_OPERATION = "UPDATE_PAYER_DATA";
     static final String USER_AGENT = "Artha-Android-SDK/";//+ BuildConfig.VERSION_NAME;
-    private final String BASE_ORDER_URL = "https://pach.dev.pay.ulis.co.uk/order/";;
+    private final String BASE_ORDER_URL = "https://pach.dev.pay.ulis.co.uk/order/";
+    ;
 
     static final int REQUEST_SECURE = 10000;
     String merchantId;
@@ -95,19 +94,28 @@ public class Gateway<T> {
         this.merchantId = merchantId;
     }
 
+    GatewayRequest buildOrderStatusRequest(String orderId, HeaderBean headerBean) {
+        GatewayRequest request = new GatewayRequest();
+        request.URL = BASE_ORDER_URL;
+        request.method = GatewayRequest.POST;
+        request.payload = new OrderStatusPayload(new OrderIdBean(orderId));
+        request.extraHeaders = getHeaders(headerBean);
+        return request;
+    }
+
     GatewayRequest buildGatewayRequest(OrderBean orderBean) {
         GatewayRequest request = new GatewayRequest();
         request.URL = BASE_ORDER_URL;
         request.method = GatewayRequest.POST;
         request.payload = new OrderPayload(orderBean);
-        request.extraHeaders = getHeaders(orderBean);
+        request.extraHeaders = getHeaders(orderBean.getHeaders());
         return request;
     }
 
-    private Map<String, String> getHeaders(OrderBean orderBean) {
+    private Map<String, String> getHeaders(HeaderBean headerBean) {
         HashMap<String, String> headers = new HashMap<>();
-        headers.put("X-Key", orderBean.getX_KEY());
-        headers.put("X-Password", orderBean.getX_PASSWORD());
+        headers.put("X-Key", headerBean.getX_KEY());
+        headers.put("X-Password", headerBean.getX_PASSWORD());
         return headers;
     }
 
@@ -140,62 +148,62 @@ public class Gateway<T> {
         return true;
     }
 
-   GatewayMap executeGatewayRequest(GatewayRequest request) throws Exception {
-       // init connection
-       HttpsURLConnection c = createHttpsUrlConnection(request);
+    GatewayMap executeGatewayRequest(GatewayRequest request) throws Exception {
+        // init connection
+        HttpsURLConnection c = createHttpsUrlConnection(request);
 
-       // encode request data to json
-       String requestData = gson.toJson(request.payload);
+        // encode request data to json
+        String requestData = gson.toJson(request.payload);
 
-       // log request data
+        // log request data
 //       logger.logRequest(c, requestData);
 
-       // write request data
-       if (requestData != null) {
-           OutputStream os = c.getOutputStream();
-           os.write(requestData.getBytes("UTF-8"));
-           os.close();
-       }
+        // write request data
+        if (requestData != null) {
+            OutputStream os = c.getOutputStream();
+            os.write(requestData.getBytes("UTF-8"));
+            os.close();
+        }
 
-       // initiate the connection
-       c.connect();
+        // initiate the connection
+        c.connect();
 
-       String responseData = null;
-       int statusCode = c.getResponseCode();
-       boolean isStatusOk = (statusCode >= 200 && statusCode < 300);
+        String responseData = null;
+        int statusCode = c.getResponseCode();
+        boolean isStatusOk = (statusCode >= 200 && statusCode < 300);
 
-       // if connection has output stream, get the data
-       // socket time-out exceptions will be thrown here
-       if (c.getDoInput()) {
-           InputStream is = isStatusOk ? c.getInputStream() : c.getErrorStream();
-           responseData = inputStreamToString(is);
-           is.close();
-       }
+        // if connection has output stream, get the data
+        // socket time-out exceptions will be thrown here
+        if (c.getDoInput()) {
+            InputStream is = isStatusOk ? c.getInputStream() : c.getErrorStream();
+            responseData = inputStreamToString(is);
+            is.close();
+        }
 
-       c.disconnect();
+        c.disconnect();
 
-       // log response
+        // log response
 //       logger.logResponse(c, responseData);
 
-       // parse the response body
-       GatewayMap response = new GatewayMap(responseData);
+        // parse the response body
+        GatewayMap response = new GatewayMap(responseData);
 
-       // if response static is good, return response
-       if (isStatusOk) {
-           return response;
-       }
+        // if response static is good, return response
+        if (isStatusOk) {
+            return response;
+        }
 
-       // otherwise, create a gateway exception and throw it
-       String message = (String) response.get("error.explanation");
-       if (message == null) {
-           message = "An error occurred";
-       }
+        // otherwise, create a gateway exception and throw it
+        String message = (String) response.get("error.explanation");
+        if (message == null) {
+            message = "An error occurred";
+        }
 
-       GatewayException exception = new GatewayException(message);
-       exception.setStatusCode(statusCode);
-       exception.setErrorResponse(response);
+        GatewayException exception = new GatewayException(message);
+        exception.setStatusCode(statusCode);
+        exception.setErrorResponse(response);
 
-       throw exception;
+        throw exception;
     }
 
     HttpsURLConnection createHttpsUrlConnection(GatewayRequest request) throws Exception {
