@@ -1,4 +1,4 @@
-package com.ulisfintech.artha.helper;
+package com.ulisfintech.artha.ui;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,6 +15,8 @@ public class PaymentData implements Parcelable {
     private String product;
     @Expose
     private double price;
+    @Expose
+    private String currency;
 
     private String merchantKey;
     private String merchantSecret;
@@ -22,18 +24,12 @@ public class PaymentData implements Parcelable {
     public PaymentData() {
     }
 
-    public PaymentData(String vendorName, String vendorMobile, String product, double price) {
-        this.vendorName = vendorName;
-        this.vendorMobile = vendorMobile;
-        this.product = product;
-        this.price = price;
-    }
-
     protected PaymentData(Parcel in) {
         vendorName = in.readString();
         vendorMobile = in.readString();
         product = in.readString();
         price = in.readDouble();
+        currency = in.readString();
         merchantKey = in.readString();
         merchantSecret = in.readString();
     }
@@ -44,6 +40,7 @@ public class PaymentData implements Parcelable {
         dest.writeString(vendorMobile);
         dest.writeString(product);
         dest.writeDouble(price);
+        dest.writeString(currency);
         dest.writeString(merchantKey);
         dest.writeString(merchantSecret);
     }
@@ -95,6 +92,14 @@ public class PaymentData implements Parcelable {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public String getMerchantKey() {

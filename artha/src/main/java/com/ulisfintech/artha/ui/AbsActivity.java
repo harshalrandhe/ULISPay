@@ -37,13 +37,13 @@ public abstract class AbsActivity extends AppCompatActivity implements PaymentLi
     @Override
     public void paymentSuccess() {
         Log.e("paymentSuccess", "<<<<<<<<");
-        handleResponse(new BaseResponse(PaymentActivity.SUCCESS,"Transaction is successful!"));
+        handleResponse(new BaseResponse(true,"Transaction is successful!"));
     }
 
     @Override
     public void paymentError() {
         Log.e("paymentError", "<<<<<<<<");
-        handleResponse(new BaseResponse(PaymentActivity.ERROR,"Transaction failed!"));
+        handleResponse(new BaseResponse(false,"Transaction failed!"));
     }
 
     private class TransactionNotifier extends BroadcastReceiver {

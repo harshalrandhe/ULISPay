@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 
 import com.ulisfintech.artha.BuildConfig;
+import com.ulisfintech.artha.api.Call;
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
 import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.JSONConvector;
@@ -41,6 +42,7 @@ public class PaymentActivity extends AbsActivity {
 
         viewModel = getDefaultViewModelProviderFactory().create(PaymentViewModel.class);
         viewModel.getPaymentDataMutableLiveData().observe(this, paymentData -> {
+
             if (paymentData == null) {
                 new AlertDialog.Builder(this)
                         .setTitle("Error")
@@ -60,9 +62,15 @@ public class PaymentActivity extends AbsActivity {
             binding.tvProductName.setText(paymentData.getProduct());
             binding.tvProductPrice.setText("₹" + paymentData.getPrice());
 
+        });
+
+        /**
+         * Observer
+         */
+        viewModel.getIsOrderCreated().observe(this, orderResponse -> {
             //Intent
             Intent payIntent = new Intent(this, KHostApduService.class);
-            payIntent.putExtra(NDEF_MESSAGE, paymentData);
+            payIntent.putExtra(NDEF_MESSAGE, orderResponse);
             startService(payIntent);
         });
 

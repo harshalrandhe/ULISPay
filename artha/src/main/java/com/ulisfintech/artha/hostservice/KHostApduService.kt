@@ -9,7 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import com.ulisfintech.artha.helper.ArthaConstants
 import com.ulisfintech.artha.helper.JSONConvector
-import com.ulisfintech.artha.helper.PaymentData
+import com.ulisfintech.artha.ui.OrderResponse
 import com.ulisfintech.artha.ui.PaymentActivity
 import java.io.UnsupportedEncodingException
 import java.math.BigInteger
@@ -116,12 +116,12 @@ class KHostApduService : HostApduService() {
         this.intent = intent
 
         if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
-            var paymentdata: PaymentData? = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)
+            var orderPayload: OrderResponse? = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)
             NDEF_URI =
                 NdefMessage(
                     createTextRecord(
                         "en",
-                        JSONConvector.toJSONExcludeWithoutExposeFields(paymentdata), NDEF_ID
+                        JSONConvector.toJSONExcludeWithoutExposeFields(orderPayload), NDEF_ID
                     )
                 )
 

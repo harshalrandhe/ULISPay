@@ -14,14 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
-import com.ulisfintech.artha.helper.ArthaConstants;
-import com.ulisfintech.artha.helper.JSONConvector;
-import com.ulisfintech.artha.helper.PaymentData;
+import com.ulisfintech.artha.ui.PaymentData;
 import com.ulisfintech.artha.ui.BaseResponse;
 import com.ulisfintech.artha.ui.Gateway;
-import com.ulisfintech.artha.ui.GatewayMap;
 import com.ulisfintech.artha.ui.GatewaySecureCallback;
-import com.ulisfintech.artha.ui.PaymentActivity;
 import com.ulisfintech.myapplication.BuildConfig;
 import com.ulisfintech.myapplication.R;
 import com.ulisfintech.myapplication.databinding.ActivityProductDetailsBinding;
@@ -83,8 +79,8 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 paymentData.setProduct(productBean.getName());
                 paymentData.setPrice(productBean.getPrice());
 
-                paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
-                paymentData.setMerchantKey(BuildConfig.MERCHANT_SECRET);
+                paymentData.setMerchantKey(BuildConfig.X_KEY);
+                paymentData.setMerchantSecret(BuildConfig.X_PASSWORD);
 
                 /**
                  * Start payment receiver

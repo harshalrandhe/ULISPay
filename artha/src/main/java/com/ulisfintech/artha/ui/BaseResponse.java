@@ -5,20 +5,49 @@ import android.os.Parcelable;
 
 public class BaseResponse implements Parcelable {
 
-    private int status;
+
+    private boolean status;
+
     private String message;
 
     public BaseResponse() {
     }
 
-    public BaseResponse(int status, String message) {
+    public BaseResponse(boolean status, String message) {
         this.status = status;
         this.message = message;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     protected BaseResponse(Parcel in) {
-        status = in.readInt();
+        status = in.readByte() != 0;
         message = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte((byte) (status ? 1 : 0));
+        dest.writeString(message);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<BaseResponse> CREATOR = new Creator<BaseResponse>() {
@@ -32,31 +61,4 @@ public class BaseResponse implements Parcelable {
             return new BaseResponse[size];
         }
     };
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(status);
-        parcel.writeString(message);
-    }
 }

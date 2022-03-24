@@ -20,8 +20,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // should correspond to key/value pairs inside the file
-        buildConfigField("String", "MERCHANT_KEY", apikeyProperties['MERCHANT_KEY'])
-        buildConfigField("String", "MERCHANT_SECRET", apikeyProperties['MERCHANT_SECRET'])
+        buildConfigField("String", "X_KEY", apikeyProperties['X_KEY'])
+        buildConfigField("String", "X_PASSWORD", apikeyProperties['X_PASSWORD'])
     }
 
     buildTypes {
