@@ -15,7 +15,6 @@ package com.ulisfintech.artha.helper;
 
     String ITEM_POSITION = "item_position";
 
-    String NDEF_MESSAGE = "com.ulisfintech.artha.ndefMessage";
     String ACTION_TRANSACTION = "action_transaction_";
     String REASON = "reason";
 }

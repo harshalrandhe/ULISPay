@@ -9,15 +9,15 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ulisfintech.artha.helper.ArthaConstants;
-import com.ulisfintech.artha.helper.PaymentListener;
+import com.ulisfintech.artha.helper.NFCListener;
 import com.ulisfintech.artha.hostservice.KHostApduService;
 
-public abstract class AbsActivity extends AppCompatActivity implements PaymentListener {
+public abstract class AbsActivity extends AppCompatActivity implements NFCListener {
 
 
     private TransactionNotifier transactionNotifier;
 
-    protected abstract void handleResponse(BaseResponse result);
+    protected abstract void handleResponse(SyncMessage syncMessage);
 
     @Override
     protected void onResume() {
@@ -35,15 +35,26 @@ public abstract class AbsActivity extends AppCompatActivity implements PaymentLi
     }
 
     @Override
-    public void paymentSuccess() {
-        Log.e("paymentSuccess", "<<<<<<<<");
-        handleResponse(new BaseResponse(true,"Transaction is successful!"));
+    public void readSuccess(OrderResponse orderResponse) {
+
+        SyncMessage syncMessage = new SyncMessage();
+        syncMessage.message = "Payment successful";
+        syncMessage.status = true;
+        syncMessage.data = orderResponse;
+        handleResponse(syncMessage);
+
+        Log.e("<STATUS>", "<<<<<<<<" + syncMessage.message);
     }
 
     @Override
-    public void paymentError() {
-        Log.e("paymentError", "<<<<<<<<");
-        handleResponse(new BaseResponse(false,"Transaction failed!"));
+    public void readError() {
+
+        SyncMessage syncMessage = new SyncMessage();
+        syncMessage.message = "Payment successful";
+        syncMessage.status = false;
+        handleResponse(syncMessage);
+
+        Log.e("<STATUS>", "<<<<<<<<" + syncMessage.message);
     }
 
     private class TransactionNotifier extends BroadcastReceiver {
@@ -51,7 +62,12 @@ public abstract class AbsActivity extends AppCompatActivity implements PaymentLi
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null && intent.getAction().equals(ArthaConstants.ACTION_TRANSACTION)) {
-                paymentSuccess();
+                OrderResponse orderResponse = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
+                if (orderResponse != null) {
+                    readSuccess(orderResponse);
+                } else {
+                    readError();
+                }
             }
         }
     }

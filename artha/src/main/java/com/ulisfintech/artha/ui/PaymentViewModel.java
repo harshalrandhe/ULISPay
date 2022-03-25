@@ -1,6 +1,9 @@
 package com.ulisfintech.artha.ui;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -12,10 +15,13 @@ public class PaymentViewModel extends ViewModel {
 
     private MutableLiveData<PaymentData> paymentDataMutableLiveData;
     private MutableLiveData<OrderResponse> orderResponseMutableLiveData;
+    private MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
+    private ProgressDialog progressDialog;
 
     public PaymentViewModel() {
         this.paymentDataMutableLiveData = new MutableLiveData<>();
         this.orderResponseMutableLiveData = new MutableLiveData<>();
+        this.orderStatusBeanMutableLiveData = new MutableLiveData<>();
     }
 
     /**
@@ -37,11 +43,20 @@ public class PaymentViewModel extends ViewModel {
     }
 
     /**
+     * Observer Method
+     *
+     * @return order status and other data
+     */
+    public MutableLiveData<OrderStatusBean> getOrderStatusBeanMutableLiveData() {
+        return orderStatusBeanMutableLiveData;
+    }
+
+    /**
      * Intent Received From Marchant
      *
      * @param intent product data
      */
-    public void setIntent(Intent intent) {
+    public void setIntent(Context context, Intent intent) {
         PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
         String vendorMobile = paymentData.getVendorMobile();
         String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
@@ -52,11 +67,15 @@ public class PaymentViewModel extends ViewModel {
         /**
          *  Place New Order
          */
-        createOrder(paymentData);
+        createOrderAsync(context, paymentData);
     }
 
-    public void createOrder(PaymentData paymentData) {
-
+    /**
+     * Create Payment Order
+     *
+     * @param paymentData merchant details
+     */
+    void createOrderAsync(Context context, PaymentData paymentData) {
         OrderBean orderBean = new OrderBean();
         orderBean.setAmount(paymentData.getPrice());
         orderBean.setCurrency("USD");
@@ -70,41 +89,92 @@ public class PaymentViewModel extends ViewModel {
         headerBean.setX_PASSWORD(paymentData.getMerchantSecret());
         orderBean.setHeaders(headerBean);
 
+        ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setTitle("Please wait...");
+        progressDialog.show();
+
         Gateway gateway = new Gateway();
         GatewayRequest request = gateway.buildGatewayRequest(orderBean);
         request.URL += "Create";
         gateway.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
-                Log.e("API>>", response.toString());
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", response.toString());
                 Gson gson = new Gson();
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
-                orderResponseMutableLiveData.setValue(orderResponse);
+                if (orderResponse != null) {
+                    orderResponseMutableLiveData.setValue(orderResponse);
+                }
             }
 
             @Override
             public void onError(Throwable throwable) {
-                Log.e("API>>", throwable.getMessage());
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<ERROR>>", throwable.getMessage());
             }
         });
     }
 
-    void checkOrderStatusAsync(HeaderBean headerBean) {
+    /**
+     * Check Order Status
+     *
+     * @param headerBean API Headers
+     * @param orderId Order Id
+     */
+    void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId) {
+
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setTitle("Do not press back button...");
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
+        }
+
         Gateway gateway = new Gateway();
-        GatewayRequest request = gateway.buildOrderStatusRequest("", headerBean);
+        GatewayRequest request = gateway.buildOrderStatusRequest(orderId, headerBean);
         request.URL += "Details";
         gateway.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
-                Log.e("API>>", response.toString());
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", response.toString());
+
                 Gson gson = new Gson();
-//                OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
-//                orderResponseMutableLiveData.setValue(orderResponse);
+                OrderStatusResponse orderStatusResponse = gson.fromJson(gson.toJson(response),
+                        OrderStatusResponse.class);
+
+                if (orderStatusResponse != null && orderStatusResponse.getData() != null) {
+                    if (orderStatusResponse.getData().getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_CREATED)) {
+
+                        // Check order status on every second
+                        new Handler().postDelayed(() -> {
+                            checkOrderStatusAsync(context, headerBean, orderId);
+                        }, 2000);
+
+                    } else {
+
+                        if (progressDialog.isShowing()) progressDialog.dismiss();
+                        orderStatusBeanMutableLiveData.setValue(orderStatusResponse.getData());
+                    }
+                }
             }
 
             @Override
             public void onError(Throwable throwable) {
-                Log.e("API>>", throwable.getMessage());
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<ERROR>>", throwable.getMessage());
             }
         });
     }

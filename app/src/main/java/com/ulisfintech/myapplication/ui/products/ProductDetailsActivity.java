@@ -119,7 +119,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
     }
 
     @Override
-    public void onSecureComplete(BaseResponse txnResult) {
+    public void onTransactionComplete(BaseResponse txnResult) {
         new AlertDialog.Builder(this)
                 .setTitle("SUCCESS")
                 .setMessage(txnResult.getMessage())
@@ -130,7 +130,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
     }
 
     @Override
-    public void onSecureCancel(BaseResponse txnResult) {
+    public void onTransactionCancel(BaseResponse txnResult) {
         new AlertDialog.Builder(this)
                 .setTitle("CANCEL")
                 .setMessage(txnResult.getMessage())

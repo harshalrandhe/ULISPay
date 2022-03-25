@@ -111,12 +111,13 @@ class KHostApduService : HostApduService() {
     )
 
     private var intent = Intent()
+    private var orderPayload: OrderResponse? = null
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         this.intent = intent
 
         if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
-            var orderPayload: OrderResponse? = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)
+            orderPayload = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)!!
             NDEF_URI =
                 NdefMessage(
                     createTextRecord(
@@ -241,6 +242,9 @@ class KHostApduService : HostApduService() {
         val intent = Intent()
         intent.action = ArthaConstants.ACTION_TRANSACTION
         intent.putExtra(ArthaConstants.REASON, reason)
+        if (orderPayload != null) {
+            intent.putExtra(PaymentActivity.NDEF_MESSAGE, orderPayload)
+        }
         sendBroadcast(intent)
 
     }

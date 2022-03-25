@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-public class Gateway<T> {
+public class Gateway {
 
     static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
@@ -42,8 +42,8 @@ public class Gateway<T> {
     }
 
     /**
-     * @param activity
-     * @param paymentData
+     * @param activity calling activity
+     * @param paymentData required data for payment transaction(Product information)
      */
     public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) {
         Intent intent = new Intent(activity, PaymentActivity.class);
@@ -58,12 +58,10 @@ public class Gateway<T> {
 
         if (requestCode == REQUEST_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
-                BaseResponse txnResult = data.getParcelableExtra(PaymentActivity.EXTRA_TXN_RESULT);
-//                String acsResultJson = data.getStringExtra(PaymentActivity.EXTRA_TXN_RESULT);
-//                GatewayMap acsResult = new GatewayMap(acsResultJson);
-                callback.onSecureComplete(txnResult);
+                OrderStatusBean txnResult = data.getParcelableExtra(PaymentActivity.EXTRA_TXN_RESULT);
+                callback.onTransactionComplete(txnResult);
             } else {
-                callback.onSecureCancel(new BaseResponse(false, "Transaction cancel!"));
+                callback.onTransactionCancel(new BaseResponse(false, "Transaction cancel!"));
             }
 
             return true;

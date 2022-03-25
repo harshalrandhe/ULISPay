@@ -8,11 +8,11 @@ public interface GatewaySecureCallback {
      * @param txnResult A response map containing the Txn result
      */
 //    void onSecureComplete(GatewayMap txnResult);
-    void onSecureComplete(BaseResponse txnResult);
+    void onTransactionComplete(BaseResponse txnResult);
 
     /**
      * Callback when a user cancels the transaction flow. (typically on back press)
      */
 //    void onSecureCancel();
-    void onSecureCancel(BaseResponse txnResult);
+    void onTransactionCancel(BaseResponse txnResult);
 }
