@@ -4,9 +4,16 @@
     package="com.ulisfintech.artha">
 
     <uses-permission android:name="android.permission.NFC" />
+
     <uses-feature android:name="android.hardware.nfc" />
     <uses-feature android:name="FEATURE_NFC_HOST_CARD_EMULATION" />
+
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <application>
+        <activity
+            android:name=".ui.ReaderActivity"
+            android:exported="true" />
+    </application>
 
 </manifest>

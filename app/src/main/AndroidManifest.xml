@@ -38,15 +38,16 @@
             android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity
             android:name="com.ulisfintech.artha.ui.PaymentActivity"
+            android:exported="true"
             android:screenOrientation="userPortrait"
-
-            android:theme="@style/Theme.Design.Light.NoActionBar" />
+            android:theme="@style/Theme.Design.Light.NoActionBar">
+        </activity>
 
         <service
             android:name="com.ulisfintech.artha.hostservice.KHostApduService"
+            android:description="@string/service_desc"
             android:enabled="true"
             android:exported="true"
-            android:description="@string/service_desc"
             android:permission="android.permission.BIND_NFC_SERVICE">
             <intent-filter>
                 <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />

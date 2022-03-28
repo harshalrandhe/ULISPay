@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Base64;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -110,6 +111,15 @@ public class Gateway {
         return request;
     }
 
+    GatewayRequest buildPaymentRequest(PaymentRequestBean bean) {
+        GatewayRequest request = new GatewayRequest();
+        request.URL = BASE_ORDER_URL;
+        request.method = GatewayRequest.POST;
+        request.payload = new PaymentPayload(bean);
+        request.extraHeaders = getHeaders(bean.getHeaders());
+        return request;
+    }
+
     private Map<String, String> getHeaders(HeaderBean headerBean) {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("X-Key", headerBean.getX_KEY());
@@ -155,6 +165,7 @@ public class Gateway {
 
         // log request data
 //       logger.logRequest(c, requestData);
+        Log.e("<<Request>>", requestData);
 
         // write request data
         if (requestData != null) {

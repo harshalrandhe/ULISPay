@@ -15,13 +15,17 @@ public class PaymentViewModel extends ViewModel {
 
     private MutableLiveData<PaymentData> paymentDataMutableLiveData;
     private MutableLiveData<OrderResponse> orderResponseMutableLiveData;
+    private MutableLiveData<TransactionResponseBean> transactionResponseBeanMutableLiveData;
     private MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
     private ProgressDialog progressDialog;
+    private OrderResponse orderResponse;
+    private PaymentData paymentData;
 
     public PaymentViewModel() {
         this.paymentDataMutableLiveData = new MutableLiveData<>();
         this.orderResponseMutableLiveData = new MutableLiveData<>();
         this.orderStatusBeanMutableLiveData = new MutableLiveData<>();
+        this.transactionResponseBeanMutableLiveData = new MutableLiveData<>();
     }
 
     /**
@@ -51,23 +55,30 @@ public class PaymentViewModel extends ViewModel {
         return orderStatusBeanMutableLiveData;
     }
 
+    public MutableLiveData<TransactionResponseBean> getTransactionResponseBeanMutableLiveData() {
+        return transactionResponseBeanMutableLiveData;
+    }
+
     /**
      * Intent Received From Marchant
      *
      * @param intent product data
      */
     public void setIntent(Context context, Intent intent) {
+
         PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
         String vendorMobile = paymentData.getVendorMobile();
         String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
         paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
+        this.paymentData = paymentData;
 
         /**
          *  Place New Order
          */
         createOrderAsync(context, paymentData);
+
     }
 
     /**
@@ -97,6 +108,8 @@ public class PaymentViewModel extends ViewModel {
         GatewayRequest request = gateway.buildGatewayRequest(orderBean);
         request.URL += "Create";
         gateway.call(request, new GatewayCallback() {
+
+
             @Override
             public void onSuccess(GatewayMap response) {
 
@@ -108,6 +121,7 @@ public class PaymentViewModel extends ViewModel {
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
                 if (orderResponse != null) {
                     orderResponseMutableLiveData.setValue(orderResponse);
+                    PaymentViewModel.this.orderResponse = orderResponse;
                 }
             }
 
@@ -126,7 +140,7 @@ public class PaymentViewModel extends ViewModel {
      * Check Order Status
      *
      * @param headerBean API Headers
-     * @param orderId Order Id
+     * @param orderId    Order Id
      */
     void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId) {
 
@@ -175,6 +189,48 @@ public class PaymentViewModel extends ViewModel {
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<ERROR>>", throwable.getMessage());
+            }
+        });
+    }
+
+    void proceedToPaymentAsync(Context context, PaymentRequestBean paymentRequestBean) {
+
+
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setTitle("Do not press back button...");
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
+        }
+
+
+        Gateway gateway = new Gateway();
+        GatewayRequest request = gateway.buildPaymentRequest(paymentRequestBean);
+        request.URL += "Pay";
+        gateway.call(request, new GatewayCallback() {
+            @Override
+            public void onSuccess(GatewayMap response) {
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", response.toString());
+                Gson gson = new Gson();
+                TransactionResponseBean responseBean = gson.fromJson(gson.toJson(response), TransactionResponseBean.class);
+                if (responseBean != null) {
+                    transactionResponseBeanMutableLiveData.setValue(responseBean);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<ERROR>>", throwable.getMessage());
+                transactionResponseBeanMutableLiveData.setValue(null);
             }
         });
     }
