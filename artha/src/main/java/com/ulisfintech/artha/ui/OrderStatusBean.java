@@ -33,7 +33,9 @@ public class OrderStatusBean extends BaseResponse implements Parcelable {
     private String country;
     @Expose
     private String payment_method;
+
     BaseResponse baseResponse;
+
     public OrderStatusBean() {
     }
 

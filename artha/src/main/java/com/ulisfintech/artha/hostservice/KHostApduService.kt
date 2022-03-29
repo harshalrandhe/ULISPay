@@ -117,6 +117,7 @@ class KHostApduService : HostApduService() {
         this.intent = intent
 
         if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
+
             orderPayload = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)!!
             NDEF_URI =
                 NdefMessage(

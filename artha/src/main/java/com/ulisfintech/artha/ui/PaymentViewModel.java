@@ -1,8 +1,9 @@
 package com.ulisfintech.artha.ui;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Handler;
 import android.util.Log;
 
@@ -10,16 +11,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.gson.Gson;
+import com.ulisfintech.artha.R;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class PaymentViewModel extends ViewModel {
 
-    private MutableLiveData<PaymentData> paymentDataMutableLiveData;
-    private MutableLiveData<OrderResponse> orderResponseMutableLiveData;
-    private MutableLiveData<TransactionResponseBean> transactionResponseBeanMutableLiveData;
-    private MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
-    private ProgressDialog progressDialog;
-    private OrderResponse orderResponse;
-    private PaymentData paymentData;
+    private final MutableLiveData<PaymentData> paymentDataMutableLiveData;
+    private final MutableLiveData<OrderResponse> orderResponseMutableLiveData;
+    private final MutableLiveData<TransactionResponseBean> transactionResponseBeanMutableLiveData;
+    private final MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
+    private SweetAlertDialog progressDialog;
 
     public PaymentViewModel() {
         this.paymentDataMutableLiveData = new MutableLiveData<>();
@@ -55,12 +57,15 @@ public class PaymentViewModel extends ViewModel {
         return orderStatusBeanMutableLiveData;
     }
 
+    /**
+     * @return transaction response by tapping card directly
+     */
     public MutableLiveData<TransactionResponseBean> getTransactionResponseBeanMutableLiveData() {
         return transactionResponseBeanMutableLiveData;
     }
 
     /**
-     * Intent Received From Marchant
+     * Intent Received From Merchant
      *
      * @param intent product data
      */
@@ -72,7 +77,6 @@ public class PaymentViewModel extends ViewModel {
         paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
-        this.paymentData = paymentData;
 
         /**
          *  Place New Order
@@ -100,15 +104,17 @@ public class PaymentViewModel extends ViewModel {
         headerBean.setX_PASSWORD(paymentData.getMerchantSecret());
         orderBean.setHeaders(headerBean);
 
-        ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setTitle("Please wait...");
+        SweetAlertDialog progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+        progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        progressDialog.setTitleText("Order");
+        progressDialog.setContentText("Please wait...");
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
         Gateway gateway = new Gateway();
-        GatewayRequest request = gateway.buildGatewayRequest(orderBean);
+        GatewayRequest request = gateway.buildCreateOrderRequest(orderBean);
         request.URL += "Create";
         gateway.call(request, new GatewayCallback() {
-
 
             @Override
             public void onSuccess(GatewayMap response) {
@@ -121,7 +127,6 @@ public class PaymentViewModel extends ViewModel {
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
                 if (orderResponse != null) {
                     orderResponseMutableLiveData.setValue(orderResponse);
-                    PaymentViewModel.this.orderResponse = orderResponse;
                 }
             }
 
@@ -132,6 +137,19 @@ public class PaymentViewModel extends ViewModel {
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<ERROR>>", throwable.getMessage());
+
+                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("ERROR!")
+                        .setContentText(context.getString(R.string.network_error_message))
+                        .setCancelText("Cancel")
+                        .setCancelClickListener(Dialog::dismiss)
+                        .setConfirmText("Retry")
+                        .setConfirmClickListener(sweetAlertDialog -> {
+                            //Retry API
+                            createOrderAsync(context, paymentData);
+
+                        })
+                        .show();
             }
         });
     }
@@ -145,8 +163,11 @@ public class PaymentViewModel extends ViewModel {
     void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId) {
 
         if (progressDialog == null) {
-            progressDialog = new ProgressDialog(context);
-            progressDialog.setTitle("Do not press back button...");
+            progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+            progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            progressDialog.setTitleText("Transaction");
+            progressDialog.setContentText("Do not press back button...");
+            progressDialog.setCancelable(false);
             if (!progressDialog.isShowing()) {
                 progressDialog.show();
             }
@@ -175,7 +196,6 @@ public class PaymentViewModel extends ViewModel {
                         }, 2000);
 
                     } else {
-
                         if (progressDialog.isShowing()) progressDialog.dismiss();
                         orderStatusBeanMutableLiveData.setValue(orderStatusResponse.getData());
                     }
@@ -189,21 +209,39 @@ public class PaymentViewModel extends ViewModel {
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<ERROR>>", throwable.getMessage());
+
+                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("ERROR!")
+                        .setContentText(context.getString(R.string.network_error_message))
+                        .setCancelText("Cancel")
+                        .setCancelClickListener(Dialog::dismiss)
+                        .setConfirmText("Retry")
+                        .setConfirmClickListener(sweetAlertDialog -> {
+                            //Retry API
+                            checkOrderStatusAsync(context, headerBean, orderId);
+
+                        })
+                        .show();
             }
         });
     }
 
+    /**
+     * Payment Transaction
+     *
+     * @param context            calling activity context
+     * @param paymentRequestBean payment request
+     */
     void proceedToPaymentAsync(Context context, PaymentRequestBean paymentRequestBean) {
 
-
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(context);
-            progressDialog.setTitle("Do not press back button...");
-            if (!progressDialog.isShowing()) {
-                progressDialog.show();
-            }
+        progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+        progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        progressDialog.setTitleText("Paying");
+        progressDialog.setContentText("Do not press back button...");
+        progressDialog.setCancelable(false);
+        if (!progressDialog.isShowing()) {
+            progressDialog.show();
         }
-
 
         Gateway gateway = new Gateway();
         GatewayRequest request = gateway.buildPaymentRequest(paymentRequestBean);
@@ -230,6 +268,14 @@ public class PaymentViewModel extends ViewModel {
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<ERROR>>", throwable.getMessage());
+
+                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("ERROR!")
+                        .setContentText(context.getString(R.string.network_error_message))
+                        .setConfirmText("Okay")
+                        .setConfirmClickListener(Dialog::dismiss)
+                        .show();
+
                 transactionResponseBeanMutableLiveData.setValue(null);
             }
         });

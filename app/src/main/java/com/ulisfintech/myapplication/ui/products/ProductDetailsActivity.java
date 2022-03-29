@@ -2,6 +2,7 @@ package com.ulisfintech.myapplication.ui.products;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -14,10 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 import com.ulisfintech.artha.ui.PaymentData;
 import com.ulisfintech.artha.ui.BaseResponse;
 import com.ulisfintech.artha.ui.Gateway;
 import com.ulisfintech.artha.ui.GatewaySecureCallback;
+import com.ulisfintech.artha.ui.SyncMessage;
 import com.ulisfintech.myapplication.BuildConfig;
 import com.ulisfintech.myapplication.R;
 import com.ulisfintech.myapplication.databinding.ActivityProductDetailsBinding;
@@ -119,24 +122,24 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
     }
 
     @Override
-    public void onTransactionComplete(BaseResponse txnResult) {
+    public void onTransactionComplete(SyncMessage syncMessage) {
+        Log.e(this.getClass().getName(), new Gson().toJson(syncMessage));
         new AlertDialog.Builder(this)
                 .setTitle("SUCCESS")
-                .setMessage(txnResult.getMessage())
+                .setMessage(syncMessage.message)
                 .setPositiveButton("Okay", (dialogInterface, i) -> {
                     dialogInterface.dismiss();
-                    onBackPressed();
                 }).show();
     }
 
     @Override
-    public void onTransactionCancel(BaseResponse txnResult) {
+    public void onTransactionCancel(SyncMessage syncMessage) {
+        Log.e(this.getClass().getName(), new Gson().toJson(syncMessage));
         new AlertDialog.Builder(this)
                 .setTitle("CANCEL")
-                .setMessage(txnResult.getMessage())
+                .setMessage(syncMessage.message)
                 .setPositiveButton("Okay", (dialogInterface, i) -> {
                     dialogInterface.dismiss();
-                    onBackPressed();
                 }).show();
     }
 }

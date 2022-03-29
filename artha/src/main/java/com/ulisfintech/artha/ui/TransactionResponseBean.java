@@ -1,10 +1,13 @@
 package com.ulisfintech.artha.ui;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 
-public class TransactionResponseBean {
+public class TransactionResponseBean implements Parcelable {
 
     @Expose
     private String order_id;
@@ -41,6 +44,32 @@ public class TransactionResponseBean {
 
     public TransactionResponseBean() {
     }
+
+    protected TransactionResponseBean(Parcel in) {
+        order_id = in.readString();
+        transaction_id = in.readString();
+        status = in.readString();
+        currency = in.readString();
+        amount = in.readDouble();
+        payment_method = in.readString();
+        return_url = in.readString();
+        result_code = in.readString();
+        result_message = in.readString();
+        cardNumber = in.readString();
+        txnDate = in.readLong();
+    }
+
+    public static final Creator<TransactionResponseBean> CREATOR = new Creator<TransactionResponseBean>() {
+        @Override
+        public TransactionResponseBean createFromParcel(Parcel in) {
+            return new TransactionResponseBean(in);
+        }
+
+        @Override
+        public TransactionResponseBean[] newArray(int size) {
+            return new TransactionResponseBean[size];
+        }
+    };
 
     public String getOrder_id() {
         return order_id;
@@ -129,5 +158,25 @@ public class TransactionResponseBean {
 
     public void setTxnDate(long txnDate) {
         this.txnDate = txnDate;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(order_id);
+        parcel.writeString(transaction_id);
+        parcel.writeString(status);
+        parcel.writeString(currency);
+        parcel.writeDouble(amount);
+        parcel.writeString(payment_method);
+        parcel.writeString(return_url);
+        parcel.writeString(result_code);
+        parcel.writeString(result_message);
+        parcel.writeString(cardNumber);
+        parcel.writeLong(txnDate);
     }
 }

@@ -24,26 +24,19 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class Gateway {
 
-    static final int MIN_API_VERSION = 39;
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
-    static final int REQUEST_3D_SECURE = 10000;
-    static final int REQUEST_GOOGLE_PAY_LOAD_PAYMENT_DATA = 10001;
-    static final String API_OPERATION = "UPDATE_PAYER_DATA";
-    static final String USER_AGENT = "Artha-Android-SDK/";//+ BuildConfig.VERSION_NAME;
     private final String BASE_ORDER_URL = "https://pach.dev.pay.ulis.co.uk/order/";
-    ;
 
     static final int REQUEST_SECURE = 10000;
-    String merchantId;
-    Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
 
     public Gateway() {
     }
 
     /**
-     * @param activity calling activity
+     * @param activity    calling activity
      * @param paymentData required data for payment transaction(Product information)
      */
     public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) {
@@ -59,10 +52,13 @@ public class Gateway {
 
         if (requestCode == REQUEST_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
-                OrderStatusBean txnResult = data.getParcelableExtra(PaymentActivity.EXTRA_TXN_RESULT);
-                callback.onTransactionComplete(txnResult);
+                SyncMessage syncMessage = data.getParcelableExtra(PaymentActivity.EXTRA_TXN_RESULT);
+                callback.onTransactionComplete(syncMessage);
             } else {
-                callback.onTransactionCancel(new BaseResponse(false, "Transaction cancel!"));
+                SyncMessage syncMessage = new SyncMessage();
+                syncMessage.message = "Transaction cancel!";
+                syncMessage.status = false;
+                callback.onTransactionCancel(syncMessage);
             }
 
             return true;
@@ -72,27 +68,12 @@ public class Gateway {
     }
 
     /**
-     * Gets the current Merchant ID
+     * Check Order Status
      *
-     * @return The current Merchant ID
+     * @param orderId    order id
+     * @param headerBean API headers
+     * @return API request
      */
-    public String getMerchantId() {
-        return merchantId;
-    }
-
-    /**
-     * Sets the current Merchant ID
-     *
-     * @param merchantId A valid Merchant ID
-     * @throws IllegalArgumentException If the provided Merchant ID is null
-     */
-    public void setMerchantId(String merchantId) {
-        if (merchantId == null) {
-            throw new IllegalArgumentException("Merchant ID may not be null");
-        }
-        this.merchantId = merchantId;
-    }
-
     GatewayRequest buildOrderStatusRequest(String orderId, HeaderBean headerBean) {
         GatewayRequest request = new GatewayRequest();
         request.URL = BASE_ORDER_URL;
@@ -102,7 +83,14 @@ public class Gateway {
         return request;
     }
 
-    GatewayRequest buildGatewayRequest(OrderBean orderBean) {
+    /**
+     * Request
+     * Create Order
+     *
+     * @param orderBean initial product data for order
+     * @return place order or create order request
+     */
+    GatewayRequest buildCreateOrderRequest(OrderBean orderBean) {
         GatewayRequest request = new GatewayRequest();
         request.URL = BASE_ORDER_URL;
         request.method = GatewayRequest.POST;
@@ -111,6 +99,13 @@ public class Gateway {
         return request;
     }
 
+    /**
+     * Request
+     * Buy order
+     *
+     * @param bean payment data
+     * @return payment request
+     */
     GatewayRequest buildPaymentRequest(PaymentRequestBean bean) {
         GatewayRequest request = new GatewayRequest();
         request.URL = BASE_ORDER_URL;
@@ -120,6 +115,12 @@ public class Gateway {
         return request;
     }
 
+    /**
+     * API Headers
+     *
+     * @param headerBean headers
+     * @return headers
+     */
     private Map<String, String> getHeaders(HeaderBean headerBean) {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("X-Key", headerBean.getX_KEY());
@@ -127,6 +128,12 @@ public class Gateway {
         return headers;
     }
 
+    /**
+     * API Call async
+     *
+     * @param request  API Request
+     * @param callback API Callback
+     */
     void call(GatewayRequest request, GatewayCallback callback) {
         // create handler on current thread
         Handler handler = new Handler(msg -> handleCallbackMessage(callback, msg.obj));
@@ -143,7 +150,13 @@ public class Gateway {
         }).start();
     }
 
-    // handler callback method when executing a request on a new thread
+    /**
+     * Handler callback method when executing a request on a new thread
+     *
+     * @param callback API response callback
+     * @param arg      response data
+     * @return handler status
+     */
     @SuppressWarnings("unchecked")
     boolean handleCallbackMessage(GatewayCallback callback, Object arg) {
         if (callback != null) {
@@ -156,9 +169,16 @@ public class Gateway {
         return true;
     }
 
+    /**
+     * Execute API Request On Background
+     *
+     * @param request API Request
+     * @return API Response
+     * @throws Exception Any exception occur during
+     */
     GatewayMap executeGatewayRequest(GatewayRequest request) throws Exception {
         // init connection
-        HttpsURLConnection c = createHttpsUrlConnection(request);
+        HttpsURLConnection httpsUrlConnection = createHttpsUrlConnection(request);
 
         // encode request data to json
         String requestData = gson.toJson(request.payload);
@@ -169,27 +189,27 @@ public class Gateway {
 
         // write request data
         if (requestData != null) {
-            OutputStream os = c.getOutputStream();
+            OutputStream os = httpsUrlConnection.getOutputStream();
             os.write(requestData.getBytes("UTF-8"));
             os.close();
         }
 
         // initiate the connection
-        c.connect();
+        httpsUrlConnection.connect();
 
         String responseData = null;
-        int statusCode = c.getResponseCode();
+        int statusCode = httpsUrlConnection.getResponseCode();
         boolean isStatusOk = (statusCode >= 200 && statusCode < 300);
 
         // if connection has output stream, get the data
         // socket time-out exceptions will be thrown here
-        if (c.getDoInput()) {
-            InputStream is = isStatusOk ? c.getInputStream() : c.getErrorStream();
+        if (httpsUrlConnection.getDoInput()) {
+            InputStream is = isStatusOk ? httpsUrlConnection.getInputStream() : httpsUrlConnection.getErrorStream();
             responseData = inputStreamToString(is);
             is.close();
         }
 
-        c.disconnect();
+        httpsUrlConnection.disconnect();
 
         // log response
 //       logger.logResponse(c, responseData);
@@ -215,28 +235,34 @@ public class Gateway {
         throw exception;
     }
 
+    /**
+     * HTTP Connection
+     *
+     * @param request API Request
+     * @return @HttpsURLConnection
+     * @throws Exception
+     */
     HttpsURLConnection createHttpsUrlConnection(GatewayRequest request) throws Exception {
         // parse url
         URL url = new URL(request.URL);
 
-        HttpsURLConnection c = (HttpsURLConnection) url.openConnection();
-        c.setSSLSocketFactory((SSLSocketFactory) SSLSocketFactory.getDefault());
-        c.setConnectTimeout(CONNECTION_TIMEOUT);
-        c.setReadTimeout(READ_TIMEOUT);
-        c.setRequestMethod(request.method);
-        c.setDoOutput(true);
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
+        httpsURLConnection.setSSLSocketFactory((SSLSocketFactory) SSLSocketFactory.getDefault());
+        httpsURLConnection.setConnectTimeout(CONNECTION_TIMEOUT);
+        httpsURLConnection.setReadTimeout(READ_TIMEOUT);
+        httpsURLConnection.setRequestMethod(request.method);
+        httpsURLConnection.setDoOutput(true);
 
-        c.setRequestProperty("Content-Type", "application/json");
-        c.setRequestProperty("X-Environment", "android");
+        httpsURLConnection.setRequestProperty("Content-Type", "application/json");
+        httpsURLConnection.setRequestProperty("X-Environment", "android");
 
         // add extra headers
         if (request.extraHeaders != null) {
             for (String key : request.extraHeaders.keySet()) {
-                c.setRequestProperty(key, request.extraHeaders.get(key));
+                httpsURLConnection.setRequestProperty(key, request.extraHeaders.get(key));
             }
         }
-
-        return c;
+        return httpsURLConnection;
     }
 
     String inputStreamToString(InputStream is) throws IOException {
@@ -252,10 +278,5 @@ public class Gateway {
         }
 
         return total.toString();
-    }
-
-    String createAuthHeader(String sessionId) {
-        String value = "merchant." + merchantId + ":" + sessionId;
-        return "Basic " + Base64.encodeToString(value.getBytes(), Base64.NO_WRAP);
     }
 }

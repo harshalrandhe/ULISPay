@@ -26,8 +26,8 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
         private CardNfcInterface mInterface;
         private boolean mFromStart;
 
-        public Builder(CardNfcInterface i, Intent intent, boolean fromCreate) {
-            mInterface = i;
+        public Builder(CardNfcInterface cardNfcInterface, Intent intent, boolean fromCreate) {
+            mInterface = cardNfcInterface;
             mTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             mFromStart = fromCreate;
         }
@@ -38,9 +38,12 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
     }
 
     public interface CardNfcInterface {
+
         void startNfcReadCard();
 
         void cardIsReadyToRead();
+
+        void mobilePhoneDetected();
 
         void doNotMoveCardSoFast();
 
@@ -85,15 +88,7 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
 
     private final static String NFC_A_TAG = "TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcA]";
     private final static String NFC_B_TAG = "TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcB]";
-    private final String UNKNOWN_CARD_MESS =
-            "===========================================================================\n\n" +
-                    "Hi! This library is not familiar with your credit card. \n " +
-                    "Please, write me an email with information of your bank: \n" +
-                    "country, bank name, card type, etc) and i will try to do my best, \n" +
-                    "to add your bank as a known one into this lib. \n" +
-                    "Great thanks for using and reporting!!! \n" +
-                    "Here is my email: pro100svitlo@gmail.com. \n\n" +
-                    "===========================================================================";
+    private final String UNKNOWN_CARD_MESS = "Unknown Card";
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CardNfcAsyncTask.class);
@@ -102,20 +97,20 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
     private boolean mException;
     private EmvCard mCard;
     private CardNfcInterface mInterface;
-    private Tag mTag;
-    private String mCardNumber;
-    private String mExpireDate;
-    private String mCardType;
+    private Tag tag;
+    private String cardNumber;
+    private String expireDate;
+    private String cardType;
 
-    private CardNfcAsyncTask(Builder b) {
-        mTag = b.mTag;
-        if (mTag != null) {
-            mInterface = b.mInterface;
+    private CardNfcAsyncTask(Builder builder) {
+        tag = builder.mTag;
+        if (tag != null) {
+            mInterface = builder.mInterface;
             try {
-                if (mTag.toString().equals(NFC_A_TAG) || mTag.toString().equals(NFC_B_TAG)) {
+                if (tag.toString().equals(NFC_A_TAG) || tag.toString().equals(NFC_B_TAG)) {
                     execute();
                 } else {
-                    if (!b.mFromStart) {
+                    if (!builder.mFromStart) {
                         mInterface.unknownEmvCard();
                     }
                     clearAll();
@@ -127,15 +122,15 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
     }
 
     public String getCardNumber() {
-        return mCardNumber;
+        return cardNumber;
     }
 
     public String getCardExpireDate() {
-        return mExpireDate;
+        return expireDate;
     }
 
     public String getCardType() {
-        return mCardType;
+        return cardType;
     }
 
     @Override
@@ -148,9 +143,10 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
     protected Object doInBackground(final Void... params) {
 
         Object result = null;
-
         try {
+
             doInBackground();
+
         } catch (Exception e) {
             result = e;
             LOGGER.error(e.getMessage(), e);
@@ -164,10 +160,10 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
         if (!mException) {
             if (mCard != null) {
                 if (StringUtils.isNotBlank(mCard.getCardNumber())) {
-                    mCardNumber = mCard.getCardNumber();
-                    mExpireDate = mCard.getExpireDate();
-                    mCardType = mCard.getType().toString();
-                    if (mCardType.equals(EmvCardScheme.UNKNOWN.toString())) {
+                    cardNumber = mCard.getCardNumber();
+                    expireDate = mCard.getExpireDate();
+                    cardType = mCard.getType().toString();
+                    if (cardType.equals(EmvCardScheme.UNKNOWN.toString())) {
                         LOGGER.debug(UNKNOWN_CARD_MESS);
                     }
                     mInterface.cardIsReadyToRead();
@@ -185,7 +181,7 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
     }
 
     private void doInBackground() {
-        IsoDep mIsoDep = IsoDep.get(mTag);
+        IsoDep mIsoDep = IsoDep.get(tag);
         if (mIsoDep == null) {
             mInterface.doNotMoveCardSoFast();
             return;
@@ -202,6 +198,7 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
             mCard = parser.readEmvCard();
         } catch (IOException e) {
             mException = true;
+            mInterface.mobilePhoneDetected();
         } finally {
             IOUtils.closeQuietly(mIsoDep);
         }
@@ -211,9 +208,9 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
         mInterface = null;
         mProvider = null;
         mCard = null;
-        mTag = null;
-        mCardNumber = null;
-        mExpireDate = null;
-        mCardType = null;
+        tag = null;
+        cardNumber = null;
+        expireDate = null;
+        cardType = null;
     }
 }
