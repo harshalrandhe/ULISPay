@@ -17,6 +17,14 @@ public class PaymentData implements Parcelable {
     private double price;
     @Expose
     private String currency;
+    @Expose
+    private String customerName;
+    @Expose
+    private String customerEmail;
+    @Expose
+    private String customerMobile;
+    @Expose
+    private String returnUrl;
 
     private String merchantKey;
     private String merchantSecret;
@@ -30,8 +38,12 @@ public class PaymentData implements Parcelable {
         product = in.readString();
         price = in.readDouble();
         currency = in.readString();
+        customerName = in.readString();
+        customerEmail = in.readString();
+        customerMobile = in.readString();
         merchantKey = in.readString();
         merchantSecret = in.readString();
+        returnUrl = in.readString();
     }
 
     @Override
@@ -41,8 +53,12 @@ public class PaymentData implements Parcelable {
         dest.writeString(product);
         dest.writeDouble(price);
         dest.writeString(currency);
+        dest.writeString(customerName);
+        dest.writeString(customerEmail);
+        dest.writeString(customerMobile);
         dest.writeString(merchantKey);
         dest.writeString(merchantSecret);
+        dest.writeString(returnUrl);
     }
 
     @Override
@@ -102,6 +118,30 @@ public class PaymentData implements Parcelable {
         this.currency = currency;
     }
 
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerMobile() {
+        return customerMobile;
+    }
+
+    public void setCustomerMobile(String customerMobile) {
+        this.customerMobile = customerMobile;
+    }
+
     public String getMerchantKey() {
         return merchantKey;
     }
@@ -116,5 +156,13 @@ public class PaymentData implements Parcelable {
 
     public void setMerchantSecret(String merchantSecret) {
         this.merchantSecret = merchantSecret;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 }

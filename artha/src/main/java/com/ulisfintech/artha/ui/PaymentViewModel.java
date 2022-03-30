@@ -22,8 +22,10 @@ public class PaymentViewModel extends ViewModel {
     private final MutableLiveData<TransactionResponseBean> transactionResponseBeanMutableLiveData;
     private final MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
     private SweetAlertDialog progressDialog;
+    private final NetBuilder netBuilder;
 
     public PaymentViewModel() {
+        netBuilder = new NetBuilder();
         this.paymentDataMutableLiveData = new MutableLiveData<>();
         this.orderResponseMutableLiveData = new MutableLiveData<>();
         this.orderStatusBeanMutableLiveData = new MutableLiveData<>();
@@ -82,7 +84,6 @@ public class PaymentViewModel extends ViewModel {
          *  Place New Order
          */
         createOrderAsync(context, paymentData);
-
     }
 
     /**
@@ -93,11 +94,11 @@ public class PaymentViewModel extends ViewModel {
     void createOrderAsync(Context context, PaymentData paymentData) {
         OrderBean orderBean = new OrderBean();
         orderBean.setAmount(paymentData.getPrice());
-        orderBean.setCurrency("USD");
-        orderBean.setCustomer_name("John");
-        orderBean.setCustomer_email("john.d@ulistechnology.com");
-        orderBean.setCustomer_mobile("0987654321");
-        orderBean.setReturn_url("https://ulis.co.uk/payment_status");
+        orderBean.setCurrency(paymentData.getCurrency());
+        orderBean.setCustomer_name(paymentData.getCustomerName());
+        orderBean.setCustomer_email(paymentData.getCustomerEmail());
+        orderBean.setCustomer_mobile(paymentData.getCustomerMobile());
+        orderBean.setReturn_url(paymentData.getReturnUrl());
         orderBean.setResource("API");
         HeaderBean headerBean = new HeaderBean();
         headerBean.setX_KEY(paymentData.getMerchantKey());
@@ -111,10 +112,8 @@ public class PaymentViewModel extends ViewModel {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        Gateway gateway = new Gateway();
-        GatewayRequest request = gateway.buildCreateOrderRequest(orderBean);
-        request.URL += "Create";
-        gateway.call(request, new GatewayCallback() {
+        GatewayRequest request = new GatewayRequestBuilder().buildCreateOrderRequest(orderBean);
+        netBuilder.call(request, new GatewayCallback() {
 
             @Override
             public void onSuccess(GatewayMap response) {
@@ -174,10 +173,8 @@ public class PaymentViewModel extends ViewModel {
             }
         }
 
-        Gateway gateway = new Gateway();
-        GatewayRequest request = gateway.buildOrderStatusRequest(orderId, headerBean);
-        request.URL += "Details";
-        gateway.call(request, new GatewayCallback() {
+        GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, headerBean);
+        netBuilder.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
 
@@ -225,7 +222,6 @@ public class PaymentViewModel extends ViewModel {
                         })
                         .show();
             }
-
         });
     }
 
@@ -246,10 +242,8 @@ public class PaymentViewModel extends ViewModel {
             progressDialog.show();
         }
 
-        Gateway gateway = new Gateway();
-        GatewayRequest request = gateway.buildPaymentRequest(paymentRequestBean);
-        request.URL += "Pay";
-        gateway.call(request, new GatewayCallback() {
+        GatewayRequest request = new GatewayRequestBuilder().buildPaymentRequest(paymentRequestBean);
+        netBuilder.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
 
