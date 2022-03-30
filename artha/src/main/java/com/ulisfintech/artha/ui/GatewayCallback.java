@@ -15,4 +15,5 @@ public interface GatewayCallback {
      * @param throwable The exception thrown
      */
     void onError(Throwable throwable);
+
 }

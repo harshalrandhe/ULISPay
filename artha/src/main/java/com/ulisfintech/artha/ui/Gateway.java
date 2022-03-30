@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -45,10 +44,16 @@ public class Gateway {
         activity.startActivityForResult(intent, REQUEST_SECURE);
     }
 
-    public static boolean handleSecureResult(int requestCode, int resultCode, Intent data, GatewaySecureCallback callback) {
-        if (callback == null) {
-            return false;
-        }
+    /**
+     * Handle Activity Result
+     * @param requestCode activity request code
+     * @param resultCode activity result code
+     * @param data result data
+     * @param callback gateway callback to handle result
+     */
+    public static void handleSecureResult(int requestCode, int resultCode, Intent data, GatewaySecureCallback callback) {
+
+        if (callback == null) return;
 
         if (requestCode == REQUEST_SECURE) {
             if (resultCode == Activity.RESULT_OK) {
@@ -60,11 +65,7 @@ public class Gateway {
                 syncMessage.status = false;
                 callback.onTransactionCancel(syncMessage);
             }
-
-            return true;
         }
-
-        return false;
     }
 
     /**
@@ -265,6 +266,12 @@ public class Gateway {
         return httpsURLConnection;
     }
 
+    /**
+     * Convert InputStream InTo The String
+     * @param is input stream
+     * @return string
+     * @throws IOException
+     */
     String inputStreamToString(InputStream is) throws IOException {
         // get buffered reader from stream
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
@@ -276,7 +283,6 @@ public class Gateway {
         while ((line = rd.readLine()) != null) {
             total.append(line);
         }
-
         return total.toString();
     }
 }

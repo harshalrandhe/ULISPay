@@ -145,12 +145,13 @@ public class PaymentViewModel extends ViewModel {
                         .setCancelClickListener(Dialog::dismiss)
                         .setConfirmText("Retry")
                         .setConfirmClickListener(sweetAlertDialog -> {
+                            sweetAlertDialog.dismiss();
                             //Retry API
                             createOrderAsync(context, paymentData);
-
                         })
                         .show();
             }
+
         });
     }
 
@@ -217,12 +218,14 @@ public class PaymentViewModel extends ViewModel {
                         .setCancelClickListener(Dialog::dismiss)
                         .setConfirmText("Retry")
                         .setConfirmClickListener(sweetAlertDialog -> {
+                            sweetAlertDialog.dismiss();
                             //Retry API
                             checkOrderStatusAsync(context, headerBean, orderId);
 
                         })
                         .show();
             }
+
         });
     }
 
@@ -278,6 +281,7 @@ public class PaymentViewModel extends ViewModel {
 
                 transactionResponseBeanMutableLiveData.setValue(null);
             }
+
         });
     }
 }

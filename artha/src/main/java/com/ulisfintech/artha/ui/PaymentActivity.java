@@ -429,6 +429,7 @@ public class PaymentActivity extends AbsActivity {
                 .setContentText(mess)
                 .setContentText(pos)
                 .setConfirmClickListener(sweetAlertDialog -> {
+                    sweetAlertDialog.dismiss();
                     // Send the user to the settings page and hope they turn it on
                     startActivity(new Intent(android.provider.Settings.ACTION_NFC_SETTINGS));
                 })
