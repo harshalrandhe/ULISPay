@@ -3,7 +3,7 @@ package com.ulisfintech.artha.ui;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class OrderIdBean {
+class OrderIdBean {
 
     @Expose
     @SerializedName("order_id")

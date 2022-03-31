@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 
-public class TransactionResponseBean implements Parcelable {
+class TransactionResponseBean implements Parcelable {
 
     @Expose
     private String order_id;

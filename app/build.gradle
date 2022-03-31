@@ -11,7 +11,7 @@ android {
     apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
     defaultConfig {
-        applicationId "com.ulisfintech.myapplication"
+        applicationId "com.ulisfintech.arthavendor"
         minSdk 23
         targetSdk 32
         versionCode 1

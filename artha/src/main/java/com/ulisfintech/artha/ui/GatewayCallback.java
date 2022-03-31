@@ -1,6 +1,6 @@
 package com.ulisfintech.artha.ui;
 
-public interface GatewayCallback {
+interface GatewayCallback {
 
     /**
      * Callback on a successful call to the Gateway API

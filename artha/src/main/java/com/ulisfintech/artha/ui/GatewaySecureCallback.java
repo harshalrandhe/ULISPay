@@ -1,5 +1,7 @@
 package com.ulisfintech.artha.ui;
 
+import com.ulisfintech.artha.helper.SyncMessage;
+
 public interface GatewaySecureCallback {
 
     /**

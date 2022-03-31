@@ -9,7 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import com.ulisfintech.artha.helper.ArthaConstants
 import com.ulisfintech.artha.helper.JSONConvector
-import com.ulisfintech.artha.ui.OrderResponse
+import com.ulisfintech.artha.helper.OrderResponse
 import com.ulisfintech.artha.ui.PaymentActivity
 import java.io.UnsupportedEncodingException
 import java.math.BigInteger

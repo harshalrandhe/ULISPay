@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  * Both of these examples construct a GatewayMap containing the keys 'sourceOfFunds' and 'customer'.  The
  * value for the 'customer' key is a map containing the keys 'email', 'firstName', and 'lastName'.
  */
-public class GatewayMap extends LinkedHashMap<String, Object> {
+class GatewayMap extends LinkedHashMap<String, Object> {
     private static final Pattern arrayIndexPattern = Pattern.compile("(.*)\\[(.*)\\]");
 
     /**

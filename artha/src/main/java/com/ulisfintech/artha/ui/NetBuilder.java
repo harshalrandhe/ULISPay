@@ -17,13 +17,13 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-public class NetBuilder {
+class NetBuilder {
 
     static final int CONNECTION_TIMEOUT = 15000;
     static final int READ_TIMEOUT = 60000;
     private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-    void createService(){
+    void createService() {
 
     }
 
@@ -166,6 +166,7 @@ public class NetBuilder {
 
     /**
      * Convert InputStream InTo The String
+     *
      * @param is input stream
      * @return string
      * @throws IOException

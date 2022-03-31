@@ -12,6 +12,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.gson.Gson;
 import com.ulisfintech.artha.R;
+import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.helper.OrderResponse;
+import com.ulisfintech.artha.helper.PaymentData;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -80,6 +83,8 @@ public class PaymentViewModel extends ViewModel {
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
 
+
+
         /**
          *  Place New Order
          */
@@ -125,6 +130,7 @@ public class PaymentViewModel extends ViewModel {
                 Gson gson = new Gson();
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
                 if (orderResponse != null) {
+                    orderResponse.setPaymentType(paymentData.getPaymentType());
                     orderResponseMutableLiveData.setValue(orderResponse);
                 }
             }

@@ -10,9 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.NFCListener;
+import com.ulisfintech.artha.helper.OrderResponse;
+import com.ulisfintech.artha.helper.SyncMessage;
 import com.ulisfintech.artha.hostservice.KHostApduService;
 
-public abstract class AbsActivity extends AppCompatActivity implements NFCListener {
+abstract class AbsActivity extends AppCompatActivity implements NFCListener {
 
 
     private TransactionNotifier transactionNotifier;

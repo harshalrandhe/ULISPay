@@ -3,7 +3,7 @@ package com.ulisfintech.artha.ui;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class PaymentRequestBean {
+class PaymentRequestBean {
 
     @Expose
     @SerializedName("token")

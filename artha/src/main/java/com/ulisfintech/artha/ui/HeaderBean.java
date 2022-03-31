@@ -1,6 +1,6 @@
 package com.ulisfintech.artha.ui;
 
-public class HeaderBean {
+class HeaderBean {
 
     private String X_KEY;
     private String X_PASSWORD;

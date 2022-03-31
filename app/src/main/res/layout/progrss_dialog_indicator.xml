@@ -13,7 +13,7 @@
         tools:layout_editor_absoluteX="161dp"
         tools:layout_editor_absoluteY="321dp">
 
-        <com.ulisfintech.myapplication.progress.AVLoadingIndicatorView
+        <com.ulisfintech.arthavendor.progress.AVLoadingIndicatorView
             android:id="@+id/avi"
             style="@style/AVLoadingIndicatorView"
             android:layout_width="wrap_content"

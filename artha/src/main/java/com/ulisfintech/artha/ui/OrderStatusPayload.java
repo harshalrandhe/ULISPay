@@ -3,7 +3,7 @@ package com.ulisfintech.artha.ui;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class OrderStatusPayload extends GatewayRequest{
+class OrderStatusPayload extends GatewayRequest {
 
     @Expose
     @SerializedName("data")

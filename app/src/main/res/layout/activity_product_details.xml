@@ -193,6 +193,32 @@
 
                             </LinearLayout>
 
+<!--                            <View-->
+<!--                                android:layout_width="match_parent"-->
+<!--                                android:layout_height="1dp"-->
+<!--                                android:background="@color/cardview_shadow_start_color" />-->
+
+<!--                            <LinearLayout-->
+<!--                                android:layout_width="match_parent"-->
+<!--                                android:layout_height="match_parent"-->
+<!--                                android:gravity="start|center"-->
+<!--                                android:orientation="horizontal"-->
+<!--                                android:padding="10dp">-->
+
+<!--                                <RadioButton-->
+<!--                                    android:id="@+id/radioArthaPay"-->
+<!--                                    android:layout_width="0dp"-->
+<!--                                    android:layout_height="wrap_content"-->
+<!--                                    android:layout_weight="1"-->
+<!--                                    android:text="Artha-Pay" />-->
+
+<!--                                <ImageView-->
+<!--                                    android:layout_width="@dimen/iv_pay_logo"-->
+<!--                                    android:layout_height="@dimen/iv_pay_logo"-->
+<!--                                    android:background="@drawable/ic_artha_pay" />-->
+
+<!--                            </LinearLayout>-->
+
                             <View
                                 android:layout_width="match_parent"
                                 android:layout_height="1dp"

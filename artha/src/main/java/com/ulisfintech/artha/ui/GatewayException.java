@@ -1,6 +1,6 @@
 package com.ulisfintech.artha.ui;
 
-public class GatewayException extends Exception {
+class GatewayException extends Exception {
 
     int statusCode;
     GatewayMap error;

@@ -3,7 +3,7 @@ package com.ulisfintech.artha.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GatewayRequestBuilder {
+class GatewayRequestBuilder {
 
     private final String BASE_ORDER_URL = "https://pach.dev.pay.ulis.co.uk/order/";
 

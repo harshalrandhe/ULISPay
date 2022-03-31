@@ -3,7 +3,7 @@ package com.ulisfintech.artha.ui;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class PaymentPayload {
+class PaymentPayload {
 
     @Expose
     @SerializedName("data")

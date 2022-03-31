@@ -2,7 +2,7 @@ package com.ulisfintech.artha.ui;
 
 import com.google.gson.annotations.Expose;
 
-public class OrderPayload {
+class OrderPayload {
 
     @Expose
     private OrderBean data;

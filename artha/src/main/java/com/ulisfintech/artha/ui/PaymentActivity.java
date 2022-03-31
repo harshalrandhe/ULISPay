@@ -1,29 +1,39 @@
 package com.ulisfintech.artha.ui;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.google.gson.Gson;
 import com.ulisfintech.artha.R;
 import com.ulisfintech.artha.cardreader.CardNfcAsyncTask;
 import com.ulisfintech.artha.cardreader.CardNfcUtils;
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
+import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.helper.OrderResponse;
+import com.ulisfintech.artha.helper.PaymentData;
+import com.ulisfintech.artha.helper.SyncMessage;
 import com.ulisfintech.artha.hostservice.KHostApduService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class PaymentActivity extends AbsActivity {
 
     public static final String NDEF_MESSAGE = "com.ulisfintech.artha.android.ndefMessage";
+    static final String ORDER_MESSAGE = "com.ulisfintech.artha.android.orderMessage";
     /**
      * The ACS Result data after performing 3DS
      */
@@ -42,6 +52,9 @@ public class PaymentActivity extends AbsActivity {
     private boolean isScanNow;
     private SweetAlertDialog progressDialog;
     private final String PAYMENT_TYPE_CARD_PAY = "card_pay";
+    private boolean isSharePaymentRunning;
+    private final String ARTHA_TAP_AND_PAY = "Artha ( Tap & Pay)";
+    private final String ARTHA_SHARE_PAY = "Artha Share Pay";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +94,7 @@ public class PaymentActivity extends AbsActivity {
 
         /**
          * Observer
-         * Get call after successful order is created.
+         * Get called after successful order is created.
          * @orderResponse order data (order id and token).
          */
         paymentViewModel.getIsOrderCreated().observe(this, orderResponse -> {
@@ -90,10 +103,45 @@ public class PaymentActivity extends AbsActivity {
 
             this.orderResponse = orderResponse;
 
-            //Intent
-            Intent payIntent = new Intent(this, KHostApduService.class);
-            payIntent.putExtra(NDEF_MESSAGE, orderResponse);
-            startService(payIntent);
+            String[] list = {ARTHA_TAP_AND_PAY, ARTHA_SHARE_PAY};
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Pay with")
+                    .setCancelable(false)
+                    .setItems(list, (dialogInterface, which) -> {
+
+                        if (list[which].equalsIgnoreCase(ARTHA_TAP_AND_PAY)) {
+
+                            //Intent
+                            Intent payIntent = new Intent(this, KHostApduService.class);
+                            payIntent.putExtra(NDEF_MESSAGE, orderResponse);
+                            startService(payIntent);
+
+                        } else {
+
+                            //Intent
+                            String packageName = "com.ulisfintech.arthacustomer";
+                            if (isPackageInstalled(this, packageName)) {
+
+                                Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
+                                LaunchIntent.putExtra(ORDER_MESSAGE, new Gson().toJson(orderResponse));
+                                startActivity(LaunchIntent);
+                                isSharePaymentRunning = true;
+
+                                Log.i("SampleLog", "Application is already installed.");
+                            } else {
+                                Log.i("SampleLog", "Application is not currently installed.");
+                            }
+
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+
+//            if (orderResponse.getPaymentType() == ArthaConstants.PAYMENT_TYPE_TAP_AND_PAY ||
+//                    orderResponse.getPaymentType() == ArthaConstants.PAYMENT_TYPE_CARD_PAY) {
+//            } else if (orderResponse.getPaymentType() == ArthaConstants.PAYMENT_TYPE_ARTHA_PAY) {
+//            }
         });
 
         /**
@@ -211,6 +259,7 @@ public class PaymentActivity extends AbsActivity {
 
     /**
      * Post result back to the merchant activity
+     *
      * @param response product order data
      */
     private void postResultBack(SyncMessage response) {
@@ -227,10 +276,16 @@ public class PaymentActivity extends AbsActivity {
         if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
             showTurnOnNfcDialog();
             if (!isScanNow) {
-//                tvPutYourCard.setVisibility(View.VISIBLE);
+
             }
         }
         cardNfcUtils.enableDispatch();
+
+        if (isSharePaymentRunning) {
+            isSharePaymentRunning = false;
+            //
+            checkOrderStatus(this.orderResponse.getOrder_id());
+        }
     }
 
     @Override
@@ -243,11 +298,13 @@ public class PaymentActivity extends AbsActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+
         if (intent.getAction() == null) {
 
             if (!intent.hasExtra(NDEF_MESSAGE)) {
                 Log.e(this.getClass().getName(), "NDEF_MESSAGE not found!");
             }
+
 
             //Process intent data
             paymentViewModel.setIntent(this, intent);
@@ -439,5 +496,15 @@ public class PaymentActivity extends AbsActivity {
                     onBackPressed();
                 })
                 .show();
+    }
+
+    public boolean isPackageInstalled(Context context, String packageName) {
+        final PackageManager packageManager = context.getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(packageName);
+        if (intent == null) {
+            return false;
+        }
+        List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return !list.isEmpty();
     }
 }
