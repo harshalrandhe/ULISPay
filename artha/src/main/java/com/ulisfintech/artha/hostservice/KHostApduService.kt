@@ -117,14 +117,14 @@ class KHostApduService : HostApduService() {
         this.intent = intent
 
         if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
-
+            val aarRecord = NdefRecord.createApplicationRecord("com.ulisfintech.arthacustomer")
             orderPayload = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)!!
             NDEF_URI =
                 NdefMessage(
                     createTextRecord(
                         "en",
                         JSONConvector.toJSONExcludeWithoutExposeFields(orderPayload), NDEF_ID
-                    )
+                    ),aarRecord
                 )
 
             NDEF_URI_BYTES = NDEF_URI.toByteArray()

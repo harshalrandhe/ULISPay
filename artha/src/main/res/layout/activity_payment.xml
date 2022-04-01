@@ -180,9 +180,8 @@
             </LinearLayout>
         </LinearLayout>
 
-
         <TextView
-            android:id="@+id/label"
+            android:id="@+id/paymentMethodLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/layout_one"
@@ -192,8 +191,23 @@
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="30dp"
             android:gravity="center"
-            android:text="@string/tap_and_pay"
+            android:text="@string/nothing_selected"
             android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnChangePaymentMethod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/btnCancel"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="0dp"
+            android:background="@drawable/text_shape"
+            android:ems="17"
+            android:text="@string/label_btn_change_payment"
+            android:textColor="@color/white" />
 
         <Button
             android:id="@+id/btnCancel"
@@ -201,9 +215,12 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:ems="17"
-            android:layout_margin="30dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="30dp"
             android:background="@drawable/text_shape"
+            android:ems="17"
             android:text="@string/label_btn_cancel"
             android:textColor="@color/white" />
     </RelativeLayout>

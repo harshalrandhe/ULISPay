@@ -30,6 +30,7 @@ public class PaymentData implements Parcelable {
 
     private String merchantKey;
     private String merchantSecret;
+    private ProductBean productBean;
 
     public PaymentData() {
     }
@@ -47,6 +48,7 @@ public class PaymentData implements Parcelable {
         merchantSecret = in.readString();
         returnUrl = in.readString();
         paymentType = in.readInt();
+        productBean = in.readParcelable(ProductBean.class.getClassLoader());
     }
 
     @Override
@@ -63,6 +65,7 @@ public class PaymentData implements Parcelable {
         dest.writeString(merchantSecret);
         dest.writeString(returnUrl);
         dest.writeInt(paymentType);
+        dest.writeParcelable(productBean, flags);
     }
 
     @Override
@@ -176,5 +179,13 @@ public class PaymentData implements Parcelable {
 
     public void setPaymentType(int paymentType) {
         this.paymentType = paymentType;
+    }
+
+    public ProductBean getProductBean() {
+        return productBean;
+    }
+
+    public void setProductBean(ProductBean productBean) {
+        this.productBean = productBean;
     }
 }

@@ -12,11 +12,10 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.gson.Gson;
 import com.ulisfintech.artha.R;
-import com.ulisfintech.artha.helper.ArthaConstants;
+import com.ulisfintech.artha.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.artha.helper.OrderResponse;
 import com.ulisfintech.artha.helper.PaymentData;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class PaymentViewModel extends ViewModel {
 
@@ -26,6 +25,7 @@ public class PaymentViewModel extends ViewModel {
     private final MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
     private SweetAlertDialog progressDialog;
     private final NetBuilder netBuilder;
+    private int statusCounter;
 
     public PaymentViewModel() {
         netBuilder = new NetBuilder();
@@ -82,7 +82,6 @@ public class PaymentViewModel extends ViewModel {
         paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
-
 
 
         /**
@@ -174,9 +173,9 @@ public class PaymentViewModel extends ViewModel {
             progressDialog.setTitleText("Transaction");
             progressDialog.setContentText("Do not press back button...");
             progressDialog.setCancelable(false);
-            if (!progressDialog.isShowing()) {
-                progressDialog.show();
-            }
+            progressDialog.show();
+        } else {
+            statusCounter++;
         }
 
         GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, headerBean);
@@ -194,10 +193,27 @@ public class PaymentViewModel extends ViewModel {
                 if (orderStatusResponse != null && orderStatusResponse.getData() != null) {
                     if (orderStatusResponse.getData().getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_CREATED)) {
 
-                        // Check order status on every second
-                        new Handler().postDelayed(() -> {
-                            checkOrderStatusAsync(context, headerBean, orderId);
-                        }, 2000);
+                        if (statusCounter < 5) {
+                            // Check order status on every second
+                            new Handler().postDelayed(() -> {
+                                checkOrderStatusAsync(context, headerBean, orderId);
+                            }, 2000);
+                        } else {
+                            statusCounter = 0;
+                            new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+                                    .setTitleText("ERROR!")
+                                    .setContentText(context.getString(R.string.transaction_processing_message))
+                                    .setCancelText("Cancel")
+                                    .setCancelClickListener(Dialog::dismiss)
+                                    .setConfirmText("Retry")
+                                    .setConfirmClickListener(sweetAlertDialog -> {
+                                        sweetAlertDialog.dismiss();
+                                        //Retry API
+                                        checkOrderStatusAsync(context, headerBean, orderId);
+
+                                    })
+                                    .show();
+                        }
 
                     } else {
                         if (progressDialog.isShowing()) progressDialog.dismiss();

@@ -95,6 +95,10 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             paymentData.setMerchantKey(BuildConfig.X_KEY);
             paymentData.setMerchantSecret(BuildConfig.X_PASSWORD);
 
+            Gson gson = new Gson();
+            paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),
+                    com.ulisfintech.artha.helper.ProductBean.class));
+
             if (binding.radioArtha.isChecked()) {
 
                 paymentData.setPaymentType(ArthaConstants.PAYMENT_TYPE_TAP_AND_PAY);
@@ -105,17 +109,6 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 Gateway.startReceivingPaymentActivity(this, paymentData);
 
             }
-//            else if (binding.radioArthaPay.isChecked()) {
-//
-//                paymentData.setPaymentType(ArthaConstants.PAYMENT_TYPE_ARTHA_PAY);
-//
-//                /**
-//                 * Start payment receiver
-//                 */
-//                Gateway.startReceivingPaymentActivity(this, paymentData);
-//
-//
-//            }
             else {
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();
             }

@@ -18,6 +18,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
     private String amount;
     private String payment_link;
     private String next_step;
+    private ProductBean productBean;
 
     protected OrderResponse(Parcel in) {
         order_id = in.readString();
@@ -26,6 +27,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         amount = in.readString();
         payment_link = in.readString();
         next_step = in.readString();
+        productBean = in.readParcelable(ProductBean.class.getClassLoader());
     }
 
     public static final Creator<OrderResponse> CREATOR = new Creator<OrderResponse>() {
@@ -88,6 +90,14 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         this.next_step = next_step;
     }
 
+    public ProductBean getProductBean() {
+        return productBean;
+    }
+
+    public void setProductBean(ProductBean productBean) {
+        this.productBean = productBean;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -101,5 +111,6 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         parcel.writeString(amount);
         parcel.writeString(payment_link);
         parcel.writeString(next_step);
+        parcel.writeParcelable(productBean, i);
     }
 }

@@ -2,7 +2,6 @@ package com.ulisfintech.artha.ui;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -16,19 +15,17 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.gson.Gson;
 import com.ulisfintech.artha.R;
+import com.ulisfintech.artha.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.artha.cardreader.CardNfcAsyncTask;
 import com.ulisfintech.artha.cardreader.CardNfcUtils;
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
-import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.OrderResponse;
 import com.ulisfintech.artha.helper.PaymentData;
 import com.ulisfintech.artha.helper.SyncMessage;
 import com.ulisfintech.artha.hostservice.KHostApduService;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class PaymentActivity extends AbsActivity {
 
@@ -55,6 +52,7 @@ public class PaymentActivity extends AbsActivity {
     private boolean isSharePaymentRunning;
     private final String ARTHA_TAP_AND_PAY = "Artha ( Tap & Pay)";
     private final String ARTHA_SHARE_PAY = "Artha Share Pay";
+    String[] list = {ARTHA_TAP_AND_PAY, ARTHA_SHARE_PAY};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +62,34 @@ public class PaymentActivity extends AbsActivity {
         binding.btnCancel.setOnClickListener(view -> finish());
 
         paymentViewModel = getDefaultViewModelProviderFactory().create(PaymentViewModel.class);
+
+        /**
+         * Button
+         */
+        binding.btnChangePaymentMethod.setOnClickListener(view -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Pay with")
+                    .setCancelable(false)
+                    .setItems(list, (dialogInterface, which) -> {
+
+                        if (list[which].equalsIgnoreCase(ARTHA_TAP_AND_PAY)) {
+                            //
+                            startNFCPaymentService(orderResponse);
+                        } else {
+                            String packageName = "com.ulisfintech.arthacustomer";
+                            if (isPackageInstalled(this, packageName)) {
+                                //
+                                startSharePayment(packageName, orderResponse);
+                            } else {
+                                applicationNotInstalled();
+                            }
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialogInterface, i) -> {
+                        dialogInterface.dismiss();
+                    })
+                    .show();
+        });
 
         /**
          * Observer
@@ -103,45 +129,28 @@ public class PaymentActivity extends AbsActivity {
 
             this.orderResponse = orderResponse;
 
-            String[] list = {ARTHA_TAP_AND_PAY, ARTHA_SHARE_PAY};
-
             new AlertDialog.Builder(this)
                     .setTitle("Pay with")
                     .setCancelable(false)
                     .setItems(list, (dialogInterface, which) -> {
 
                         if (list[which].equalsIgnoreCase(ARTHA_TAP_AND_PAY)) {
-
-                            //Intent
-                            Intent payIntent = new Intent(this, KHostApduService.class);
-                            payIntent.putExtra(NDEF_MESSAGE, orderResponse);
-                            startService(payIntent);
-
+                            //
+                            startNFCPaymentService(orderResponse);
                         } else {
-
-                            //Intent
                             String packageName = "com.ulisfintech.arthacustomer";
                             if (isPackageInstalled(this, packageName)) {
-
-                                Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-                                LaunchIntent.putExtra(ORDER_MESSAGE, new Gson().toJson(orderResponse));
-                                startActivity(LaunchIntent);
-                                isSharePaymentRunning = true;
-
-                                Log.i("SampleLog", "Application is already installed.");
+                                //
+                                startSharePayment(packageName, orderResponse);
                             } else {
-                                Log.i("SampleLog", "Application is not currently installed.");
+                                applicationNotInstalled();
                             }
-
                         }
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton("Cancel", (dialogInterface, i) -> {
+                        dialogInterface.dismiss();
+                    })
                     .show();
-
-//            if (orderResponse.getPaymentType() == ArthaConstants.PAYMENT_TYPE_TAP_AND_PAY ||
-//                    orderResponse.getPaymentType() == ArthaConstants.PAYMENT_TYPE_CARD_PAY) {
-//            } else if (orderResponse.getPaymentType() == ArthaConstants.PAYMENT_TYPE_ARTHA_PAY) {
-//            }
         });
 
         /**
@@ -255,6 +264,41 @@ public class PaymentActivity extends AbsActivity {
         }
         createProgressDialog();
         onNewIntent(getIntent());
+    }
+
+    private void applicationNotInstalled() {
+        new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                .setTitleText("Error")
+                .setContentText("Application is not currently installed.")
+                .setConfirmText("Okay")
+                .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
+                .show();
+    }
+
+    private void startNFCPaymentService(OrderResponse orderResponse) {
+        binding.paymentMethodLabel.setText(getString(R.string.tap_and_pay));
+        //Intent
+        Intent payIntent = new Intent(this, KHostApduService.class);
+        payIntent.putExtra(NDEF_MESSAGE, orderResponse);
+        startService(payIntent);
+    }
+
+    private void stopNFCPaymentService() {
+        //Intent
+        Intent payIntent = new Intent(this, KHostApduService.class);
+        stopService(payIntent);
+    }
+
+    private void startSharePayment(String packageName, OrderResponse orderResponse) {
+        stopNFCPaymentService();
+        binding.paymentMethodLabel.setText(getString(R.string.share_pay));
+        orderResponse.setProductBean(paymentData.getProductBean());
+        Intent intentForPackage = getPackageManager().getLaunchIntentForPackage(packageName);
+        intentForPackage.putExtra(ORDER_MESSAGE, new Gson().toJson(orderResponse));
+        intentForPackage.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intentForPackage.setAction("receive_data_from_artha");
+        startActivity(intentForPackage);
+        isSharePaymentRunning = true;
     }
 
     /**
@@ -430,12 +474,6 @@ public class PaymentActivity extends AbsActivity {
     private void createProgressDialog() {
         String title = getString(R.string.ad_progressBar_title);
         String mess = getString(R.string.ad_progressBar_mess);
-//        progressDialog = new ProgressDialog(this);
-//        progressDialog.setTitle(title);
-//        progressDialog.setMessage(mess);
-//        progressDialog.setIndeterminate(true);
-//        progressDialog.setCancelable(false);
-
         progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
         progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
         progressDialog.setTitleText(title);
