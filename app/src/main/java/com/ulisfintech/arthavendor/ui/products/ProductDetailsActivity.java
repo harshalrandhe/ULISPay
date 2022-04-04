@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -80,6 +81,9 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
          */
         binding.btnPay.setOnClickListener(view -> {
 
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+
             PaymentData paymentData = new PaymentData();
             paymentData.setVendorName("ABC Vendor");
             paymentData.setVendorMobile("1122334455");
@@ -108,8 +112,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                  */
                 Gateway.startReceivingPaymentActivity(this, paymentData);
 
-            }
-            else {
+            } else {
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();
             }
 

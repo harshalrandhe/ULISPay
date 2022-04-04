@@ -204,7 +204,12 @@ public class PaymentViewModel extends ViewModel {
                                     .setTitleText("ERROR!")
                                     .setContentText(context.getString(R.string.transaction_processing_message))
                                     .setCancelText("Cancel")
-                                    .setCancelClickListener(Dialog::dismiss)
+                                    .setCancelClickListener(sweetAlertDialog1 -> {
+                                        sweetAlertDialog1.dismiss();
+                                        if (progressDialog != null && progressDialog.isShowing()) {
+                                            progressDialog.dismiss();
+                                        }
+                                    })
                                     .setConfirmText("Retry")
                                     .setConfirmClickListener(sweetAlertDialog -> {
                                         sweetAlertDialog.dismiss();
@@ -297,7 +302,6 @@ public class PaymentViewModel extends ViewModel {
 
                 transactionResponseBeanMutableLiveData.setValue(null);
             }
-
         });
     }
 }

@@ -33,6 +33,7 @@ public class PaymentData implements Parcelable {
     private ProductBean productBean;
 
     public PaymentData() {
+
     }
 
     protected PaymentData(Parcel in) {
