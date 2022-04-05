@@ -22,9 +22,9 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
 
     public static class Builder {
 
-        private Tag mTag;
-        private CardNfcInterface mInterface;
-        private boolean mFromStart;
+        private final Tag mTag;
+        private final CardNfcInterface mInterface;
+        private final boolean mFromStart;
 
         public Builder(CardNfcInterface cardNfcInterface, Intent intent, boolean fromCreate) {
             mInterface = cardNfcInterface;

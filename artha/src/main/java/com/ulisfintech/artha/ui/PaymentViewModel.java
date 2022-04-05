@@ -191,7 +191,8 @@ public class PaymentViewModel extends ViewModel {
                         OrderStatusResponse.class);
 
                 if (orderStatusResponse != null && orderStatusResponse.getData() != null) {
-                    if (orderStatusResponse.getData().getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_CREATED)) {
+                    if (orderStatusResponse.getData().getOrder_status().equalsIgnoreCase(
+                            APIConstant.ORDER_STATUS_CREATED)) {
 
                         if (statusCounter < 5) {
                             // Check order status on every second

@@ -8,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
 
 import com.google.gson.Gson;
+import com.ulisfintech.artha.BuildConfig;
 import com.ulisfintech.artha.R;
 import com.ulisfintech.artha.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.artha.cardreader.CardNfcAsyncTask;
@@ -28,6 +30,7 @@ import com.ulisfintech.artha.helper.SyncMessage;
 import com.ulisfintech.artha.hostservice.KHostApduService;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class PaymentActivity extends AbsActivity {
@@ -38,6 +41,8 @@ public class PaymentActivity extends AbsActivity {
      * The ACS Result data after performing 3DS
      */
     public static final String EXTRA_TXN_RESULT = "com.ulisfintech.artha.android.TXN_RESULT";
+    private static final int TIMEOUT_TIMER = 30000;
+    private static final int INTERVAL = 1000;
 
     private ActivityPaymentBinding binding;
     private PaymentViewModel paymentViewModel;
@@ -57,13 +62,23 @@ public class PaymentActivity extends AbsActivity {
     private final String ARTHA_TAP_AND_PAY = "Artha ( Tap & Pay)";
     private final String ARTHA_SHARE_PAY = "Artha Share Pay";
     String[] list = {ARTHA_TAP_AND_PAY, ARTHA_SHARE_PAY};
+    private boolean isSessionExpire;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPaymentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.btnCancel.setOnClickListener(view -> finish());
+        binding.btnCancel.setOnClickListener(view -> {
+            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("Cancel Transaction")
+                    .setContentText("Are you sure?")
+                    .setCancelText("No")
+                    .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+                    .setConfirmText("Yes")
+                    .setConfirmClickListener(sweetAlertDialog -> finish())
+                    .show();
+        });
 
         paymentViewModel = getDefaultViewModelProviderFactory().create(PaymentViewModel.class);
 
@@ -243,6 +258,8 @@ public class PaymentActivity extends AbsActivity {
             //Dialog
             showSelectPaymentMethodDialog();
 
+            startSessions();
+
         };
     }
 
@@ -294,7 +311,7 @@ public class PaymentActivity extends AbsActivity {
                         //
                         startNFCPaymentService(orderResponse);
                     } else {
-                        String packageName = "com.ulisfintech.arthacustomer";
+                        String packageName = BuildConfig.FRIEND;
                         if (isPackageInstalled(this, packageName)) {
                             //
                             startSharePayment(packageName, orderResponse);
@@ -345,6 +362,7 @@ public class PaymentActivity extends AbsActivity {
             return;
         }
         binding.paymentMethodLabel.setText(getString(R.string.tap_and_pay));
+        binding.ivScanCardPoster.setVisibility(View.VISIBLE);
         //Intent
         Intent payIntent = new Intent(this, KHostApduService.class);
         payIntent.putExtra(NDEF_MESSAGE, orderResponse);
@@ -370,6 +388,7 @@ public class PaymentActivity extends AbsActivity {
     private void startSharePayment(String packageName, OrderResponse orderResponse) {
         stopNFCPaymentService();
         binding.paymentMethodLabel.setText(getString(R.string.share_pay));
+        binding.ivScanCardPoster.setVisibility(View.GONE);
         orderResponse.setProductBean(paymentData.getProductBean());
         Intent intentForPackage = getPackageManager().getLaunchIntentForPackage(packageName);
         intentForPackage.putExtra(ORDER_MESSAGE, new Gson().toJson(orderResponse));
@@ -417,7 +436,6 @@ public class PaymentActivity extends AbsActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-
         if (intent.getAction() == null) {
 
             if (!intent.hasExtra(NDEF_MESSAGE)) {
@@ -430,7 +448,11 @@ public class PaymentActivity extends AbsActivity {
         } else if (intent.getAction() != null && intent.getAction().equals("android.nfc.action.TAG_DISCOVERED") ||
                 intent.getAction() != null && intent.getAction().equals("android.nfc.action.TECH_DISCOVERED")) {
 
-            if (nfcAdapter != null && nfcAdapter.isEnabled()) {
+            if (isSessionExpire) {
+                return;
+            }
+
+            if (nfcAdapter != null && nfcAdapter.isEnabled() && !isScanNow) {
                 cardNfcAsyncTask = new CardNfcAsyncTask.Builder(new CardNfcAsyncTask.CardNfcInterface() {
 
                     @Override
@@ -472,7 +494,7 @@ public class PaymentActivity extends AbsActivity {
                         progressDialog.dismiss();
                         cardNfcAsyncTask = null;
                         isScanNow = false;
-                        Log.e("<mobileDetected>", "mobilePhoneDetected....");
+                        Log.e("<finishNfcReadCard>", "finishNfcReadCard....");
                         if (nfcAdapter != null) cardNfcUtils.disableDispatch();
 
                         //Intent
@@ -582,6 +604,27 @@ public class PaymentActivity extends AbsActivity {
 
         if (syncMessage.status) {
             checkOrderStatus(((OrderResponse) syncMessage.data).getOrder_id());
+        } else {
+
+            if (isSessionExpire) {
+                return;
+            }
+
+            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("Request Timeout!")
+                    .setContentText("Your payment request is timeout!, please retry again")
+                    .setCancelText("Cancel")
+                    .setCancelClickListener(sweetAlertDialog1 -> {
+                        sweetAlertDialog1.dismiss();
+                        onBackPressed();
+                    })
+                    .setConfirmText("Retry")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismiss();
+                        //Retry API
+                        showSelectPaymentMethodDialog();
+                    })
+                    .show();
         }
     }
 
@@ -649,5 +692,44 @@ public class PaymentActivity extends AbsActivity {
         view.setHapticFeedbackEnabled(true);
         view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
                 HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+    }
+
+    /**
+     * Session
+     */
+    private void startSessions() {
+        new CountDownTimer(TIMEOUT_TIMER, INTERVAL) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long minute = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
+                long second = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished);
+                binding.tvTimeout.setText("Timeout in " + minute + ":" + second + " minute");
+            }
+
+            @Override
+            public void onFinish() {
+                stopNFCPaymentService();
+                isSessionExpire = true;
+                SweetAlertDialog dialog = new SweetAlertDialog(PaymentActivity.this, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("Request Timeout!")
+                        .setContentText("Your payment request is timeout!, please retry again")
+                        .setConfirmText("Okay")
+                        .setConfirmClickListener(sweetAlertDialog -> {
+
+                            sweetAlertDialog.dismiss();
+
+                            SyncMessage syncMessage = new SyncMessage();
+                            syncMessage.data = null;
+                            syncMessage.message = "Request timeout..";
+                            syncMessage.status = false;
+                            //Intent
+                            postResultBack(syncMessage);
+
+                        });
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        }.start();
     }
 }

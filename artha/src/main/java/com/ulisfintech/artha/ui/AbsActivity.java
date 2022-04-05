@@ -52,7 +52,7 @@ abstract class AbsActivity extends AppCompatActivity implements NFCListener {
     public void readError() {
 
         SyncMessage syncMessage = new SyncMessage();
-        syncMessage.message = "Payment successful";
+        syncMessage.message = "Request timeout!";
         syncMessage.status = false;
         handleResponse(syncMessage);
 
@@ -70,6 +70,8 @@ abstract class AbsActivity extends AppCompatActivity implements NFCListener {
                 } else {
                     readError();
                 }
+            }else if (intent != null && intent.getAction().equals(ArthaConstants.ACTION_DESTROY)) {
+                readError();
             }
         }
     }

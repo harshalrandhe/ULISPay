@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     tools:context=".ui.PaymentActivity">
 
@@ -10,193 +11,221 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:id="@+id/layout_one"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
-            android:background="@drawable/info_layout_shape"
-            android:orientation="vertical"
-            android:padding="0dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/text_shape"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="Payment Information"
-                android:textColor="@color/white" />
+            app:cardElevation="10dp"
+            app:cardCornerRadius="5dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardPreventCornerOverlap="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:background="@drawable/info_layout_shape"
+                android:orientation="vertical"
+                android:padding="0dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawablePadding="10dp"
-                    android:gravity="start|center"
+                    android:background="@drawable/text_shape"
+                    android:gravity="center"
                     android:padding="10dp"
-                    android:text="Vendor Name"
-                    android:textSize="12sp" />
+                    android:text="Payment Information"
+                    android:textColor="@color/white" />
 
-                <TextView
-                    android:id="@+id/tvVendorName"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawablePadding="10dp"
-                    android:gravity="end|center"
-                    android:padding="10dp"
-                    android:text=""
-                    android:textSize="14sp" />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:drawablePadding="10dp"
+                        android:gravity="start|center"
+                        android:padding="10dp"
+                        android:text="Vendor Name"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvVendorName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:drawablePadding="10dp"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/cardview_shadow_start_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:drawablePadding="10dp"
+                        android:gravity="start|center"
+                        android:padding="10dp"
+                        android:text="Mobile"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvVendorMobile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/cardview_shadow_start_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:drawablePadding="10dp"
+                        android:gravity="start|center"
+                        android:padding="10dp"
+                        android:text="Product Name"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvProductName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:drawablePadding="10dp"
+                        android:padding="10dp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/cardview_shadow_start_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:drawablePadding="10dp"
+                        android:gravity="start|center"
+                        android:padding="10dp"
+                        android:text="Product Price"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvProductPrice"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/cardview_shadow_start_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:drawablePadding="10dp"
+                        android:gravity="start|center"
+                        android:padding="10dp"
+                        android:text="Order Id"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvOrderId"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="10dp"
+                        android:text=""
+                        android:textSize="14sp" />
+                </LinearLayout>
             </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/cardview_shadow_start_color" />
+        <ImageView
+            android:id="@+id/ivScanCardPoster"
+            android:layout_width="300dp"
+            android:layout_height="350dp"
+            android:layout_below="@+id/paymentMethodLabel"
+            android:layout_centerInParent="true"
+            android:src="@drawable/card_tap_image"
+            android:visibility="gone" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawablePadding="10dp"
-                    android:gravity="start|center"
-                    android:padding="10dp"
-                    android:text="Mobile"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvVendorMobile"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end|center"
-                    android:padding="10dp"
-                    android:text=""
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/cardview_shadow_start_color" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="10dp"
-                    android:gravity="start|center"
-                    android:padding="10dp"
-                    android:text="Product Name"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvProductName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawablePadding="10dp"
-                    android:gravity="end|center"
-                    android:padding="10dp"
-                    android:text=""
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/cardview_shadow_start_color" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawablePadding="10dp"
-                    android:gravity="start|center"
-                    android:padding="10dp"
-                    android:text="Product Price"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvProductPrice"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end|center"
-                    android:padding="10dp"
-                    android:text=""
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/cardview_shadow_start_color" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawablePadding="10dp"
-                    android:gravity="start|center"
-                    android:padding="10dp"
-                    android:text="Order Id"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvOrderId"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end|center"
-                    android:padding="10dp"
-                    android:text=""
-                    android:textSize="14sp" />
-            </LinearLayout>
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tvTimeout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_one"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="5dp"
+            android:gravity="center"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/paymentMethodLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_one"
+            android:layout_below="@id/tvTimeout"
             android:layout_centerInParent="true"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="0dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="0dp"
             android:gravity="center"
             android:text="@string/nothing_selected"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/btnChangePaymentMethod"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/btnCancel"
             android:layout_centerHorizontal="true"
@@ -204,14 +233,14 @@
             android:layout_marginTop="0dp"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="0dp"
-            android:background="@drawable/text_shape"
+            android:background="@drawable/btn_selector"
             android:ems="17"
             android:text="@string/label_btn_change_payment"
             android:textColor="@color/white" />
 
         <Button
             android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
@@ -219,10 +248,12 @@
             android:layout_marginTop="30dp"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="30dp"
-            android:background="@drawable/text_shape"
+            android:background="@drawable/btn_selector"
             android:ems="17"
             android:text="@string/label_btn_cancel"
             android:textColor="@color/white" />
+
+
     </RelativeLayout>
 
 

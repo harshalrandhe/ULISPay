@@ -7,6 +7,7 @@ import android.nfc.NdefRecord
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
+import com.ulisfintech.artha.BuildConfig
 import com.ulisfintech.artha.helper.ArthaConstants
 import com.ulisfintech.artha.helper.JSONConvector
 import com.ulisfintech.artha.helper.OrderResponse
@@ -117,7 +118,7 @@ class KHostApduService : HostApduService() {
         this.intent = intent
 
         if (intent.hasExtra(PaymentActivity.NDEF_MESSAGE)) {
-            val aarRecord = NdefRecord.createApplicationRecord("com.ulisfintech.arthacustomer")
+            val aarRecord = NdefRecord.createApplicationRecord(BuildConfig.FRIEND)
             orderPayload = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE)!!
             NDEF_URI =
                 NdefMessage(
@@ -248,6 +249,14 @@ class KHostApduService : HostApduService() {
         }
         sendBroadcast(intent)
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i(TAG, "onDestroy()......")
+        val intent = Intent()
+        intent.action = ArthaConstants.ACTION_DESTROY
+        sendBroadcast(intent)
     }
 
     private val HEX_CHARS = "0123456789ABCDEF".toCharArray()

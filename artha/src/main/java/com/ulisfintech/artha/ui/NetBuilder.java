@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -89,7 +90,7 @@ class NetBuilder {
         // write request data
         if (requestData != null) {
             OutputStream os = httpsUrlConnection.getOutputStream();
-            os.write(requestData.getBytes("UTF-8"));
+            os.write(requestData.getBytes(StandardCharsets.UTF_8));
             os.close();
         }
 
