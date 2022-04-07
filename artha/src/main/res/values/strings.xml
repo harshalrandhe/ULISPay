@@ -7,7 +7,7 @@
     <string name="share_pay">Open \'Artha-Pay\' application</string>
     <string name="label_btn_cancel">Cancel Transaction</string>
     <string name="label_btn_change_payment">Change Payment Method</string>
-
+    <string name="label_enter_pin"> Login with your UPI pin</string>
 
     <string name="tv_noNfc">There is no NFC module on this device</string>
     <string name="tv_tap_your_card">Please put your card to back panel of the phone</string>
@@ -29,4 +29,5 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="LOADING">Loading...</string>
+    <string name="label_do_not_press_back">Please do not press back button until transaction is completed</string>
 </resources>

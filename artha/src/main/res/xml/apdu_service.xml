@@ -18,4 +18,6 @@
         <!--<aid-filter android:name="F0394148148100" />-->
     </aid-group>
     <!-- END_INCLUDE(CardEmulationXML) -->
+
+
 </host-apdu-service>

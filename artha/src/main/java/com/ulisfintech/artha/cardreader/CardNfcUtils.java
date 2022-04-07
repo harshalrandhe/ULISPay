@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
 import android.nfc.tech.IsoDep;
+import android.nfc.tech.MifareUltralight;
+import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
 
 public class CardNfcUtils {
@@ -15,9 +17,12 @@ public class CardNfcUtils {
     private final Activity mActivity;
     private static final IntentFilter[] INTENT_FILTER = new IntentFilter[] {
             new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
-            new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)};
+            new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
+            new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED)};
     private static final String[][] TECH_LIST = new String[][] { {
-            NfcA.class.getName(), IsoDep.class.getName() } };
+            NfcA.class.getName(), IsoDep.class.getName(), MifareUltralight.class.getName(), Ndef.class.getName()} };
+
+    private boolean isDispatchEnabled;
 
     public CardNfcUtils(final Activity pActivity) {
         mActivity = pActivity;
@@ -26,14 +31,20 @@ public class CardNfcUtils {
                 new Intent(mActivity, mActivity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
     }
 
+    public boolean isDispatchEnabled() {
+        return isDispatchEnabled;
+    }
+
     public void disableDispatch() {
         if (mNfcAdapter != null) {
+            isDispatchEnabled = false;
             mNfcAdapter.disableForegroundDispatch(mActivity);
         }
     }
 
     public void enableDispatch() {
         if (mNfcAdapter != null) {
+            isDispatchEnabled = true;
             mNfcAdapter.enableForegroundDispatch(mActivity, mPendingIntent, INTENT_FILTER, TECH_LIST);
         }
     }

@@ -1,10 +1,15 @@
 package com.ulisfintech.artha.cardreader;
 
 import android.content.Intent;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
+import android.os.Parcelable;
+import android.util.Log;
 
 import com.ulisfintech.artha.cardreader.enums.EmvCardScheme;
 import com.ulisfintech.artha.cardreader.model.EmvCard;
@@ -17,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
 
@@ -110,6 +116,7 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
                 if (tag.toString().equals(NFC_A_TAG) || tag.toString().equals(NFC_B_TAG)) {
                     execute();
                 } else {
+
                     if (!builder.mFromStart) {
                         mInterface.unknownEmvCard();
                     }
@@ -212,5 +219,37 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
         cardNumber = null;
         expireDate = null;
         cardType = null;
+    }
+
+    public String readFromTag(Intent intent) {
+
+        Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+
+        Ndef ndef = Ndef.get(detectedTag);
+        try {
+            ndef.connect();
+
+            Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
+            if (messages != null) {
+                NdefMessage[] ndefMessages = new NdefMessage[messages.length];
+                for (int i = 0; i < messages.length; i++) {
+                    ndefMessages[i] = (NdefMessage) messages[i];
+                }
+                NdefRecord record = ndefMessages[0].getRecords()[0];
+
+                byte[] payload = record.getPayload();
+                String text = new String(payload, StandardCharsets.UTF_8);
+
+                Log.e("<<TAG-NDEF>>", text.trim());
+
+                ndef.close();
+
+                return text.trim();
+            }
+        } catch (Exception e) {
+            Log.e("<<TAG-NDEF>>", "Cannot Read From Tag.");
+        }
+        return null;
     }
 }

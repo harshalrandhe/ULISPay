@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white"
+    android:background="@color/gif_back_color"
     tools:context=".ui.PaymentActivity">
 
     <RelativeLayout
@@ -187,14 +187,24 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <ImageView
+<!--        <ImageView-->
+<!--            android:id="@+id/ivScanCardPoster"-->
+<!--            android:layout_width="300dp"-->
+<!--            android:layout_height="350dp"-->
+<!--            android:layout_below="@+id/paymentMethodLabel"-->
+<!--            android:layout_centerInParent="true"-->
+<!--            android:src="@drawable/card_tap_image"-->
+<!--            android:visibility="visible" />-->
+
+        <com.ulisfintech.artha.helper.PlayGifView
             android:id="@+id/ivScanCardPoster"
-            android:layout_width="300dp"
-            android:layout_height="350dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
             android:layout_below="@+id/paymentMethodLabel"
+            android:layout_above="@+id/btnChangePaymentMethod"
             android:layout_centerInParent="true"
-            android:src="@drawable/card_tap_image"
-            android:visibility="gone" />
+            android:visibility="visible"/>
 
         <TextView
             android:id="@+id/tvTimeout"
@@ -218,7 +228,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="0dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginBottom="0dp"
+            android:layout_marginBottom="10dp"
             android:gravity="center"
             android:text="@string/nothing_selected"
             android:textSize="16sp" />
@@ -230,7 +240,7 @@
             android:layout_above="@+id/btnCancel"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="0dp"
             android:background="@drawable/btn_selector"
@@ -245,7 +255,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="30dp"
             android:background="@drawable/btn_selector"

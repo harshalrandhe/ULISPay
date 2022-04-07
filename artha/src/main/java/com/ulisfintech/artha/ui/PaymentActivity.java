@@ -1,5 +1,6 @@
 package com.ulisfintech.artha.ui;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,8 @@ import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
 
@@ -41,7 +44,7 @@ public class PaymentActivity extends AbsActivity {
      * The ACS Result data after performing 3DS
      */
     public static final String EXTRA_TXN_RESULT = "com.ulisfintech.artha.android.TXN_RESULT";
-    private static final int TIMEOUT_TIMER = 30000;
+    private static final int TIMEOUT_TIMER = 60000;
     private static final int INTERVAL = 1000;
 
     private ActivityPaymentBinding binding;
@@ -53,16 +56,20 @@ public class PaymentActivity extends AbsActivity {
     private CardNfcUtils cardNfcUtils;
 
     private CardNfcAsyncTask cardNfcAsyncTask;
-    private boolean intentFromCreate;
-    private boolean isScanNow;
     private SweetAlertDialog progressDialog;
     private final String PAYMENT_TYPE_CARD_PAY = "card_pay";
+    private boolean intentFromCreate;
+    private boolean isScanNow;
     private boolean isSharePaymentRunning;
+    private boolean isCardPaymentRunning;
+    private boolean isMobilePaymentRunning;
+    private boolean isUPIPaymentRunning;
     private boolean isOrderCreated;
+    private boolean isSessionExpire;
     private final String ARTHA_TAP_AND_PAY = "Artha ( Tap & Pay)";
     private final String ARTHA_SHARE_PAY = "Artha Share Pay";
     String[] list = {ARTHA_TAP_AND_PAY, ARTHA_SHARE_PAY};
-    private boolean isSessionExpire;
+    private CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,8 +156,34 @@ public class PaymentActivity extends AbsActivity {
             intentFromCreate = true;
         }
 
+
         createProgressDialog();
         onNewIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        intentFromCreate = false;
+        if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
+            showTurnOnNfcDialog();
+        }
+
+        if (!cardNfcUtils.isDispatchEnabled()) {
+            cardNfcUtils.enableDispatch();
+        }
+
+        if (isSharePaymentRunning) {
+            isSharePaymentRunning = false;
+            //
+            checkOrderStatus(this.orderResponse.getOrder_id());
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (nfcAdapter != null && cardNfcUtils.isDispatchEnabled()) cardNfcUtils.disableDispatch();
     }
 
     /**
@@ -160,7 +193,9 @@ public class PaymentActivity extends AbsActivity {
     private Observer<? super TransactionResponseBean> transactionStatusObserver() {
         return transactionResponseBean -> {
 
-            cardNfcUtils.enableDispatch();
+//            if (!cardNfcUtils.isDispatchEnabled()) {
+//                cardNfcUtils.enableDispatch();
+//            }
 
             setHapticEffect(binding.getRoot());
 
@@ -208,6 +243,8 @@ public class PaymentActivity extends AbsActivity {
                         })
                         .show();
             }
+
+            isCardPaymentRunning = false;
         };
     }
 
@@ -235,6 +272,8 @@ public class PaymentActivity extends AbsActivity {
             binding.tvVendorMobile.setText(strMobile);
             binding.tvProductName.setText(paymentData.getProduct());
             binding.tvProductPrice.setText("₹" + paymentData.getPrice());
+
+
 
             this.paymentData = paymentData;
         };
@@ -292,6 +331,8 @@ public class PaymentActivity extends AbsActivity {
                         })
                         .show();
             }
+
+            isMobilePaymentRunning = false;
         };
     }
 
@@ -363,6 +404,9 @@ public class PaymentActivity extends AbsActivity {
         }
         binding.paymentMethodLabel.setText(getString(R.string.tap_and_pay));
         binding.ivScanCardPoster.setVisibility(View.VISIBLE);
+        binding.ivScanCardPoster.setImageResource(R.drawable.nfc);
+
+
         //Intent
         Intent payIntent = new Intent(this, KHostApduService.class);
         payIntent.putExtra(NDEF_MESSAGE, orderResponse);
@@ -396,6 +440,14 @@ public class PaymentActivity extends AbsActivity {
         intentForPackage.setAction("receive_data_from_artha");
         startActivity(intentForPackage);
         isSharePaymentRunning = true;
+        stopSessionTimer();
+    }
+
+    private void stopSessionTimer() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
     }
 
     /**
@@ -408,28 +460,6 @@ public class PaymentActivity extends AbsActivity {
         intent.putExtra(EXTRA_TXN_RESULT, response);
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        intentFromCreate = false;
-        if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
-            showTurnOnNfcDialog();
-        }
-        cardNfcUtils.enableDispatch();
-
-        if (isSharePaymentRunning) {
-            isSharePaymentRunning = false;
-            //
-            checkOrderStatus(this.orderResponse.getOrder_id());
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (nfcAdapter != null) cardNfcUtils.disableDispatch();
     }
 
     @Override
@@ -469,7 +499,9 @@ public class PaymentActivity extends AbsActivity {
                     @Override
                     public void mobilePhoneDetected() {
                         Log.e("<mobileDetected>", "mobilePhoneDetected....");
-                        if (nfcAdapter != null) cardNfcUtils.disableDispatch();
+                        if (nfcAdapter != null && cardNfcUtils.isDispatchEnabled()) {
+                            cardNfcUtils.disableDispatch();
+                        }
                         //Intent
                         startNFCPaymentService(orderResponse);
                     }
@@ -481,7 +513,18 @@ public class PaymentActivity extends AbsActivity {
 
                     @Override
                     public void unknownEmvCard() {
-                        showSnackBar(getString(R.string.snack_unknownEmv));
+                        //showSnackBar(getString(R.string.snack_unknownEmv));
+                        String msg = cardNfcAsyncTask.readFromTag(intent);
+                        orderResponse.setProductBean(paymentData.getProductBean());
+                        isUPIPaymentRunning = true;
+                        stopSessionTimer();
+                        Intent launcherIntent = new Intent(PaymentActivity.this, UPIPinActivity.class);
+                        launcherIntent.putExtra(UPIPinActivity.UPI_KEY, msg);
+                        if (paymentData!=null && paymentData.getVendorName() != null) {
+                            launcherIntent.putExtra(UPIPinActivity.VENDOR_NAME_KEY, paymentData.getVendorName());
+                        }
+                        launcherIntent.putExtra(ORDER_MESSAGE, orderResponse);
+                        upiPaymentResultLauncher.launch(launcherIntent);
                     }
 
                     @Override
@@ -495,10 +538,6 @@ public class PaymentActivity extends AbsActivity {
                         cardNfcAsyncTask = null;
                         isScanNow = false;
                         Log.e("<finishNfcReadCard>", "finishNfcReadCard....");
-                        if (nfcAdapter != null) cardNfcUtils.disableDispatch();
-
-                        //Intent
-                        startNFCPaymentService(orderResponse);
                     }
                 }, intent, intentFromCreate).build();
             }
@@ -533,6 +572,9 @@ public class PaymentActivity extends AbsActivity {
         }
 
         setHapticEffect(binding.getRoot());
+
+        isCardPaymentRunning = true;
+        stopSessionTimer();
 
         String cardNumber = cardNfcAsyncTask.getCardNumber().trim();
         String expiredDate = cardNfcAsyncTask.getCardExpireDate();
@@ -603,7 +645,11 @@ public class PaymentActivity extends AbsActivity {
          */
 
         if (syncMessage.status) {
+
+            isMobilePaymentRunning = true;
+            stopSessionTimer();
             checkOrderStatus(((OrderResponse) syncMessage.data).getOrder_id());
+
         } else {
 
             if (isSessionExpire) {
@@ -698,7 +744,7 @@ public class PaymentActivity extends AbsActivity {
      * Session
      */
     private void startSessions() {
-        new CountDownTimer(TIMEOUT_TIMER, INTERVAL) {
+        countDownTimer = new CountDownTimer(TIMEOUT_TIMER, INTERVAL) {
 
             @Override
             public void onTick(long millisUntilFinished) {
@@ -709,6 +755,15 @@ public class PaymentActivity extends AbsActivity {
 
             @Override
             public void onFinish() {
+
+                if (isCardPaymentRunning || isMobilePaymentRunning || isSharePaymentRunning || isUPIPaymentRunning) {
+                    /**
+                     * Payment transaction process is running, do not expire session.
+                     * After the transaction is completed, the activity will be automatically closed.
+                     */
+                    return;
+                }
+
                 stopNFCPaymentService();
                 isSessionExpire = true;
                 SweetAlertDialog dialog = new SweetAlertDialog(PaymentActivity.this, SweetAlertDialog.ERROR_TYPE)
@@ -732,4 +787,39 @@ public class PaymentActivity extends AbsActivity {
             }
         }.start();
     }
+
+    /**
+     * Result Launcher
+     * UPI Payment result launcher
+     */
+    ActivityResultLauncher<Intent> upiPaymentResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+
+                    new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                            .setTitleText("UPI Payment")
+                            .setContentText("Payment successful!")
+                            .setConfirmText("Okay")
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismiss();
+                                SyncMessage syncMessage = new SyncMessage();
+                                syncMessage.data = null;
+                                syncMessage.message = "Transaction is successful!";
+                                syncMessage.status = true;
+                                //Intent
+                                postResultBack(syncMessage);
+                            })
+                            .show();
+                } else {
+
+                    SyncMessage syncMessage = new SyncMessage();
+                    syncMessage.data = null;
+                    syncMessage.message = "Transaction is canceled!";
+                    syncMessage.status = false;
+                    //Intent
+                    postResultBack(syncMessage);
+                }
+
+                isUPIPaymentRunning = false;
+            });
 }

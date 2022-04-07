@@ -96,6 +96,7 @@ public class PaymentViewModel extends ViewModel {
      * @param paymentData merchant details
      */
     void createOrderAsync(Context context, PaymentData paymentData) {
+
         OrderBean orderBean = new OrderBean();
         orderBean.setAmount(paymentData.getPrice());
         orderBean.setCurrency(paymentData.getCurrency());
