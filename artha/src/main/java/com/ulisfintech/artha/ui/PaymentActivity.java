@@ -66,16 +66,23 @@ public class PaymentActivity extends AbsActivity {
     private boolean isUPIPaymentRunning;
     private boolean isOrderCreated;
     private boolean isSessionExpire;
-    private final String ARTHA_TAP_AND_PAY = "Artha ( Tap & Pay)";
-    private final String ARTHA_SHARE_PAY = "Artha Share Pay";
-    String[] list = {ARTHA_TAP_AND_PAY, ARTHA_SHARE_PAY};
+
+
     private CountDownTimer countDownTimer;
+    private SdkUtils sdkUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPaymentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        sdkUtils = new SdkUtils();
+
+        /**
+         * Button
+         * Cancel Transaction
+         */
         binding.btnCancel.setOnClickListener(view -> {
             new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                     .setTitleText("Cancel Transaction")
@@ -157,7 +164,8 @@ public class PaymentActivity extends AbsActivity {
         }
 
 
-        createProgressDialog();
+        progressDialog = sdkUtils.createProgressDialog(this);
+
         onNewIntent(getIntent());
     }
 
@@ -166,7 +174,7 @@ public class PaymentActivity extends AbsActivity {
         super.onResume();
         intentFromCreate = false;
         if (nfcAdapter != null && !nfcAdapter.isEnabled()) {
-            showTurnOnNfcDialog();
+            sdkUtils.showTurnOnNfcDialog(PaymentActivity.this);
         }
 
         if (!cardNfcUtils.isDispatchEnabled()) {
@@ -193,11 +201,7 @@ public class PaymentActivity extends AbsActivity {
     private Observer<? super TransactionResponseBean> transactionStatusObserver() {
         return transactionResponseBean -> {
 
-//            if (!cardNfcUtils.isDispatchEnabled()) {
-//                cardNfcUtils.enableDispatch();
-//            }
-
-            setHapticEffect(binding.getRoot());
+            sdkUtils.setHapticEffect(binding.getRoot());
 
             if (transactionResponseBean != null) {
                 if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
@@ -256,12 +260,9 @@ public class PaymentActivity extends AbsActivity {
         return paymentData -> {
 
             if (paymentData == null) {
-                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                        .setTitleText("ERROR!")
-                        .setContentText("Payments details are not available!")
-                        .setConfirmText("Okay")
-                        .setConfirmClickListener(Dialog::dismiss)
-                        .show();
+
+                sdkUtils.errorAlert(this, "Payments details are not available!");
+
                 return;
             }
 
@@ -272,8 +273,6 @@ public class PaymentActivity extends AbsActivity {
             binding.tvVendorMobile.setText(strMobile);
             binding.tvProductName.setText(paymentData.getProduct());
             binding.tvProductPrice.setText("₹" + paymentData.getPrice());
-
-
 
             this.paymentData = paymentData;
         };
@@ -286,7 +285,7 @@ public class PaymentActivity extends AbsActivity {
     private Observer<? super OrderResponse> orderIsCreatedObserver() {
         return orderResponse -> {
 
-            setHapticEffect(binding.getRoot());
+            sdkUtils.setHapticEffect(binding.getRoot());
 
             binding.tvOrderId.setText(orderResponse.getOrder_id());
 
@@ -321,15 +320,8 @@ public class PaymentActivity extends AbsActivity {
 
             } else if (orderStatusBean.getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
 
-                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                        .setTitleText("ERROR!")
-                        .setContentText("Transaction failed!, please try again")
-                        .setConfirmText("Okay")
-                        .setConfirmClickListener(sweetAlertDialog -> {
-                            sweetAlertDialog.dismiss();
-                            onBackPressed();
-                        })
-                        .show();
+                sdkUtils.errorAlert(this, "Transaction failed!, please try again", true);
+
             }
 
             isMobilePaymentRunning = false;
@@ -341,44 +333,27 @@ public class PaymentActivity extends AbsActivity {
      * Show Payment Method
      */
     private void showSelectPaymentMethodDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Pay with")
-                .setCancelable(false)
-                .setItems(list, (dialogInterface, which) -> {
+        sdkUtils.showSelectPaymentMethodDialog(this, new SdkUtils.PaymentOptionListener() {
+            @Override
+            public void onTapAndPay() {
+                //
+                startNFCPaymentService(orderResponse);
+            }
 
-                    setHapticEffect(binding.getRoot());
-
-                    if (list[which].equalsIgnoreCase(ARTHA_TAP_AND_PAY)) {
-                        //
-                        startNFCPaymentService(orderResponse);
-                    } else {
-                        String packageName = BuildConfig.FRIEND;
-                        if (isPackageInstalled(this, packageName)) {
-                            //
-                            startSharePayment(packageName, orderResponse);
-                        } else {
-                            applicationNotInstalled();
-                        }
-                    }
-                })
-                .setNegativeButton("Cancel", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                })
-                .show();
+            @Override
+            public void onSharePay() {
+                String packageName = BuildConfig.FRIEND;
+                if (sdkUtils.isPackageInstalled(PaymentActivity.this, packageName)) {
+                    //
+                    startSharePayment(packageName, orderResponse);
+                } else {
+                    String msg = "Application is not currently installed.";
+                    sdkUtils.errorAlert(PaymentActivity.this, msg);
+                }
+            }
+        });
     }
 
-    /**
-     * Dialog Alert
-     * Application Is Not Available
-     */
-    private void applicationNotInstalled() {
-        new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                .setTitleText("Error")
-                .setContentText("Application is not currently installed.")
-                .setConfirmText("Okay")
-                .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
-                .show();
-    }
 
     /**
      * Process Payment
@@ -402,10 +377,10 @@ public class PaymentActivity extends AbsActivity {
                     .show();
             return;
         }
+
         binding.paymentMethodLabel.setText(getString(R.string.tap_and_pay));
         binding.ivScanCardPoster.setVisibility(View.VISIBLE);
         binding.ivScanCardPoster.setImageResource(R.drawable.nfc);
-
 
         //Intent
         Intent payIntent = new Intent(this, KHostApduService.class);
@@ -520,7 +495,7 @@ public class PaymentActivity extends AbsActivity {
                         stopSessionTimer();
                         Intent launcherIntent = new Intent(PaymentActivity.this, UPIPinActivity.class);
                         launcherIntent.putExtra(UPIPinActivity.UPI_KEY, msg);
-                        if (paymentData!=null && paymentData.getVendorName() != null) {
+                        if (paymentData != null && paymentData.getVendorName() != null) {
                             launcherIntent.putExtra(UPIPinActivity.VENDOR_NAME_KEY, paymentData.getVendorName());
                         }
                         launcherIntent.putExtra(ORDER_MESSAGE, orderResponse);
@@ -571,7 +546,7 @@ public class PaymentActivity extends AbsActivity {
             return;
         }
 
-        setHapticEffect(binding.getRoot());
+        sdkUtils.setHapticEffect(binding.getRoot());
 
         isCardPaymentRunning = true;
         stopSessionTimer();
@@ -623,17 +598,6 @@ public class PaymentActivity extends AbsActivity {
      */
     private void showSnackBar(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Create Progress Dialog
-     */
-    private void createProgressDialog() {
-        progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
-        progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-        progressDialog.setTitleText(getString(R.string.ad_progressBar_title));
-        progressDialog.setContentText(getString(R.string.ad_progressBar_mess));
-        progressDialog.setCancelable(false);
     }
 
     @Override
@@ -690,55 +654,6 @@ public class PaymentActivity extends AbsActivity {
         }
     }
 
-    /**
-     * Turn On NFC
-     * NFC setting dialog
-     */
-    private void showTurnOnNfcDialog() {
-        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
-                .setTitleText(getString(R.string.ad_nfcTurnOn_title))
-                .setContentText(getString(R.string.ad_nfcTurnOn_message))
-                .setContentText(getString(R.string.ad_nfcTurnOn_pos))
-                .setConfirmClickListener(sweetAlertDialog -> {
-                    sweetAlertDialog.dismiss();
-                    // Send the user to the settings page and hope they turn it on
-                    startActivity(new Intent(android.provider.Settings.ACTION_NFC_SETTINGS));
-                })
-                .setCancelText(getString(R.string.ad_nfcTurnOn_neg))
-                .setCancelClickListener(sweetAlertDialog -> {
-                    sweetAlertDialog.dismiss();
-                    onBackPressed();
-                })
-                .show();
-    }
-
-    /**
-     * Check Application Is Installed
-     *
-     * @param context     activity context
-     * @param packageName application package name
-     * @return true if an app is available or false if not
-     */
-    private boolean isPackageInstalled(Context context, String packageName) {
-        final PackageManager packageManager = context.getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-        if (intent == null) {
-            return false;
-        }
-        List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return !list.isEmpty();
-    }
-
-    /**
-     * Haptic Effect
-     *
-     * @param view any view
-     */
-    private void setHapticEffect(View view) {
-        view.setHapticFeedbackEnabled(true);
-        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-    }
 
     /**
      * Session

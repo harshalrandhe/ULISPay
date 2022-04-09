@@ -69,7 +69,6 @@ public class UPIPinActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (binding.edtPin.getText().toString().length() == 6) {
 
-                    binding.edtPin.setFocusable(false);
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(binding.edtPin.getWindowToken(), 0);
 
@@ -92,6 +91,8 @@ public class UPIPinActivity extends AppCompatActivity {
                                 .setConfirmClickListener(sweetAlertDialog -> {
                                     sweetAlertDialog.dismiss();
                                     binding.edtPin.setText("");
+                                    binding.edtPin.setFocusable(true);
+                                    imm.hideSoftInputFromWindow(binding.edtPin.getWindowToken(), 1);
                                 })
                                 .show();
                     }

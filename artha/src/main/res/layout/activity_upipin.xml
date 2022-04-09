@@ -91,7 +91,7 @@
                 android:background="@drawable/pint_edt_shape"
                 android:ems="12"
                 android:gravity="center"
-                android:hint="******"
+                android:hint="@string/dot_uni_codes"
                 android:inputType="numberPassword"
                 android:letterSpacing="1"
                 android:maxLength="6"

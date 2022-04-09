@@ -30,4 +30,5 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="LOADING">Loading...</string>
     <string name="label_do_not_press_back">Please do not press back button until transaction is completed</string>
+    <string name="dot_uni_codes">••••••</string>
 </resources>
