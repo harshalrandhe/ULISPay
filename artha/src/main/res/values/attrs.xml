@@ -25,4 +25,8 @@
         <attr name="pivotX" format="fraction" />
         <attr name="pivotY" format="fraction" />
     </declare-styleable>
+
+    <declare-styleable name="MyGif">
+        <attr name="src" format="integer"/>
+    </declare-styleable>
 </resources>

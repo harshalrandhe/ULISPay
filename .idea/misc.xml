@@ -25,10 +25,12 @@
         <entry key="artha/src/main/res/drawable/red_button_background.xml" value="0.13802083333333334" />
         <entry key="artha/src/main/res/drawable/success_bow.xml" value="0.13802083333333334" />
         <entry key="artha/src/main/res/drawable/success_circle.xml" value="0.13802083333333334" />
+        <entry key="artha/src/main/res/drawable/success_receipt_shape.xml" value="0.25435897435897437" />
         <entry key="artha/src/main/res/drawable/text_shape.xml" value="0.2518518518518518" />
         <entry key="artha/src/main/res/drawable/warning_circle.xml" value="0.13802083333333334" />
         <entry key="artha/src/main/res/drawable/warning_sigh.xml" value="0.13802083333333334" />
         <entry key="artha/src/main/res/layout/activity_payment.xml" value="0.25" />
+        <entry key="artha/src/main/res/layout/activity_payment_success.xml" value="0.2246376811594203" />
         <entry key="artha/src/main/res/layout/activity_reader.xml" value="0.21784420289855072" />
         <entry key="artha/src/main/res/layout/activity_upipin.xml" value="0.25" />
         <entry key="artha/src/main/res/layout/alert_dialog.xml" value="0.213768115942029" />

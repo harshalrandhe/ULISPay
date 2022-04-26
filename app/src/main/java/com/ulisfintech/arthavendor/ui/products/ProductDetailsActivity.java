@@ -25,6 +25,7 @@ import com.ulisfintech.artha.ui.Gateway;
 import com.ulisfintech.artha.ui.GatewaySecureCallback;
 import com.ulisfintech.artha.helper.PaymentData;
 import com.ulisfintech.artha.helper.SyncMessage;
+import com.ulisfintech.artha.ui.PaymentSuccessActivity;
 import com.ulisfintech.arthavendor.BuildConfig;
 import com.ulisfintech.arthavendor.R;
 import com.ulisfintech.arthavendor.databinding.ActivityProductDetailsBinding;
@@ -80,6 +81,9 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
          * Button
          */
         binding.btnPay.setOnClickListener(view -> {
+
+//            startActivity(new Intent(this, PaymentSuccessActivity.class));
+//            return;
 
             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
                     HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);

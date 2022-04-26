@@ -2,22 +2,16 @@ package com.ulisfintech.artha.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.Color;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
 
 import com.google.gson.Gson;
@@ -32,7 +26,6 @@ import com.ulisfintech.artha.helper.PaymentData;
 import com.ulisfintech.artha.helper.SyncMessage;
 import com.ulisfintech.artha.hostservice.KHostApduService;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 

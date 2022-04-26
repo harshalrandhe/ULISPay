@@ -82,8 +82,7 @@ public class PaymentViewModel extends ViewModel {
         paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
-
-
+        
         /**
          *  Place New Order
          */

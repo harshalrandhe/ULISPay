@@ -40,15 +40,7 @@
             android:name="com.ulisfintech.artha.ui.PaymentActivity"
             android:exported="true"
             android:screenOrientation="userPortrait"
-            android:theme="@style/Theme.Design.Light.NoActionBar">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.nfc.action.TAG_DISCOVERED"/>-->
-<!--                <action android:name="android.nfc.action.TECH_DISCOVERED"/>-->
-<!--                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>-->
-<!--            </intent-filter>-->
-<!--            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"-->
-<!--                android:resource="@xml/nfc_tech_filter" />-->
-        </activity>
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
 
         <service
             android:name="com.ulisfintech.artha.hostservice.KHostApduService"

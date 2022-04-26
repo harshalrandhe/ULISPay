@@ -21,6 +21,9 @@
 
     <application>
         <activity
+            android:name=".ui.PaymentSuccessActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.UPIPinActivity"
             android:exported="true" />
     </application>
