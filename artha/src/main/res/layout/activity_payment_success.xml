@@ -54,8 +54,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginStart="30dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="30dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/success_receipt_shape"
@@ -84,6 +84,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:drawablePadding="10dp"
+                        android:gravity="end"
                         android:padding="10dp"
                         android:textColor="@color/text_color"
                         android:textSize="14sp" />
@@ -115,6 +116,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:gravity="end"
                         android:padding="10dp"
                         android:textColor="@color/text_color"
                         android:textSize="14sp" />
@@ -148,6 +150,7 @@
                         android:layout_weight="1"
                         android:drawablePadding="10dp"
                         android:ellipsize="end"
+                        android:gravity="end"
                         android:maxLines="1"
                         android:padding="10dp"
                         android:textColor="@color/text_color"
@@ -180,6 +183,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:gravity="end"
                         android:padding="10dp"
                         android:textColor="@color/text_color"
                         android:textSize="14sp" />
@@ -211,6 +215,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:gravity="end"
                         android:padding="10dp"
                         android:textColor="@color/text_color"
                         android:textSize="14sp" />
@@ -237,6 +242,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:gravity="end"
                         android:padding="10dp"
                         android:textColor="@color/text_color"
                         android:textSize="14sp" />
@@ -256,9 +262,9 @@
                 android:id="@+id/btnDonePayment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="40dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
+                android:layout_marginEnd="40dp"
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/btn_selector"
                 android:ems="17"
