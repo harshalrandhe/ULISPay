@@ -33,6 +33,7 @@ public class PaymentActivity extends AbsActivity {
 
     public static final String NDEF_MESSAGE = "com.ulisfintech.artha.android.ndefMessage";
     static final String ORDER_MESSAGE = "com.ulisfintech.artha.android.orderMessage";
+    static final String TRANSACTION_MESSAGE = "com.ulisfintech.artha.android.transactionMessage";
     /**
      * The ACS Result data after performing 3DS
      */
@@ -200,11 +201,12 @@ public class PaymentActivity extends AbsActivity {
                 if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
 
                     SyncMessage syncMessage = new SyncMessage();
-                    syncMessage.data = transactionResponseBean;
+                    syncMessage.orderId = transactionResponseBean.getOrder_id();
+                    syncMessage.transactionId = transactionResponseBean.getTransaction_id();
                     syncMessage.message = "Transaction is successful!";
                     syncMessage.status = true;
-                    //Intent
-                    postResultBack(syncMessage);
+                    //Show
+                    showTransactionReceipt(syncMessage);
 
                 } else {
                     new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
@@ -216,11 +218,12 @@ public class PaymentActivity extends AbsActivity {
                                 sweetAlertDialog.dismiss();
 
                                 SyncMessage syncMessage = new SyncMessage();
-                                syncMessage.data = transactionResponseBean;
+                                syncMessage.orderId = transactionResponseBean.getOrder_id();
+                                syncMessage.transactionId = transactionResponseBean.getTransaction_id();
                                 syncMessage.message = "Transaction is failed!";
-                                syncMessage.status = true;
-                                //Intent
-                                postResultBack(syncMessage);
+                                syncMessage.status = false;
+                                //Show
+                                showTransactionReceipt(syncMessage);
                             })
                             .show();
                 }
@@ -243,6 +246,13 @@ public class PaymentActivity extends AbsActivity {
 
             isCardPaymentRunning = false;
         };
+    }
+
+    private void showTransactionReceipt(SyncMessage syncMessage) {
+        Intent intent = new Intent(this, PaymentSuccessActivity.class);
+        intent.putExtra(NDEF_MESSAGE, paymentData);
+        intent.putExtra(TRANSACTION_MESSAGE, syncMessage);
+        successResultLauncher.launch(intent);
     }
 
     /**
@@ -305,11 +315,13 @@ public class PaymentActivity extends AbsActivity {
                 orderStatusBean.setMessage("Transaction is successful!");
 
                 SyncMessage syncMessage = new SyncMessage();
-                syncMessage.data = orderStatusBean;
+                syncMessage.orderId = orderStatusBean.getOrder_id();
+                syncMessage.transactionId = orderStatusBean.getTransaction_id();
                 syncMessage.message = "Transaction is successful!";
                 syncMessage.status = true;
-                //Intent
-                postResultBack(syncMessage);
+
+                //Show
+                showTransactionReceipt(syncMessage);
 
             } else if (orderStatusBean.getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
 
@@ -704,30 +716,48 @@ public class PaymentActivity extends AbsActivity {
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK) {
 
-                    new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                            .setTitleText("UPI Payment")
-                            .setContentText("Payment successful!")
-                            .setConfirmText("Okay")
-                            .setConfirmClickListener(sweetAlertDialog -> {
-                                sweetAlertDialog.dismiss();
-                                SyncMessage syncMessage = new SyncMessage();
-                                syncMessage.data = null;
-                                syncMessage.message = "Transaction is successful!";
-                                syncMessage.status = true;
-                                //Intent
-                                postResultBack(syncMessage);
-                            })
-                            .show();
+                    SyncMessage syncMessage = new SyncMessage();
+                    if (result.getData() != null) {
+                        OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
+                        syncMessage.orderId = orderResponse.getOrder_id();
+                        syncMessage.transactionId = null;
+                    }
+                    syncMessage.message = "Transaction is successful!";
+                    syncMessage.status = true;
+
+                    //Show
+                    showTransactionReceipt(syncMessage);
+
                 } else {
 
                     SyncMessage syncMessage = new SyncMessage();
-                    syncMessage.data = null;
+                    if (result.getData() != null) {
+                        OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
+                        syncMessage.orderId = orderResponse.getOrder_id();
+                        syncMessage.transactionId = null;
+                    }
                     syncMessage.message = "Transaction is canceled!";
                     syncMessage.status = false;
-                    //Intent
-                    postResultBack(syncMessage);
+
+                    //Show
+                    showTransactionReceipt(syncMessage);
                 }
 
                 isUPIPaymentRunning = false;
             });
+
+    /**
+     * Transaction Result Launcher
+     */
+    ActivityResultLauncher<Intent> successResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null) {
+                        SyncMessage syncMessage = result.getData().getParcelableExtra(TRANSACTION_MESSAGE);
+                        //Intent
+                        postResultBack(syncMessage);
+                    }
+                }
+            }
+    );
 }

@@ -2,14 +2,16 @@ package com.ulisfintech.artha.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.ulisfintech.artha.R;
 import com.ulisfintech.artha.databinding.ActivityPaymentSuccessBinding;
 import com.ulisfintech.artha.helper.PaymentData;
+import com.ulisfintech.artha.helper.SyncMessage;
 
 public class PaymentSuccessActivity extends AppCompatActivity {
 
@@ -27,6 +29,11 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         sdkUtils = new SdkUtils();
 
         /**
+         * Button
+         */
+        binding.btnDonePayment.setOnClickListener(view -> onBackPressed());
+
+        /**
          * Observer
          * Intent Data Observer
          */
@@ -39,14 +46,33 @@ public class PaymentSuccessActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-//        Intent intent = new Intent(activity, PaymentSuccessActivity.class);
-//        intent.putExtra(PaymentActivity.NDEF_MESSAGE, paymentData);
-//        activity.startActivityForResult(intent, REQUEST_SECURE);
-
         if (intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE) != null) {
             //Process intent data
-            paymentViewModel.setIntent(this, intent);
+            paymentViewModel.setReceiptIntent(this, intent);
         }
+        if (intent.getParcelableExtra(PaymentActivity.TRANSACTION_MESSAGE) != null) {
+            SyncMessage syncMessage = getIntent().getParcelableExtra(PaymentActivity.TRANSACTION_MESSAGE);
+            if (syncMessage.status) {
+                binding.tvStatus.setText(syncMessage.message);
+                binding.tvStatus.setTextColor(getColor(R.color.success_stroke_color));
+                binding.ivError.setVisibility(View.GONE);
+                binding.gifImage.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvStatus.setText(syncMessage.message);
+                binding.tvStatus.setTextColor(getColor(R.color.error_stroke_color));
+                binding.ivError.setVisibility(View.VISIBLE);
+                binding.gifImage.setVisibility(View.GONE);
+            }
+            binding.tvOrderId.setText(syncMessage.orderId == null ? "-" : syncMessage.orderId);
+            binding.tvTransactionId.setText(syncMessage.transactionId == null ? "-" : syncMessage.transactionId);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //Post result back
+        setResult(RESULT_OK, getIntent());
+        finish();
     }
 
     /**
@@ -63,16 +89,17 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 return;
             }
 
+            this.paymentData = paymentData;
+
             String mobile = paymentData.getVendorMobile();
             String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
 
             binding.tvVendorName.setText(paymentData.getVendorName());
             binding.tvVendorMobile.setText(strMobile);
             binding.tvProductName.setText(paymentData.getProduct());
-            binding.tvProductPrice.setText("₹" + paymentData.getPrice());
-            binding.tvOrderId.setText("");
+            binding.tvProductPrice.setText(paymentData.getCurrency() + " " + paymentData.getPrice());
 
-            this.paymentData = paymentData;
+
         };
     }
 }

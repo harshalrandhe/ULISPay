@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -78,7 +79,7 @@ public class UPIPinActivity extends AppCompatActivity {
                         handler.postDelayed(() -> {
 
                             binding.progressBar.setVisibility(View.GONE);
-                            setResult(RESULT_OK);
+                            setResult(RESULT_OK, getIntent());
                             finish();
 
                         }, 4000);
@@ -108,8 +109,7 @@ public class UPIPinActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
-        setResult(RESULT_CANCELED);
+        setResult(RESULT_CANCELED, getIntent());
+        finish();
     }
 }

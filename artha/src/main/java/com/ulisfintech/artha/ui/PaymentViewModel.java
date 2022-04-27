@@ -90,6 +90,22 @@ public class PaymentViewModel extends ViewModel {
     }
 
     /**
+     * Intent Received From Payment Gateway
+     *
+     * @param intent product and transaction data
+     */
+    public void setReceiptIntent(Context context, Intent intent) {
+
+        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
+        String vendorMobile = paymentData.getVendorMobile();
+        String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
+        paymentData.setVendorMobile(strMobile);
+        //Update
+        paymentDataMutableLiveData.setValue(paymentData);
+
+    }
+
+    /**
      * Create Payment Order
      *
      * @param paymentData merchant details

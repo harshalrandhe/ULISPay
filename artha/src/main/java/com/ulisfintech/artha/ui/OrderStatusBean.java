@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.ulisfintech.artha.helper.BaseResponse;
 
-class OrderStatusBean extends BaseResponse implements Parcelable {
+public class OrderStatusBean extends BaseResponse implements Parcelable {
 
     @Expose
     private String batch_no;
