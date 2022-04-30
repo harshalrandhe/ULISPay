@@ -49,7 +49,9 @@ public class PaymentData implements Parcelable {
         merchantSecret = in.readString();
         returnUrl = in.readString();
         paymentType = in.readInt();
-        productBean = in.readParcelable(ProductBean.class.getClassLoader());
+        if (productBean != null) {
+            productBean = in.readParcelable(ProductBean.class.getClassLoader());
+        }
     }
 
     @Override
@@ -66,7 +68,9 @@ public class PaymentData implements Parcelable {
         dest.writeString(merchantSecret);
         dest.writeString(returnUrl);
         dest.writeInt(paymentType);
-        dest.writeParcelable(productBean, flags);
+        if (productBean != null) {
+            dest.writeParcelable(productBean, flags);
+        }
     }
 
     @Override

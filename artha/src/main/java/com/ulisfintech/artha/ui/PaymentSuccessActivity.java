@@ -46,11 +46,10 @@ public class PaymentSuccessActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE) != null) {
-            //Process intent data
-            paymentViewModel.setReceiptIntent(this, intent);
-        }
-        if (intent.getParcelableExtra(PaymentActivity.TRANSACTION_MESSAGE) != null) {
+        //Process intent data
+        paymentViewModel.setReceiptIntent(this, intent);
+
+        if (intent.hasExtra(PaymentActivity.TRANSACTION_MESSAGE)) {
             SyncMessage syncMessage = getIntent().getParcelableExtra(PaymentActivity.TRANSACTION_MESSAGE);
             if (syncMessage.status) {
                 binding.tvStatus.setText(syncMessage.message);
@@ -98,8 +97,6 @@ public class PaymentSuccessActivity extends AppCompatActivity {
             binding.tvVendorMobile.setText(strMobile);
             binding.tvProductName.setText(paymentData.getProduct());
             binding.tvProductPrice.setText(paymentData.getCurrency() + " " + paymentData.getPrice());
-
-
         };
     }
 }

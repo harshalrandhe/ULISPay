@@ -1,5 +1,6 @@
 package com.ulisfintech.arthavendor.ui.products;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,6 +21,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
+import com.ulisfintech.artha.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.PaymentData;
 import com.ulisfintech.artha.helper.SyncMessage;
@@ -150,23 +152,23 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
     @Override
     public void onTransactionComplete(SyncMessage syncMessage) {
         Log.e(this.getClass().getName(), new Gson().toJson(syncMessage));
-        new AlertDialog.Builder(this)
-                .setTitle("SUCCESS")
-                .setMessage(syncMessage.message)
-                .setPositiveButton("Okay", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                }).show();
+        new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                .setTitleText("SUCCESS")
+                .setContentText(syncMessage.message)
+                .setConfirmText("Okay")
+                .setConfirmClickListener(Dialog::dismiss)
+                .show();
     }
 
     @Override
     public void onTransactionCancel(SyncMessage syncMessage) {
         Log.e(this.getClass().getName(), new Gson().toJson(syncMessage));
-        new AlertDialog.Builder(this)
-                .setTitle("CANCEL")
-                .setMessage(syncMessage.message)
-                .setPositiveButton("Okay", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                }).show();
+        new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                .setTitleText("CANCEL")
+                .setContentText(syncMessage.message)
+                .setConfirmText("Okay")
+                .setConfirmClickListener(Dialog::dismiss)
+                .show();
     }
 
     public boolean isPackageInstalled(Context context, String packageName) {

@@ -203,6 +203,7 @@ public class PaymentActivity extends AbsActivity {
                     SyncMessage syncMessage = new SyncMessage();
                     syncMessage.orderId = transactionResponseBean.getOrder_id();
                     syncMessage.transactionId = transactionResponseBean.getTransaction_id();
+                    syncMessage.transactionResponseBean = transactionResponseBean;
                     syncMessage.message = "Transaction is successful!";
                     syncMessage.status = true;
                     //Show
@@ -220,6 +221,7 @@ public class PaymentActivity extends AbsActivity {
                                 SyncMessage syncMessage = new SyncMessage();
                                 syncMessage.orderId = transactionResponseBean.getOrder_id();
                                 syncMessage.transactionId = transactionResponseBean.getTransaction_id();
+                                syncMessage.transactionResponseBean = transactionResponseBean;
                                 syncMessage.message = "Transaction is failed!";
                                 syncMessage.status = false;
                                 //Show
@@ -248,6 +250,10 @@ public class PaymentActivity extends AbsActivity {
         };
     }
 
+    /**
+     * Transaction Receipt
+     * @param syncMessage transaction data
+     */
     private void showTransactionReceipt(SyncMessage syncMessage) {
         Intent intent = new Intent(this, PaymentSuccessActivity.class);
         intent.putExtra(NDEF_MESSAGE, paymentData);
@@ -317,6 +323,7 @@ public class PaymentActivity extends AbsActivity {
                 SyncMessage syncMessage = new SyncMessage();
                 syncMessage.orderId = orderStatusBean.getOrder_id();
                 syncMessage.transactionId = orderStatusBean.getTransaction_id();
+                syncMessage.orderStatusBean = orderStatusBean;
                 syncMessage.message = "Transaction is successful!";
                 syncMessage.status = true;
 
@@ -720,6 +727,7 @@ public class PaymentActivity extends AbsActivity {
                     if (result.getData() != null) {
                         OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
                         syncMessage.orderId = orderResponse.getOrder_id();
+                        syncMessage.orderResponse = orderResponse;
                         syncMessage.transactionId = null;
                     }
                     syncMessage.message = "Transaction is successful!";
@@ -734,6 +742,7 @@ public class PaymentActivity extends AbsActivity {
                     if (result.getData() != null) {
                         OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
                         syncMessage.orderId = orderResponse.getOrder_id();
+                        syncMessage.orderResponse = orderResponse;
                         syncMessage.transactionId = null;
                     }
                     syncMessage.message = "Transaction is canceled!";

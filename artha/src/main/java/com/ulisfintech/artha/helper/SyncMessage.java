@@ -13,6 +13,9 @@ public class SyncMessage implements Parcelable {
     public boolean status;
     public String orderId;
     public String transactionId;
+    public TransactionResponseBean transactionResponseBean;
+    public OrderResponse orderResponse;
+    public OrderStatusBean orderStatusBean;
 
     public SyncMessage() {
     }
@@ -22,6 +25,9 @@ public class SyncMessage implements Parcelable {
         status = in.readByte() != 0;
         orderId = in.readString();
         transactionId = in.readString();
+        transactionResponseBean = in.readParcelable(TransactionResponseBean.class.getClassLoader());
+        orderResponse = in.readParcelable(OrderResponse.class.getClassLoader());
+        orderStatusBean = in.readParcelable(OrderStatusBean.class.getClassLoader());
     }
 
     @Override
@@ -30,6 +36,9 @@ public class SyncMessage implements Parcelable {
         dest.writeByte((byte) (status ? 1 : 0));
         dest.writeString(orderId);
         dest.writeString(transactionId);
+        dest.writeParcelable(transactionResponseBean, flags);
+        dest.writeParcelable(orderResponse, flags);
+        dest.writeParcelable(orderStatusBean, flags);
     }
 
     @Override

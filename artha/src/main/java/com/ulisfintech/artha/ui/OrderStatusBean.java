@@ -55,7 +55,8 @@ public class OrderStatusBean extends BaseResponse implements Parcelable {
         ip = in.readString();
         country = in.readString();
         payment_method = in.readString();
-        baseResponse = in.readParcelable(BaseResponse.class.getClassLoader());
+        if (baseResponse != null)
+            baseResponse = in.readParcelable(BaseResponse.class.getClassLoader());
     }
 
     public static final Creator<OrderStatusBean> CREATOR = new Creator<OrderStatusBean>() {
@@ -195,5 +196,7 @@ public class OrderStatusBean extends BaseResponse implements Parcelable {
         parcel.writeString(ip);
         parcel.writeString(country);
         parcel.writeString(payment_method);
+        if (baseResponse != null)
+            parcel.writeParcelable(baseResponse, i);
     }
 }
