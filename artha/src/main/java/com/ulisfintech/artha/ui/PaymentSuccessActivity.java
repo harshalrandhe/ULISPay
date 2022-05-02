@@ -82,21 +82,17 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         return paymentData -> {
 
             if (paymentData == null) {
-
                 sdkUtils.errorAlert(this, "Payments details are not available!");
-
                 return;
             }
-
             this.paymentData = paymentData;
-
             String mobile = paymentData.getVendorMobile();
             String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
-
             binding.tvVendorName.setText(paymentData.getVendorName());
             binding.tvVendorMobile.setText(strMobile);
             binding.tvProductName.setText(paymentData.getProduct());
-            binding.tvProductPrice.setText(paymentData.getCurrency() + " " + paymentData.getPrice());
+            String price = paymentData.getCurrency() + " " + paymentData.getPrice();
+            binding.tvProductPrice.setText(price);
         };
     }
 }

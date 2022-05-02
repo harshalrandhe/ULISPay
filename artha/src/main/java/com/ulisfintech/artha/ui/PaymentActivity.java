@@ -84,7 +84,8 @@ public class PaymentActivity extends AbsActivity {
                     .setCancelText("No")
                     .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
                     .setConfirmText("Yes")
-                    .setConfirmClickListener(sweetAlertDialog -> finish())
+                    .setConfirmClickListener(sweetAlertDialog ->
+                            setResponseAndExit("Transaction cancel!", false))
                     .show();
         });
 
@@ -135,24 +136,12 @@ public class PaymentActivity extends AbsActivity {
          */
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
-            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("NFC")
-                    .setContentText("NFC is not available on this phone.")
-                    .setConfirmText("Okay")
-                    .setConfirmClickListener(sweetAlertDialog -> {
 
-                        sweetAlertDialog.dismiss();
+            //Post response
+            setResponseAndExit("NFC is not available on this phone.", false);
 
-                        SyncMessage syncMessage = new SyncMessage();
-                        syncMessage.data = null;
-                        syncMessage.message = "NFC is not available on this phone.";
-                        syncMessage.status = false;
-                        //Intent
-                        postResultBack(syncMessage);
-
-                    })
-                    .show();
         } else {
+
             cardNfcUtils = new CardNfcUtils(this);
             intentFromCreate = true;
         }
@@ -188,6 +177,12 @@ public class PaymentActivity extends AbsActivity {
         if (nfcAdapter != null && cardNfcUtils.isDispatchEnabled()) cardNfcUtils.disableDispatch();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopSessionTimer();
+    }
+
     /**
      * Observer
      * Check Transaction status
@@ -198,36 +193,26 @@ public class PaymentActivity extends AbsActivity {
             sdkUtils.setHapticEffect(binding.getRoot());
 
             if (transactionResponseBean != null) {
+
+                SyncMessage syncMessage = new SyncMessage();
+                syncMessage.orderId = transactionResponseBean.getOrder_id();
+                syncMessage.transactionId = transactionResponseBean.getTransaction_id();
+                syncMessage.transactionResponseBean = transactionResponseBean;
+
                 if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
 
-                    SyncMessage syncMessage = new SyncMessage();
-                    syncMessage.orderId = transactionResponseBean.getOrder_id();
-                    syncMessage.transactionId = transactionResponseBean.getTransaction_id();
-                    syncMessage.transactionResponseBean = transactionResponseBean;
                     syncMessage.message = "Transaction is successful!";
                     syncMessage.status = true;
                     //Show
                     showTransactionReceipt(syncMessage);
 
                 } else {
-                    new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                            .setTitleText(transactionResponseBean.getStatus())
-                            .setContentText(transactionResponseBean.getResult_message())
-                            .setConfirmText("Okay")
-                            .setConfirmClickListener(sweetAlertDialog -> {
 
-                                sweetAlertDialog.dismiss();
+                    syncMessage.message = "Transaction is failed!";
+                    syncMessage.status = false;
+                    //Show
+                    showTransactionReceipt(syncMessage);
 
-                                SyncMessage syncMessage = new SyncMessage();
-                                syncMessage.orderId = transactionResponseBean.getOrder_id();
-                                syncMessage.transactionId = transactionResponseBean.getTransaction_id();
-                                syncMessage.transactionResponseBean = transactionResponseBean;
-                                syncMessage.message = "Transaction is failed!";
-                                syncMessage.status = false;
-                                //Show
-                                showTransactionReceipt(syncMessage);
-                            })
-                            .show();
                 }
             } else {
                 new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
@@ -248,17 +233,6 @@ public class PaymentActivity extends AbsActivity {
 
             isCardPaymentRunning = false;
         };
-    }
-
-    /**
-     * Transaction Receipt
-     * @param syncMessage transaction data
-     */
-    private void showTransactionReceipt(SyncMessage syncMessage) {
-        Intent intent = new Intent(this, PaymentSuccessActivity.class);
-        intent.putExtra(NDEF_MESSAGE, paymentData);
-        intent.putExtra(TRANSACTION_MESSAGE, syncMessage);
-        successResultLauncher.launch(intent);
     }
 
     /**
@@ -332,7 +306,18 @@ public class PaymentActivity extends AbsActivity {
 
             } else if (orderStatusBean.getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
 
-                sdkUtils.errorAlert(this, "Transaction failed!, please try again", true);
+//                sdkUtils.errorAlert(this, "Transaction failed!, please try again", true);
+                orderStatusBean.setMessage("Transaction failed!");
+
+                SyncMessage syncMessage = new SyncMessage();
+                syncMessage.orderId = orderStatusBean.getOrder_id();
+                syncMessage.transactionId = orderStatusBean.getTransaction_id();
+                syncMessage.orderStatusBean = orderStatusBean;
+                syncMessage.message = "Transaction failed!";
+                syncMessage.status = false;
+
+                //Show
+                showTransactionReceipt(syncMessage);
 
             }
 
@@ -366,7 +351,6 @@ public class PaymentActivity extends AbsActivity {
         });
     }
 
-
     /**
      * Process Payment
      * Start NFC Service With Order Data
@@ -375,18 +359,7 @@ public class PaymentActivity extends AbsActivity {
      */
     private void startNFCPaymentService(OrderResponse orderResponse) {
         if (!isOrderCreated) {
-            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("Order")
-                    .setContentText("Order is not place yet, please place order and try again!")
-                    .setConfirmText("Recreate order")
-                    .setConfirmClickListener(sweetAlertDialog -> {
-                        if (paymentData != null) {
-                            //Recreate order
-                            paymentViewModel.createOrderAsync(this, paymentData);
-                        }
-                    }).setCancelText("Cancel")
-                    .setCancelClickListener(Dialog::dismiss)
-                    .show();
+            showOrderIsNotCreated();
             return;
         }
 
@@ -435,18 +408,6 @@ public class PaymentActivity extends AbsActivity {
             countDownTimer.cancel();
             countDownTimer = null;
         }
-    }
-
-    /**
-     * Post result back to the merchant activity
-     *
-     * @param response product order data
-     */
-    private void postResultBack(SyncMessage response) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_TXN_RESULT, response);
-        setResult(RESULT_OK, intent);
-        finish();
     }
 
     @Override
@@ -542,19 +503,7 @@ public class PaymentActivity extends AbsActivity {
         }
 
         if (!isOrderCreated) {
-            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("Order")
-                    .setContentText("Order is not place yet, please place order and try again!")
-                    .setConfirmText("Recreate order")
-                    .setConfirmClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismiss();
-                        if (paymentData != null) {
-                            //Recreate order
-                            paymentViewModel.createOrderAsync(this, paymentData);
-                        }
-                    }).setCancelText("Cancel")
-                    .setCancelClickListener(Dialog::dismiss)
-                    .show();
+            showOrderIsNotCreated();
             return;
         }
 
@@ -572,7 +521,7 @@ public class PaymentActivity extends AbsActivity {
         paymentRequestBean.setName("");
         paymentRequestBean.setCard_number(cardNumber);
         paymentRequestBean.setExpiration_date(expiredDate);
-        paymentRequestBean.setCvv("");
+//        paymentRequestBean.setCvv("");
         //Payment Description
         paymentRequestBean.setDescription("Card Pay");
         paymentRequestBean.setType(PAYMENT_TYPE_CARD_PAY);
@@ -601,6 +550,26 @@ public class PaymentActivity extends AbsActivity {
 
         //API Call
         paymentViewModel.proceedToPaymentAsync(PaymentActivity.this, paymentRequestBean);
+    }
+
+    /**
+     * Dialog
+     * Order is not created.
+     * Recreate order
+     */
+    private void showOrderIsNotCreated() {
+        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Order")
+                .setContentText("Order is not place yet, please place order and try again!")
+                .setConfirmText("Recreate order")
+                .setConfirmClickListener(sweetAlertDialog -> {
+                    if (paymentData != null) {
+                        //Recreate order
+                        paymentViewModel.createOrderAsync(this, paymentData);
+                    }
+                }).setCancelText("Cancel")
+                .setCancelClickListener(Dialog::dismiss)
+                .show();
     }
 
     /**
@@ -666,7 +635,6 @@ public class PaymentActivity extends AbsActivity {
         }
     }
 
-
     /**
      * Session
      */
@@ -693,24 +661,8 @@ public class PaymentActivity extends AbsActivity {
 
                 stopNFCPaymentService();
                 isSessionExpire = true;
-                SweetAlertDialog dialog = new SweetAlertDialog(PaymentActivity.this, SweetAlertDialog.ERROR_TYPE)
-                        .setTitleText("Request Timeout!")
-                        .setContentText("Your payment request is timeout!, please retry again")
-                        .setConfirmText("Okay")
-                        .setConfirmClickListener(sweetAlertDialog -> {
-
-                            sweetAlertDialog.dismiss();
-
-                            SyncMessage syncMessage = new SyncMessage();
-                            syncMessage.data = null;
-                            syncMessage.message = "Request timeout..";
-                            syncMessage.status = false;
-                            //Intent
-                            postResultBack(syncMessage);
-
-                        });
-                dialog.setCancelable(false);
-                dialog.show();
+                //Post response
+                setResponseAndExit("Request timeout..", false);
             }
         }.start();
     }
@@ -769,4 +721,43 @@ public class PaymentActivity extends AbsActivity {
                 }
             }
     );
+
+    /**
+     * Transaction Receipt Screen
+     *
+     * @param syncMessage transaction data
+     */
+    private void showTransactionReceipt(SyncMessage syncMessage) {
+        Intent intent = new Intent(this, PaymentSuccessActivity.class);
+        intent.putExtra(NDEF_MESSAGE, paymentData);
+        intent.putExtra(TRANSACTION_MESSAGE, syncMessage);
+        successResultLauncher.launch(intent);
+    }
+
+    /**
+     * Post Result With Response Back
+     *
+     * @param message transaction status message
+     * @param status  transaction status
+     */
+    private void setResponseAndExit(String message, boolean status) {
+        SyncMessage syncMessage = new SyncMessage();
+        syncMessage.data = null;
+        syncMessage.message = message;
+        syncMessage.status = status;
+        //Intent
+        postResultBack(syncMessage);
+    }
+
+    /**
+     * Post result back to the merchant activity
+     *
+     * @param response product order data
+     */
+    private void postResultBack(SyncMessage response) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_TXN_RESULT, response);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
 }

@@ -70,7 +70,7 @@ abstract class AbsActivity extends AppCompatActivity implements NFCListener {
                 } else {
                     readError();
                 }
-            }else if (intent != null && intent.getAction().equals(ArthaConstants.ACTION_DESTROY)) {
+            } else if (intent != null && intent.getAction().equals(ArthaConstants.ACTION_DESTROY)) {
                 readError();
             }
         }

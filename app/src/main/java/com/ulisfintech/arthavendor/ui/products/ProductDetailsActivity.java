@@ -60,7 +60,6 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
         binding.radioGPay.setOnCheckedChangeListener(this);
         binding.radioPhonePay.setOnCheckedChangeListener(this);
         binding.radioArtha.setOnCheckedChangeListener(this);
-//        binding.radioArthaPay.setOnCheckedChangeListener(this);
 
         String url = productBean.getImg();
 
@@ -83,13 +82,11 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
          */
         binding.btnPay.setOnClickListener(view -> {
 
-//            startActivity(new Intent(this, PaymentSuccessActivity.class));
-//            return;
-
             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
                     HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
 
             PaymentData paymentData = new PaymentData();
+
             paymentData.setVendorName("ABC Vendor");
             paymentData.setVendorMobile("1122334455");
             paymentData.setProduct(productBean.getName());
@@ -144,7 +141,6 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
         binding.radioGPay.setChecked(false);
         binding.radioPhonePay.setChecked(false);
         binding.radioArtha.setChecked(false);
-//        binding.radioArthaPay.setChecked(false);
 
         compoundButton.setChecked(check);
     }
@@ -171,13 +167,4 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 .show();
     }
 
-    public boolean isPackageInstalled(Context context, String packageName) {
-        final PackageManager packageManager = context.getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-        if (intent == null) {
-            return false;
-        }
-        List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return !list.isEmpty();
-    }
 }
