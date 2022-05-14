@@ -239,7 +239,16 @@ public class CardNfcAsyncTask extends AsyncTask<Void, Void, Object> {
                 NdefRecord record = ndefMessages[0].getRecords()[0];
 
                 byte[] payload = record.getPayload();
-                String text = new String(payload, StandardCharsets.UTF_8);
+
+                //Get the Text Encoding
+                String textEncoding = ((payload[0] & 0200) == 0) ? "UTF-8" : "UTF-16";
+
+                //Get the Language Code
+                int languageCodeLength = payload[0] & 0077;
+                String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
+
+                //Get the Text
+                String text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
 
                 Log.e("<<TAG-NDEF>>", text.trim());
 

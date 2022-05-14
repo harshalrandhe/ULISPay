@@ -58,6 +58,22 @@ class GatewayRequestBuilder {
         return request;
     }
 
+    /**
+     * Request
+     * Buy using UPI order
+     *
+     * @param bean payment data
+     * @return payment request
+     */
+    GatewayRequest buildUPIPaymentRequest(UPIPaymentRequestBean bean) {
+        GatewayRequest request = new GatewayRequest();
+        request.URL = BASE_ORDER_URL + "Pay";
+        request.method = GatewayRequest.POST;
+        request.payload = new PaymentPayload(bean);
+        request.extraHeaders = getHeaders(bean.getHeaders());
+        return request;
+    }
+
 
     /**
      * API Headers

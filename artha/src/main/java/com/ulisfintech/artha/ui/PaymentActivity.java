@@ -212,7 +212,6 @@ public class PaymentActivity extends AbsActivity {
                     syncMessage.status = false;
                     //Show
                     showTransactionReceipt(syncMessage);
-
                 }
             } else {
                 new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
@@ -472,6 +471,7 @@ public class PaymentActivity extends AbsActivity {
                             launcherIntent.putExtra(UPIPinActivity.VENDOR_NAME_KEY, paymentData.getVendorName());
                         }
                         launcherIntent.putExtra(ORDER_MESSAGE, orderResponse);
+                        launcherIntent.putExtra(PaymentActivity.NDEF_MESSAGE, paymentData);
                         upiPaymentResultLauncher.launch(launcherIntent);
                     }
 
@@ -551,6 +551,7 @@ public class PaymentActivity extends AbsActivity {
         //API Call
         paymentViewModel.proceedToPaymentAsync(PaymentActivity.this, paymentRequestBean);
     }
+
 
     /**
      * Dialog
@@ -675,16 +676,10 @@ public class PaymentActivity extends AbsActivity {
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK) {
 
-                    SyncMessage syncMessage = new SyncMessage();
+                    SyncMessage syncMessage = null;
                     if (result.getData() != null) {
-                        OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
-                        syncMessage.orderId = orderResponse.getOrder_id();
-                        syncMessage.orderResponse = orderResponse;
-                        syncMessage.transactionId = null;
+                        syncMessage = result.getData().getParcelableExtra(PaymentActivity.EXTRA_TXN_RESULT);
                     }
-                    syncMessage.message = "Transaction is successful!";
-                    syncMessage.status = true;
-
                     //Show
                     showTransactionReceipt(syncMessage);
 

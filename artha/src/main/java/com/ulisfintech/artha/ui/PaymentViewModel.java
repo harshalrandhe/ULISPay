@@ -321,4 +321,57 @@ public class PaymentViewModel extends ViewModel {
             }
         });
     }
+
+    /**
+     * UPI Payment Transaction
+     *
+     * @param context            calling activity context
+     * @param upiPaymentRequestBean UPI payment request
+     */
+    void proceedToUPIPaymentAsync(Context context, UPIPaymentRequestBean upiPaymentRequestBean) {
+
+        progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+        progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        progressDialog.setTitleText("Paying");
+        progressDialog.setContentText("Do not press back button...");
+        progressDialog.setCancelable(false);
+        if (!progressDialog.isShowing()) {
+            progressDialog.show();
+        }
+
+        GatewayRequest request = new GatewayRequestBuilder().buildUPIPaymentRequest(upiPaymentRequestBean);
+        netBuilder.call(request, new GatewayCallback() {
+            @Override
+            public void onSuccess(GatewayMap response) {
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", response.toString());
+                Gson gson = new Gson();
+                TransactionResponseBean responseBean = gson.fromJson(gson.toJson(response), TransactionResponseBean.class);
+                if (responseBean != null) {
+                    transactionResponseBeanMutableLiveData.setValue(responseBean);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<ERROR>>", throwable.getMessage());
+
+                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("ERROR!")
+                        .setContentText(context.getString(R.string.network_error_message))
+                        .setConfirmText("Okay")
+                        .setConfirmClickListener(Dialog::dismiss)
+                        .show();
+
+                transactionResponseBeanMutableLiveData.setValue(null);
+            }
+        });
+    }
 }

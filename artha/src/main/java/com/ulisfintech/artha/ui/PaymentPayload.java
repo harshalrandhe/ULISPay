@@ -7,17 +7,17 @@ class PaymentPayload {
 
     @Expose
     @SerializedName("data")
-    private PaymentRequestBean data;
+    private Object data;
 
-    public PaymentPayload(PaymentRequestBean data) {
+    public PaymentPayload(Object data) {
         this.data = data;
     }
 
-    public PaymentRequestBean getData() {
+    public Object getData() {
         return data;
     }
 
-    public void setData(PaymentRequestBean data) {
+    public void setData(Object data) {
         this.data = data;
     }
 }

@@ -39,4 +39,5 @@
     <string name="label_transaction_id">Transaction Id</string>
     <string name="label_done">Done</string>
     <string name="label_pay_to">Pay To</string>
+    <string name="hint_payment_desc">Description</string>
 </resources>

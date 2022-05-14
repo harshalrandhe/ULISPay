@@ -3,19 +3,17 @@ package com.ulisfintech.artha.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcelable;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.ulisfintech.artha.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.artha.databinding.ActivityUpipinBinding;
 import com.ulisfintech.artha.helper.OrderResponse;
+import com.ulisfintech.artha.helper.PaymentData;
+import com.ulisfintech.artha.helper.SyncMessage;
 
 public class UPIPinActivity extends AppCompatActivity {
 
@@ -23,6 +21,11 @@ public class UPIPinActivity extends AppCompatActivity {
     static final String VENDOR_NAME_KEY = "vendor_name_key";
     private PaymentViewModel paymentViewModel;
     private ActivityUpipinBinding binding;
+    private final String PAYMENT_TYPE_UPI_PAY = "upi_pay";
+    String upi = null;
+    OrderResponse orderResponse = null;
+    PaymentData paymentData = null;
+    SdkUtils sdkUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,38 @@ public class UPIPinActivity extends AppCompatActivity {
         binding = ActivityUpipinBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         paymentViewModel = new ViewModelProvider(this).get(PaymentViewModel.class);
+
+        /**
+         * Observer
+         */
+        paymentViewModel.getTransactionResponseBeanMutableLiveData().observe(this, transactionResponseBean -> {
+            sdkUtils = new SdkUtils();
+            sdkUtils.setHapticEffect(binding.getRoot());
+
+            if (transactionResponseBean != null) {
+
+                SyncMessage syncMessage = new SyncMessage();
+                syncMessage.orderId = transactionResponseBean.getOrder_id();
+                syncMessage.transactionId = transactionResponseBean.getTransaction_id();
+                syncMessage.transactionResponseBean = transactionResponseBean;
+
+                if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
+
+                    syncMessage.message = "Transaction is successful!";
+                    syncMessage.status = true;
+
+                } else {
+
+                    syncMessage.message = "Transaction is failed!";
+                    syncMessage.status = false;
+
+                }
+
+                //Intent
+                postResultBack(syncMessage);
+            }
+        });
+
         onNewIntent(getIntent());
     }
 
@@ -38,7 +73,7 @@ public class UPIPinActivity extends AppCompatActivity {
         super.onNewIntent(intent);
 
         if (intent.getStringExtra(UPI_KEY) != null) {
-            String upi = intent.getStringExtra(UPI_KEY);
+            upi = intent.getStringExtra(UPI_KEY);
 
         }
         if (intent.getStringExtra(VENDOR_NAME_KEY) != null) {
@@ -47,7 +82,7 @@ public class UPIPinActivity extends AppCompatActivity {
         }
 
         if (intent.getParcelableExtra(PaymentActivity.ORDER_MESSAGE) != null) {
-            OrderResponse orderResponse = intent.getParcelableExtra(PaymentActivity.ORDER_MESSAGE);
+            orderResponse = intent.getParcelableExtra(PaymentActivity.ORDER_MESSAGE);
             if (orderResponse != null) {
                 if (orderResponse.getProductBean() != null) {
                     String price = "₹" + orderResponse.getProductBean().getPrice();
@@ -57,59 +92,73 @@ public class UPIPinActivity extends AppCompatActivity {
                 }
             }
         }
+        if (intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE) != null) {
+            paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
+        }
 
-        Handler handler = new Handler();
+        binding.btnPay.setOnClickListener(v -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(binding.edtPin.getWindowToken(), 0);
 
-        binding.edtPin.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            upiPaymentAPICall(upi, orderResponse, paymentData);
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (binding.edtPin.getText().toString().length() == 6) {
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(binding.edtPin.getWindowToken(), 0);
-
-                    if (binding.edtPin.getText().toString().equalsIgnoreCase("123456")) {
-
-                        binding.progressBar.setVisibility(View.VISIBLE);
-                        handler.postDelayed(() -> {
-
-                            binding.progressBar.setVisibility(View.GONE);
-                            setResult(RESULT_OK, getIntent());
-                            finish();
-
-                        }, 4000);
-
-                    } else {
-                        new SweetAlertDialog(UPIPinActivity.this, SweetAlertDialog.ERROR_TYPE)
-                                .setTitleText("Wrong Pin!")
-                                .setContentText("Please enter correct UPI pin!")
-                                .setConfirmText("Okay")
-                                .setConfirmClickListener(sweetAlertDialog -> {
-                                    sweetAlertDialog.dismiss();
-                                    binding.edtPin.setText("");
-                                    binding.edtPin.setFocusable(true);
-                                    imm.hideSoftInputFromWindow(binding.edtPin.getWindowToken(), 1);
-                                })
-                                .show();
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
         });
     }
 
     @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED, getIntent());
+        finish();
+    }
+
+
+    /**
+     * Payment API Call
+     *
+     * @param upi
+     * @param orderResponse
+     * @param paymentData
+     */
+    private void upiPaymentAPICall(String upi, OrderResponse orderResponse, PaymentData paymentData) {
+
+        String pin = binding.edtPin.getText().toString().trim();
+        String desc = binding.edtDesc.getText().toString().trim();
+
+        UPIPaymentRequestBean upiPaymentRequestBean = new UPIPaymentRequestBean();
+        //Card Details
+        upiPaymentRequestBean.setName("Join");
+        upiPaymentRequestBean.setPin(pin);
+        upiPaymentRequestBean.setUpi(upi);
+        //Payment Description
+        upiPaymentRequestBean.setDescription(desc);
+        upiPaymentRequestBean.setType(PAYMENT_TYPE_UPI_PAY);
+
+        if (orderResponse != null) {
+            upiPaymentRequestBean.setToken(orderResponse.getToken());
+            upiPaymentRequestBean.setOrder_id(orderResponse.getOrder_id());
+        }
+
+        if (paymentData != null) {
+            //Headers
+            HeaderBean headerBean = new HeaderBean();
+            headerBean.setX_KEY(paymentData.getMerchantKey());
+            headerBean.setX_PASSWORD(paymentData.getMerchantSecret());
+            upiPaymentRequestBean.setHeaders(headerBean);
+        }
+
+        //API Call
+        paymentViewModel.proceedToUPIPaymentAsync(this, upiPaymentRequestBean);
+    }
+
+    /**
+     * Post result back to the merchant activity
+     *
+     * @param response product order data
+     */
+    private void postResultBack(SyncMessage response) {
+        Intent intent = getIntent();
+        intent.putExtra(PaymentActivity.EXTRA_TXN_RESULT, response);
+        setResult(RESULT_OK, intent);
         finish();
     }
 }
