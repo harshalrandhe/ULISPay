@@ -126,7 +126,7 @@ public class UPIPinActivity extends AppCompatActivity {
 
         UPIPaymentRequestBean upiPaymentRequestBean = new UPIPaymentRequestBean();
         //Card Details
-        upiPaymentRequestBean.setName("Join");
+        upiPaymentRequestBean.setName("John");
         upiPaymentRequestBean.setPin(pin);
         upiPaymentRequestBean.setUpi(upi);
         //Payment Description

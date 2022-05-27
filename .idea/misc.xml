@@ -7,7 +7,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.13802083333333334" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_product_details.xml" value="0.15806159420289856" />
-        <entry key="app/src/main/res/layout/activity_splash.xml" value="0.15806159420289856" />
+        <entry key="app/src/main/res/layout/activity_splash.xml" value="0.25" />
         <entry key="app/src/main/res/layout/product_adapter_item.xml" value="0.15806159420289856" />
         <entry key="app/src/main/res/layout/progrss_dialog_indicator.xml" value="0.11778115501519756" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.13802083333333334" />

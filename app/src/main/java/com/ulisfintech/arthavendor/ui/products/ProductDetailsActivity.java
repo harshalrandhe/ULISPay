@@ -148,12 +148,21 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
     @Override
     public void onTransactionComplete(SyncMessage syncMessage) {
         Log.e(this.getClass().getName(), new Gson().toJson(syncMessage));
-        new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                .setTitleText("SUCCESS")
-                .setContentText(syncMessage.message)
-                .setConfirmText("Okay")
-                .setConfirmClickListener(Dialog::dismiss)
-                .show();
+        if (syncMessage.status) {
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("SUCCESS")
+                    .setContentText(syncMessage.message)
+                    .setConfirmText("Okay")
+                    .setConfirmClickListener(Dialog::dismiss)
+                    .show();
+        } else {
+            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("Failed")
+                    .setContentText(syncMessage.message)
+                    .setConfirmText("Okay")
+                    .setConfirmClickListener(Dialog::dismiss)
+                    .show();
+        }
     }
 
     @Override
@@ -166,5 +175,4 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 .setConfirmClickListener(Dialog::dismiss)
                 .show();
     }
-
 }

@@ -21,6 +21,7 @@ import com.ulisfintech.artha.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.artha.cardreader.CardNfcAsyncTask;
 import com.ulisfintech.artha.cardreader.CardNfcUtils;
 import com.ulisfintech.artha.databinding.ActivityPaymentBinding;
+import com.ulisfintech.artha.helper.ArthaConstants;
 import com.ulisfintech.artha.helper.OrderResponse;
 import com.ulisfintech.artha.helper.PaymentData;
 import com.ulisfintech.artha.helper.SyncMessage;
@@ -38,7 +39,7 @@ public class PaymentActivity extends AbsActivity {
      * The ACS Result data after performing 3DS
      */
     public static final String EXTRA_TXN_RESULT = "com.ulisfintech.artha.android.TXN_RESULT";
-    private static final int TIMEOUT_TIMER = 60000;
+    private static final int TIMEOUT_TIMER = 300000;
     private static final int INTERVAL = 1000;
 
     private ActivityPaymentBinding binding;
@@ -462,6 +463,12 @@ public class PaymentActivity extends AbsActivity {
                     public void unknownEmvCard() {
                         //showSnackBar(getString(R.string.snack_unknownEmv));
                         String msg = cardNfcAsyncTask.readFromTag(intent);
+                        if (msg == null || msg.isEmpty() || msg.equalsIgnoreCase(ArthaConstants.HANDSHAKE)) {
+
+                            showSnackBar(getString(R.string.ad_progressBar_mess));
+
+                            return;
+                        }
                         orderResponse.setProductBean(paymentData.getProductBean());
                         isUPIPaymentRunning = true;
                         stopSessionTimer();
@@ -644,9 +651,10 @@ public class PaymentActivity extends AbsActivity {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                long minute = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
-                long second = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished);
-                binding.tvTimeout.setText("Timeout in " + minute + ":" + second + " minute");
+                long minutes = (millisUntilFinished / 1000) / 60;
+                int seconds = (int) ((millisUntilFinished / 1000) % 60);
+                String str = "Timeout in " + minutes + ":" + seconds + " minute";
+                binding.tvTimeout.setText(str);
             }
 
             @Override
