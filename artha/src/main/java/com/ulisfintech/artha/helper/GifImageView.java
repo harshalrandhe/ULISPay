@@ -2,11 +2,8 @@ package com.ulisfintech.artha.helper;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Movie;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -15,12 +12,9 @@ import android.view.View;
 
 import com.ulisfintech.artha.R;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 
 public class GifImageView extends View {
 
