@@ -147,7 +147,6 @@ public class PaymentActivity extends AbsActivity {
             intentFromCreate = true;
         }
 
-
         progressDialog = sdkUtils.createProgressDialog(this);
 
         onNewIntent(getIntent());

@@ -95,7 +95,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
             paymentData.setCustomerName("John");
             paymentData.setCustomerEmail("john.d@ulistechnology.com");
-            paymentData.setCustomerMobile("0987654321");
+            paymentData.setCustomerMobile("9987654321");
             paymentData.setReturnUrl("https://ulis.co.uk/payment_status");
 
             paymentData.setMerchantKey(BuildConfig.X_KEY);
