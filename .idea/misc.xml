@@ -8,6 +8,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_product_details.xml" value="0.15806159420289856" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/card_view.xml" value="0.25" />
         <entry key="app/src/main/res/layout/product_adapter_item.xml" value="0.15806159420289856" />
         <entry key="app/src/main/res/layout/progrss_dialog_indicator.xml" value="0.11778115501519756" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.13802083333333334" />
@@ -37,6 +38,17 @@
         <entry key="artha/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2518518518518518" />
         <entry key="artha/src/main/res/xml/nfc_tech_filter.xml" value="0.20969202898550723" />
         <entry key="aurtha/src/main/res/xml/apdu_service.xml" value="0.21784420289855072" />
+        <entry key="telrpay/src/main/res/drawable/expand_bg.xml" value="0.1745" />
+        <entry key="telrpay/src/main/res/drawable/expand_payment_header_bg.xml" value="0.1745" />
+        <entry key="telrpay/src/main/res/drawable/image_bg.xml" value="0.1745" />
+        <entry key="telrpay/src/main/res/drawable/secure_by_bg_shape.xml" value="0.1745" />
+        <entry key="telrpay/src/main/res/layout/activity_payment.xml" value="0.25" />
+        <entry key="telrpay/src/main/res/layout/activity_payment_success.xml" value="0.2210144927536232" />
+        <entry key="telrpay/src/main/res/layout/activity_processing_payment.xml" value="0.2210144927536232" />
+        <entry key="telrpay/src/main/res/layout/activity_upipin.xml" value="0.2210144927536232" />
+        <entry key="telrpay/src/main/res/layout/alert_dialog.xml" value="0.2210144927536232" />
+        <entry key="telrpay/src/main/res/layout/layout_upi.xml" value="0.2210144927536232" />
+        <entry key="telrpay/src/main/res/layout/layout_upi_header.xml" value="0.2210144927536232" />
         <entry key="ulisgatway/src/main/res/layout/activity_payment.xml" value="0.21784420289855072" />
       </map>
     </option>

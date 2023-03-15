@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Artha SDK</string>
+    <string name="app_name">TelrPay</string>
     <string name="service_desc">Artha Payment Service</string>
     <string name="aid_description">Customer App</string>
     <string name="payment_option">Payment options</string>
