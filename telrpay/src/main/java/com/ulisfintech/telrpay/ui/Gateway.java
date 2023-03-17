@@ -19,7 +19,7 @@ public class Gateway {
      */
     public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) {
         Intent intent = new Intent(activity, PaymentActivity.class);
-        intent.putExtra(PaymentActivity.NDEF_MESSAGE, paymentData);
+        intent.putExtra(PaymentActivity.PAYMENT_REQUEST, paymentData);
         activity.startActivityForResult(intent, REQUEST_SECURE);
     }
 

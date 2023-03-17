@@ -1,5 +1,5 @@
 package com.ulisfintech.telrpay.helper;
- public interface ArthaConstants {
+ public interface AppConstants {
 
     String ACTION_TRANSACTION = "action_transaction_";
     String ACTION_DESTROY = "action_destroy_called";

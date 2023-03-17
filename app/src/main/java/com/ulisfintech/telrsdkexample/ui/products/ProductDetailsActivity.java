@@ -18,11 +18,15 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
-import com.ulisfintech.telrpay.helper.ArthaConstants;
+import com.ulisfintech.telrpay.helper.AppConstants;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
 import com.ulisfintech.telrpay.ui.Gateway;
 import com.ulisfintech.telrpay.ui.GatewaySecureCallback;
+import com.ulisfintech.telrpay.ui.order.BillingDetails;
+import com.ulisfintech.telrpay.ui.order.CustomerDetails;
+import com.ulisfintech.telrpay.ui.order.ProductDetails;
+import com.ulisfintech.telrpay.ui.order.ShippingDetails;
 import com.ulisfintech.telrsdkexample.BuildConfig;
 import com.ulisfintech.telrsdkexample.R;
 import com.ulisfintech.telrsdkexample.databinding.ActivityProductDetailsBinding;
@@ -81,19 +85,45 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
             PaymentData paymentData = new PaymentData();
 
-            paymentData.setVendorName("ABC Vendor");
-            paymentData.setVendorMobile("1122334455");
-            paymentData.setProduct(productBean.getName());
-            paymentData.setPrice(productBean.getPrice());
-            paymentData.setCurrency("USD");
+            ProductDetails productDetails = new ProductDetails();
+            productDetails.setVendorName("ABC Vendor");
+            productDetails.setVendorMobile("1122334455");
+            productDetails.setProductName(productBean.getName());
+            productDetails.setProductPrice(productBean.getPrice());
+            productDetails.setCurrency("USD");
+            productDetails.setImage(productBean.getImg());
+            paymentData.setProductDetails(productDetails);
 
-            paymentData.setCustomerName("Pawan Kushwaha");
-            paymentData.setCustomerEmail("golu.r@ulistechnology.com");
-            paymentData.setCustomerMobile("9011240343");
-            paymentData.setReturnUrl("https://ulis.co.uk/payment_status");
+            CustomerDetails customerDetails = new CustomerDetails();
+            customerDetails.setName("Pawan Kushwaha");
+            customerDetails.setEmail("golu.r@ulistechnology.com");
+            customerDetails.setMobile("9011240343");
+            paymentData.setCustomer_details(customerDetails);
 
-            paymentData.setMerchantKey(BuildConfig.X_KEY);
-            paymentData.setMerchantSecret(BuildConfig.X_PASSWORD);
+            // Set Billing Details
+            BillingDetails billingDetails = new BillingDetails();
+            billingDetails.setAddress_line1("Wardhman nagar ,nagpur");
+            billingDetails.setAddress_line2("");
+            billingDetails.setCity("Nagpur");
+            billingDetails.setCountry("India");
+            billingDetails.setProvince("Maharashtra");
+            billingDetails.setPin("440001");
+            paymentData.setBilling_details(billingDetails);
+
+            // Set Shipping Details
+            ShippingDetails shippingDetails = new ShippingDetails();
+            shippingDetails.setAddress_line1("Wardhman nagar ,nagpur");
+            shippingDetails.setAddress_line2("");
+            shippingDetails.setCity("Nagpur");
+            shippingDetails.setCountry("India");
+            shippingDetails.setProvince("Maharashtra");
+            shippingDetails.setPin("440001");
+            paymentData.setShipping_details(shippingDetails);
+
+            paymentData.setReturnUrl("https://dev.tlr.fe.ulis.live/merchant/payment/status");
+
+            paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
+            paymentData.setMerchantSecret(BuildConfig.MERCHANT_PASSWORD);
 
             Gson gson = new Gson();
             paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),
@@ -101,7 +131,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
             if (binding.radioTelrPay.isChecked()) {
 
-                paymentData.setPaymentType(ArthaConstants.PAYMENT_TYPE_TAP_AND_PAY);
+                paymentData.setPaymentType(AppConstants.PAYMENT_TYPE_TAP_AND_PAY);
 
                 /**
                  * Start payment receiver

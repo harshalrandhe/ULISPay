@@ -31,7 +31,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
 
-            startActivity(new Intent(this, PaymentSuccessActivity.class));
+//            startActivity(new Intent(this, PaymentSuccessActivity.class));
 
         }, 4000);
     }

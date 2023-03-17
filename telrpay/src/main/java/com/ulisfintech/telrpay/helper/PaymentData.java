@@ -4,73 +4,57 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
+import com.ulisfintech.telrpay.ui.order.BillingDetails;
+import com.ulisfintech.telrpay.ui.order.CustomerDetails;
+import com.ulisfintech.telrpay.ui.order.ProductDetails;
+import com.ulisfintech.telrpay.ui.order.ShippingDetails;
 
 public class PaymentData implements Parcelable {
 
     @Expose
-    private String vendorName;
+    private ProductDetails productDetails;
     @Expose
-    private String vendorMobile;
+    private CustomerDetails customer_details;
     @Expose
-    private String product;
+    private BillingDetails billing_details;
     @Expose
-    private double price;
-    @Expose
-    private String currency;
-    @Expose
-    private String customerName;
-    @Expose
-    private String customerEmail;
-    @Expose
-    private String customerMobile;
-    @Expose
-    private String returnUrl;
+    private ShippingDetails shipping_details;
+
     @Expose
     private int paymentType;
 
     private String merchantKey;
     private String merchantSecret;
     private ProductBean productBean;
+    private String returnUrl;
 
     public PaymentData() {
 
     }
 
     protected PaymentData(Parcel in) {
-        vendorName = in.readString();
-        vendorMobile = in.readString();
-        product = in.readString();
-        price = in.readDouble();
-        currency = in.readString();
-        customerName = in.readString();
-        customerEmail = in.readString();
-        customerMobile = in.readString();
+        productDetails = in.readParcelable(ProductDetails.class.getClassLoader());
+        customer_details = in.readParcelable(CustomerDetails.class.getClassLoader());
+        billing_details = in.readParcelable(BillingDetails.class.getClassLoader());
+        shipping_details = in.readParcelable(ShippingDetails.class.getClassLoader());
+        paymentType = in.readInt();
         merchantKey = in.readString();
         merchantSecret = in.readString();
+        productBean = in.readParcelable(ProductBean.class.getClassLoader());
         returnUrl = in.readString();
-        paymentType = in.readInt();
-//        if (productBean != null) {
-            productBean = in.readParcelable(ProductBean.class.getClassLoader());
-//        }
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(vendorName);
-        dest.writeString(vendorMobile);
-        dest.writeString(product);
-        dest.writeDouble(price);
-        dest.writeString(currency);
-        dest.writeString(customerName);
-        dest.writeString(customerEmail);
-        dest.writeString(customerMobile);
+        dest.writeParcelable(productDetails, flags);
+        dest.writeParcelable(customer_details, flags);
+        dest.writeParcelable(billing_details, flags);
+        dest.writeParcelable(shipping_details, flags);
+        dest.writeInt(paymentType);
         dest.writeString(merchantKey);
         dest.writeString(merchantSecret);
+        dest.writeParcelable(productBean, flags);
         dest.writeString(returnUrl);
-        dest.writeInt(paymentType);
-        if (productBean != null) {
-            dest.writeParcelable(productBean, flags);
-        }
     }
 
     @Override
@@ -90,68 +74,44 @@ public class PaymentData implements Parcelable {
         }
     };
 
-    public String getVendorName() {
-        return vendorName;
+    public ProductDetails getProductDetails() {
+        return productDetails;
     }
 
-    public void setVendorName(String vendorName) {
-        this.vendorName = vendorName;
+    public void setProductDetails(ProductDetails productDetails) {
+        this.productDetails = productDetails;
     }
 
-    public String getVendorMobile() {
-        return vendorMobile;
+    public CustomerDetails getCustomer_details() {
+        return customer_details;
     }
 
-    public void setVendorMobile(String vendorMobile) {
-        this.vendorMobile = vendorMobile;
+    public void setCustomer_details(CustomerDetails customer_details) {
+        this.customer_details = customer_details;
     }
 
-    public String getProduct() {
-        return product;
+    public BillingDetails getBilling_details() {
+        return billing_details;
     }
 
-    public void setProduct(String product) {
-        this.product = product;
+    public void setBilling_details(BillingDetails billing_details) {
+        this.billing_details = billing_details;
     }
 
-    public double getPrice() {
-        return price;
+    public ShippingDetails getShipping_details() {
+        return shipping_details;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setShipping_details(ShippingDetails shipping_details) {
+        this.shipping_details = shipping_details;
     }
 
-    public String getCurrency() {
-        return currency;
+    public int getPaymentType() {
+        return paymentType;
     }
 
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    public String getCustomerEmail() {
-        return customerEmail;
-    }
-
-    public void setCustomerEmail(String customerEmail) {
-        this.customerEmail = customerEmail;
-    }
-
-    public String getCustomerMobile() {
-        return customerMobile;
-    }
-
-    public void setCustomerMobile(String customerMobile) {
-        this.customerMobile = customerMobile;
+    public void setPaymentType(int paymentType) {
+        this.paymentType = paymentType;
     }
 
     public String getMerchantKey() {
@@ -170,27 +130,19 @@ public class PaymentData implements Parcelable {
         this.merchantSecret = merchantSecret;
     }
 
-    public String getReturnUrl() {
-        return returnUrl;
-    }
-
-    public void setReturnUrl(String returnUrl) {
-        this.returnUrl = returnUrl;
-    }
-
-    public int getPaymentType() {
-        return paymentType;
-    }
-
-    public void setPaymentType(int paymentType) {
-        this.paymentType = paymentType;
-    }
-
     public ProductBean getProductBean() {
         return productBean;
     }
 
     public void setProductBean(ProductBean productBean) {
         this.productBean = productBean;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 }

@@ -15,10 +15,7 @@ import com.ulisfintech.telrpay.R;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
-import com.ulisfintech.telrpay.ui.order.BillingDetails;
-import com.ulisfintech.telrpay.ui.order.CustomerDetails;
 import com.ulisfintech.telrpay.ui.order.OrderDetails;
-import com.ulisfintech.telrpay.ui.order.ShippingDetails;
 
 
 public class PaymentViewModel extends ViewModel {
@@ -80,10 +77,10 @@ public class PaymentViewModel extends ViewModel {
      */
     public void setIntent(Context context, Intent intent) {
 
-        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
-        String vendorMobile = paymentData.getVendorMobile();
+        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.PAYMENT_REQUEST);
+        String vendorMobile = paymentData.getProductDetails().getVendorMobile();
         String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
-        paymentData.setVendorMobile(strMobile);
+//        paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
         
@@ -100,10 +97,10 @@ public class PaymentViewModel extends ViewModel {
      */
     public void setReceiptIntent(Context context, Intent intent) {
 
-        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
-        String vendorMobile = paymentData.getVendorMobile();
+        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.PAYMENT_REQUEST);
+        String vendorMobile = paymentData.getProductDetails().getVendorMobile();
         String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
-        paymentData.setVendorMobile(strMobile);
+//        paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
 
@@ -119,39 +116,20 @@ public class PaymentViewModel extends ViewModel {
         OrderBean orderBean = new OrderBean();
 
         // Set Customer Details
-        CustomerDetails customerDetails = new CustomerDetails();
-        customerDetails.setName(paymentData.getCustomerName());
-        customerDetails.setEmail(paymentData.getCustomerEmail());
-        customerDetails.setMobile(paymentData.getCustomerMobile());
-        orderBean.setCustomer_details(customerDetails);
+        orderBean.setCustomer_details(paymentData.getCustomer_details());
+        // Set Billing Details
+        orderBean.setBilling_details(paymentData.getBilling_details());
+        // Set Shipping Details
+        orderBean.setShipping_details(paymentData.getShipping_details());
 
         //Set Order Details
         OrderDetails orderDetails = new OrderDetails();
         orderDetails.setOrder_id("ORD2023074296");
-        orderDetails.setAmount(paymentData.getPrice());
-        orderDetails.setCurrency(paymentData.getCurrency());
+        orderDetails.setAmount(paymentData.getProductDetails().getProductPrice());
+        orderDetails.setCurrency(paymentData.getProductDetails().getCurrency());
         orderDetails.setReturn_url(paymentData.getReturnUrl());
         orderBean.setOrder_details(orderDetails);
 
-        // Set Billing Details
-        BillingDetails billingDetails = new BillingDetails();
-        billingDetails.setAddress_line1("");
-        billingDetails.setAddress_line2("");
-        billingDetails.setCity("");
-        billingDetails.setCountry("");
-        billingDetails.setProvince("");
-        billingDetails.setPin("");
-        orderBean.setBilling_details(billingDetails);
-
-        // Set Shipping Details
-        ShippingDetails shippingDetails = new ShippingDetails();
-        shippingDetails.setAddress_line1("");
-        shippingDetails.setAddress_line2("");
-        shippingDetails.setCity("");
-        shippingDetails.setCountry("");
-        shippingDetails.setProvince("");
-        shippingDetails.setPin("");
-        orderBean.setShipping_details(shippingDetails);
 
         // Set Headers
         HeaderBean headerBean = new HeaderBean();

@@ -86,12 +86,12 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 return;
             }
             this.paymentData = paymentData;
-            String mobile = paymentData.getVendorMobile();
+            String mobile = paymentData.getProductDetails().getVendorMobile();
             String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
-            binding.tvVendorName.setText(paymentData.getVendorName());
+            binding.tvVendorName.setText(paymentData.getProductDetails().getVendorName());
             binding.tvVendorMobile.setText(strMobile);
-            binding.tvProductName.setText(paymentData.getProduct());
-            String price = paymentData.getCurrency() + " " + paymentData.getPrice();
+                binding.tvProductName.setText(paymentData.getProductDetails().getProductName());
+            String price = paymentData.getProductDetails().getCurrency() + " " + paymentData.getProductDetails().getProductPrice();
             binding.tvProductPrice.setText(price);
         };
     }

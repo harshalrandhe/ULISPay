@@ -20,8 +20,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // should correspond to key/value pairs inside the file
-        buildConfigField("String", "X_KEY", apikeyProperties['X_KEY'])
-        buildConfigField("String", "X_PASSWORD", apikeyProperties['X_PASSWORD'])
+        buildConfigField("String", "MERCHANT_KEY", apikeyProperties['MERCHANT_KEY'])
+        buildConfigField("String", "MERCHANT_PASSWORD", apikeyProperties['MERCHANT_PASSWORD'])
     }
 
     buildTypes {
@@ -32,8 +32,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     buildFeatures {

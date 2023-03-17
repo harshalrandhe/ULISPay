@@ -90,8 +90,8 @@ public class UPIPinActivity extends AppCompatActivity {
                 }
             }
         }
-        if (intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE) != null) {
-            paymentData = intent.getParcelableExtra(PaymentActivity.NDEF_MESSAGE);
+        if (intent.getParcelableExtra(PaymentActivity.PAYMENT_REQUEST) != null) {
+            paymentData = intent.getParcelableExtra(PaymentActivity.PAYMENT_REQUEST);
         }
 
         binding.btnPay.setOnClickListener(v -> {

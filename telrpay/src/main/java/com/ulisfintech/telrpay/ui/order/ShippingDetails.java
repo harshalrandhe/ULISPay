@@ -1,8 +1,11 @@
 package com.ulisfintech.telrpay.ui.order;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 
-public class ShippingDetails {
+public class ShippingDetails implements Parcelable {
 
     @Expose
     private String address_line1;
@@ -16,6 +19,30 @@ public class ShippingDetails {
     private String pin;
     @Expose
     private String province;
+
+    public ShippingDetails() {
+    }
+
+    protected ShippingDetails(Parcel in) {
+        address_line1 = in.readString();
+        address_line2 = in.readString();
+        country = in.readString();
+        city = in.readString();
+        pin = in.readString();
+        province = in.readString();
+    }
+
+    public static final Creator<ShippingDetails> CREATOR = new Creator<ShippingDetails>() {
+        @Override
+        public ShippingDetails createFromParcel(Parcel in) {
+            return new ShippingDetails(in);
+        }
+
+        @Override
+        public ShippingDetails[] newArray(int size) {
+            return new ShippingDetails[size];
+        }
+    };
 
     public String getAddress_line1() {
         return address_line1;
@@ -63,5 +90,20 @@ public class ShippingDetails {
 
     public void setProvince(String province) {
         this.province = province;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(address_line1);
+        dest.writeString(address_line2);
+        dest.writeString(country);
+        dest.writeString(city);
+        dest.writeString(pin);
+        dest.writeString(province);
     }
 }

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".ui.ProcessingPaymentActivity">
 
 
@@ -33,9 +34,16 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+<!--            <ProgressBar-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content" />-->
+
+
+            <com.ulisfintech.telrpay.helper.GifImageView
+                android:id="@+id/gifImage"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                app:src="@drawable/money_flow" />
 
             <TextView
                 android:layout_width="match_parent"

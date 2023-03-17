@@ -3,18 +3,20 @@ package com.ulisfintech.telrpay.ui;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -34,16 +36,20 @@ import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 
 public class PaymentActivity extends AppCompatActivity {
 
-    public static final String NDEF_MESSAGE = "com.ulisfintech.artha.android.ndefMessage";
-    static final String ORDER_MESSAGE = "com.ulisfintech.artha.android.orderMessage";
-    static final String TRANSACTION_MESSAGE = "com.ulisfintech.artha.android.transactionMessage";
+    public static final String PAYMENT_REQUEST = "com.ulisfintech.telrpay.android.request";
+    static final String ORDER_MESSAGE = "com.ulisfintech.telrpay.android.orderMessage";
+    static final String TRANSACTION_MESSAGE = "com.ulisfintech.telrpay.android.transactionMessage";
     /**
      * The ACS Result data after performing 3DS
      */
-    public static final String EXTRA_TXN_RESULT = "com.ulisfintech.artha.android.TXN_RESULT";
+    public static final String EXTRA_TXN_RESULT = "com.ulisfintech.telrpay.android.TXN_RESULT";
     private static final int TIMEOUT_TIMER = 300000;
     private static final int INTERVAL = 1000;
 
@@ -268,7 +274,7 @@ public class PaymentActivity extends AppCompatActivity {
 //            View view = LayoutInflater.from(this).inflate(R.layout.card_view, null);
             LinearLayout childLayout = new LinearLayout(this);
             childLayout.setOrientation(LinearLayout.HORIZONTAL);
-            childLayout.setPadding(0,15,0,15);
+            childLayout.setPadding(0, 15, 0, 15);
 
             /*
              *  Add Radio Button
@@ -421,16 +427,50 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            String mobile = paymentData.getVendorMobile();
+            String mobile = paymentData.getProductDetails().getVendorMobile();
             String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
+            String orderName = paymentData.getProductDetails().getProductName();
+            String orderPrice = paymentData.getProductDetails().getCurrency() + " " +
+                    paymentData.getProductDetails().getProductPrice();
+            String imageUrl = paymentData.getProductDetails().getImage();
 
-//            binding.tvVendorName.setText(paymentData.getVendorName());
-//            binding.tvVendorMobile.setText(strMobile);
-//            binding.tvProductName.setText(paymentData.getProduct());
-//            binding.tvProductPrice.setText("₹" + paymentData.getPrice());
+            binding.tvOrderName.setText(orderName);
+            binding.tvOrderId.setText("");
+            binding.tvOrderAmount.setText(orderPrice);
+
+            new Thread(() -> downloadImageFromPath(imageUrl)).start();
 
             this.paymentData = paymentData;
         };
+    }
+
+    /**
+     * Download Image
+     * @param path Image path
+     */
+    public void downloadImageFromPath(String path) {
+        InputStream in;
+        Bitmap bmp;
+        ImageView iv = binding.ivProduct;
+        int responseCode;
+        try {
+
+            URL url = new URL(path);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setDoInput(true);
+            con.connect();
+            responseCode = con.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                //download
+                in = con.getInputStream();
+                bmp = BitmapFactory.decodeStream(in);
+                in.close();
+                iv.setImageBitmap(bmp);
+            }
+
+        } catch (Exception ex) {
+            Log.e("Exception", ex.toString());
+        }
     }
 
     /**
@@ -756,7 +796,7 @@ public class PaymentActivity extends AppCompatActivity {
      */
     private void showTransactionReceipt(SyncMessage syncMessage) {
         Intent intent = new Intent(this, PaymentSuccessActivity.class);
-        intent.putExtra(NDEF_MESSAGE, paymentData);
+        intent.putExtra(PAYMENT_REQUEST, paymentData);
         intent.putExtra(TRANSACTION_MESSAGE, syncMessage);
         successResultLauncher.launch(intent);
     }
