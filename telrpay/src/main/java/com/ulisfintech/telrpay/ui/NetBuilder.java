@@ -159,6 +159,7 @@ class NetBuilder {
         // add extra headers
         if (request.extraHeaders != null) {
             for (String key : request.extraHeaders.keySet()) {
+                Log.e("header...", key + " / " + request.extraHeaders.get(key));
                 httpsURLConnection.setRequestProperty(key, request.extraHeaders.get(key));
             }
         }

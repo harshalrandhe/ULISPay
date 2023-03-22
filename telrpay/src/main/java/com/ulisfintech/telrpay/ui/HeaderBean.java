@@ -6,6 +6,7 @@ class HeaderBean {
     private String xpassword;
     private String merchant_key;
     private String merchant_secret;
+    private String ip;
 
     public String getXusername() {
         return xusername;
@@ -37,5 +38,13 @@ class HeaderBean {
 
     public void setMerchant_secret(String merchant_secret) {
         this.merchant_secret = merchant_secret;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

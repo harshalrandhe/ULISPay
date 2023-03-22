@@ -78,12 +78,15 @@ public class PaymentViewModel extends ViewModel {
     public void setIntent(Context context, Intent intent) {
 
         PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.PAYMENT_REQUEST);
-        String vendorMobile = paymentData.getProductDetails().getVendorMobile();
-        String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
+
+//        Log.e("<<Intent>>", new Gson().toJson(paymentData));
+
+//        String vendorMobile = paymentData.getProductDetails().getVendorMobile();
+//        String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
 //        paymentData.setVendorMobile(strMobile);
         //Update
         paymentDataMutableLiveData.setValue(paymentData);
-        
+
         /**
          *  Place New Order
          */
@@ -121,15 +124,25 @@ public class PaymentViewModel extends ViewModel {
         orderBean.setBilling_details(paymentData.getBilling_details());
         // Set Shipping Details
         orderBean.setShipping_details(paymentData.getShipping_details());
+        // Set Order From Mobile SDK
+        orderBean.setMobile_sdk(1);
 
         //Set Order Details
         OrderDetails orderDetails = new OrderDetails();
-        orderDetails.setOrder_id("ORD2023074296");
+        orderDetails.setOrder_id("ORD" + System.currentTimeMillis());
         orderDetails.setAmount(paymentData.getProductDetails().getProductPrice());
         orderDetails.setCurrency(paymentData.getProductDetails().getCurrency());
+        orderDetails.setDescription(paymentData.getDescription());
         orderDetails.setReturn_url(paymentData.getReturnUrl());
         orderBean.setOrder_details(orderDetails);
 
+
+        // Set Merchant Urls
+        MerchantUrls merchantUrls = new MerchantUrls();
+        merchantUrls.setSuccess("https://ulis.live/Development/TLR/sandbox/Tabby/status.php");
+        merchantUrls.setCancel("https://ulis.live/Development/TLR/sandbox/Tabby/status.php");
+        merchantUrls.setFailure("https://ulis.live/Development/TLR/sandbox/Tabby/status.php");
+        orderBean.setMerchant_urls(merchantUrls);
 
         // Set Headers
         HeaderBean headerBean = new HeaderBean();
@@ -137,15 +150,16 @@ public class PaymentViewModel extends ViewModel {
         headerBean.setXpassword(APIConstant.X_PASSWORD);
         headerBean.setMerchant_key(paymentData.getMerchantKey());
         headerBean.setMerchant_secret(paymentData.getMerchantSecret());
+        headerBean.setIp(new SdkUtils().getMyIp(context));
         orderBean.setHeaders(headerBean);
 
         // Show progress dialog
-        SweetAlertDialog progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
-        progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-        progressDialog.setTitleText("Order");
-        progressDialog.setContentText("Please wait...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+//        SweetAlertDialog progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+//        progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+//        progressDialog.setTitleText("Order");
+//        progressDialog.setContentText("Please wait...");
+//        progressDialog.setCancelable(false);
+//        progressDialog.show();
 
         GatewayRequest request = new GatewayRequestBuilder().buildCreateOrderRequest(orderBean);
         netBuilder.call(request, new GatewayCallback() {
@@ -153,9 +167,9 @@ public class PaymentViewModel extends ViewModel {
             @Override
             public void onSuccess(GatewayMap response) {
 
-                if (progressDialog.isShowing()) progressDialog.dismiss();
+//                if (progressDialog.isShowing()) progressDialog.dismiss();
 
-                Log.e("<<URL>>", request.URL);
+//                Log.e("<<URL>>", request.URL);
                 Log.e("<<REQUEST>>", new Gson().toJson(request));
                 Log.e("<<RESPONSE>>", response.toString());
                 Gson gson = new Gson();
@@ -169,23 +183,25 @@ public class PaymentViewModel extends ViewModel {
             @Override
             public void onError(Throwable throwable) {
 
-                if (progressDialog.isShowing()) progressDialog.dismiss();
+//                if (progressDialog.isShowing()) progressDialog.dismiss();
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<ERROR>>", throwable.getMessage());
 
-                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
-                        .setTitleText("ERROR!")
-                        .setContentText(context.getString(R.string.network_error_message))
-                        .setCancelText("Cancel")
-                        .setCancelClickListener(Dialog::dismiss)
-                        .setConfirmText("Retry")
-                        .setConfirmClickListener(sweetAlertDialog -> {
-                            sweetAlertDialog.dismiss();
-                            //Retry API
-                            createOrderAsync(context, paymentData);
-                        })
-                        .show();
+                orderResponseMutableLiveData.setValue(null);
+
+//                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+//                        .setTitleText("ERROR!")
+//                        .setContentText(context.getString(R.string.network_error_message))
+//                        .setCancelText("Cancel")
+//                        .setCancelClickListener(Dialog::dismiss)
+//                        .setConfirmText("Retry")
+//                        .setConfirmClickListener(sweetAlertDialog -> {
+//                            sweetAlertDialog.dismiss();
+//                            //Retry API
+//                            createOrderAsync(context, paymentData);
+//                        })
+//                        .show();
             }
 
         });

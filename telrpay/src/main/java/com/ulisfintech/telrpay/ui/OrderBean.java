@@ -16,6 +16,10 @@ class OrderBean {
     private ShippingDetails shipping_details;
     @Expose
     private OrderDetails order_details;
+    @Expose
+    private int mobile_sdk;
+    @Expose
+    private MerchantUrls merchant_urls;
 
     private HeaderBean headerBean;
 
@@ -57,5 +61,21 @@ class OrderBean {
 
     public void setHeaders(HeaderBean headerBean) {
         this.headerBean = headerBean;
+    }
+
+    public int getMobile_sdk() {
+        return mobile_sdk;
+    }
+
+    public void setMobile_sdk(int mobile_sdk) {
+        this.mobile_sdk = mobile_sdk;
+    }
+
+    public MerchantUrls getMerchant_urls() {
+        return merchant_urls;
+    }
+
+    public void setMerchant_urls(MerchantUrls merchant_urls) {
+        this.merchant_urls = merchant_urls;
     }
 }

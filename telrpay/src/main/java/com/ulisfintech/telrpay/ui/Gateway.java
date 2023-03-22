@@ -18,7 +18,8 @@ public class Gateway {
      * @param paymentData required data for payment transaction(Product information)
      */
     public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) {
-        Intent intent = new Intent(activity, PaymentActivity.class);
+//        Intent intent = new Intent(activity, PaymentActivity.class);
+        Intent intent = new Intent(activity, ProcessingPaymentActivity.class);
         intent.putExtra(PaymentActivity.PAYMENT_REQUEST, paymentData);
         activity.startActivityForResult(intent, REQUEST_SECURE);
     }

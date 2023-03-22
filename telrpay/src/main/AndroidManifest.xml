@@ -3,8 +3,12 @@
     package="com.ulisfintech.telrpay">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <application>
+        <activity
+            android:name=".ui.WebCheckoutActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.ProcessingPaymentActivity"
             android:exported="false" />

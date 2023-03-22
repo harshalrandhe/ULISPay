@@ -44,6 +44,7 @@ import java.net.URL;
 public class PaymentActivity extends AppCompatActivity {
 
     public static final String PAYMENT_REQUEST = "com.ulisfintech.telrpay.android.request";
+    static final String ORDER_RESPONSE = "com.ulisfintech.telrpay.android.orderResponse";
     static final String ORDER_MESSAGE = "com.ulisfintech.telrpay.android.orderMessage";
     static final String TRANSACTION_MESSAGE = "com.ulisfintech.telrpay.android.transactionMessage";
     /**
@@ -173,7 +174,9 @@ public class PaymentActivity extends AppCompatActivity {
          */
         binding.btnProceed.setOnClickListener(view -> {
 
-            startActivity(new Intent(this, ProcessingPaymentActivity.class));
+            Intent intent = new Intent(this, ProcessingPaymentActivity.class);
+            intent.putExtra(PaymentActivity.PAYMENT_REQUEST, paymentData);
+            startActivity(intent);
 
 //            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
 //                    .setTitleText("Cancel Transaction")

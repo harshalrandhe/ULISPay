@@ -86,6 +86,7 @@ class GatewayRequestBuilder {
         headers.put("xpassword", headerBean.getXpassword());
         headers.put("merchant_key", headerBean.getMerchant_key());
         headers.put("merchant_secret", headerBean.getMerchant_secret());
+        headers.put("ip", headerBean.getIp());
         return headers;
     }
 }

@@ -13,21 +13,42 @@ public class OrderResponse extends BaseResponse implements Parcelable {
     @Expose
     private String token;
     @Expose
-    private int paymentType;
-
     private String amount;
+    @Expose
     private String payment_link;
+
+    private int paymentType;
     private String next_step;
     private ProductBean productBean;
+
+    public OrderResponse() {
+
+    }
 
     protected OrderResponse(Parcel in) {
         order_id = in.readString();
         token = in.readString();
-        paymentType = in.readInt();
         amount = in.readString();
         payment_link = in.readString();
+        paymentType = in.readInt();
         next_step = in.readString();
         productBean = in.readParcelable(ProductBean.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(order_id);
+        dest.writeString(token);
+        dest.writeString(amount);
+        dest.writeString(payment_link);
+        dest.writeInt(paymentType);
+        dest.writeString(next_step);
+        dest.writeParcelable(productBean, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<OrderResponse> CREATOR = new Creator<OrderResponse>() {
@@ -58,14 +79,6 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         this.token = token;
     }
 
-    public int getPaymentType() {
-        return paymentType;
-    }
-
-    public void setPaymentType(int paymentType) {
-        this.paymentType = paymentType;
-    }
-
     public String getAmount() {
         return amount;
     }
@@ -82,6 +95,14 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         this.payment_link = payment_link;
     }
 
+    public int getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(int paymentType) {
+        this.paymentType = paymentType;
+    }
+
     public String getNext_step() {
         return next_step;
     }
@@ -96,21 +117,5 @@ public class OrderResponse extends BaseResponse implements Parcelable {
 
     public void setProductBean(ProductBean productBean) {
         this.productBean = productBean;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(order_id);
-        parcel.writeString(token);
-        parcel.writeInt(paymentType);
-        parcel.writeString(amount);
-        parcel.writeString(payment_link);
-        parcel.writeString(next_step);
-        parcel.writeParcelable(productBean, i);
     }
 }

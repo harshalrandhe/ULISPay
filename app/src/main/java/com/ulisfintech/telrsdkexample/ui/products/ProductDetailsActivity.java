@@ -120,6 +120,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             shippingDetails.setPin("440001");
             paymentData.setShipping_details(shippingDetails);
 
+            paymentData.setDescription("Mobile Payment");
             paymentData.setReturnUrl("https://dev.tlr.fe.ulis.live/merchant/payment/status");
 
             paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);

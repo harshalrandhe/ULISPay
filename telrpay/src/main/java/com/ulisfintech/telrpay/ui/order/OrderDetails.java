@@ -11,6 +11,8 @@ public class OrderDetails {
     @Expose
     private String currency;
     @Expose
+    private String description;
+    @Expose
     private String return_url;
 
     public String getOrder_id() {
@@ -43,5 +45,13 @@ public class OrderDetails {
 
     public void setReturn_url(String return_url) {
         this.return_url = return_url;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
