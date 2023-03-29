@@ -8,6 +8,8 @@ class OrderStatusResponse {
     private OrderStatusBean data;
     @Expose
     private String status;
+    @Expose
+    private String message;
 
     public OrderStatusBean getData() {
         return data;
@@ -23,5 +25,13 @@ class OrderStatusResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

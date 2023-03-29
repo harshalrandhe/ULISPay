@@ -3,8 +3,12 @@ package com.ulisfintech.telrpay.ui;
 import android.app.Activity;
 import android.content.Intent;
 
+import com.google.gson.Gson;
+import com.ulisfintech.telrpay.helper.BaseResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
+
+import java.security.spec.InvalidParameterSpecException;
 
 public class Gateway {
 
@@ -17,7 +21,16 @@ public class Gateway {
      * @param activity    calling activity
      * @param paymentData required data for payment transaction(Product information)
      */
-    public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) {
+    public static void startReceivingPaymentActivity(Activity activity, PaymentData paymentData) throws Exception{
+
+        if (paymentData == null) {
+            GatewayException exception = new GatewayException("Error : Invalid payment request!");
+            exception.setStatusCode(0);
+            // parse the response body
+            GatewayMap response = new GatewayMap(new Gson().toJson(new BaseResponse("45","Error")));
+            exception.setErrorResponse(response);
+            throw exception;
+        }
 //        Intent intent = new Intent(activity, PaymentActivity.class);
         Intent intent = new Intent(activity, ProcessingPaymentActivity.class);
         intent.putExtra(PaymentActivity.PAYMENT_REQUEST, paymentData);

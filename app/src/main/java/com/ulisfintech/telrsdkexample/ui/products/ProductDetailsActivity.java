@@ -137,7 +137,11 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
                 /**
                  * Start payment receiver
                  */
-                Gateway.startReceivingPaymentActivity(this, paymentData);
+                try {
+                    Gateway.startReceivingPaymentActivity(this, paymentData);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             } else {
                 Toast.makeText(this, "Not available at this time", Toast.LENGTH_SHORT).show();

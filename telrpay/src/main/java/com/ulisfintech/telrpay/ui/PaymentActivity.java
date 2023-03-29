@@ -504,13 +504,13 @@ public class PaymentActivity extends AppCompatActivity {
      */
     private Observer<? super OrderStatusBean> checkOrderStatusObserver() {
         return orderStatusBean -> {
-            if (orderStatusBean.getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
+            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
 
-                orderStatusBean.setMessage("Transaction is successful!");
+//                orderStatusBean.setMessage("Transaction is successful!");
 
                 SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_id();
-                syncMessage.transactionId = orderStatusBean.getTransaction_id();
+                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
+                syncMessage.transactionId = "";
                 syncMessage.orderStatusBean = orderStatusBean;
                 syncMessage.message = "Transaction is successful!";
                 syncMessage.status = true;
@@ -518,14 +518,14 @@ public class PaymentActivity extends AppCompatActivity {
                 //Show
                 showTransactionReceipt(syncMessage);
 
-            } else if (orderStatusBean.getOrder_status().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
+            } else if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
 
 //                sdkUtils.errorAlert(this, "Transaction failed!, please try again", true);
-                orderStatusBean.setMessage("Transaction failed!");
+//                orderStatusBean.setMessage("Transaction failed!");
 
                 SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_id();
-                syncMessage.transactionId = orderStatusBean.getTransaction_id();
+                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
+                syncMessage.transactionId = "";
                 syncMessage.orderStatusBean = orderStatusBean;
                 syncMessage.message = "Transaction failed!";
                 syncMessage.status = false;
@@ -706,7 +706,7 @@ public class PaymentActivity extends AppCompatActivity {
             headerBean.setMerchant_key(paymentData.getMerchantKey());
             headerBean.setMerchant_secret(paymentData.getMerchantSecret());
             //Call
-            paymentViewModel.checkOrderStatusAsync(PaymentActivity.this, headerBean, orderId);
+            paymentViewModel.checkOrderStatusAsync(PaymentActivity.this, headerBean, orderId, orderId);
         }
     }
 

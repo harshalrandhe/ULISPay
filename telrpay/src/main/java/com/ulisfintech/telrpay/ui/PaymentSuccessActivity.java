@@ -25,6 +25,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityPaymentSuccessBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         paymentViewModel = new ViewModelProvider(this).get(PaymentViewModel.class);
         sdkUtils = new SdkUtils();
 

@@ -13,6 +13,7 @@
         android:layout_height="match_parent">
 
         <TextView
+            android:id="@+id/tvSecureByTelr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -20,14 +21,21 @@
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="20dp"
-            android:background="@drawable/secure_by_bg_shape"
             android:drawableLeft="@drawable/ic_baseline_secure_24"
-            android:gravity="center"
-            android:padding="10dp"
-            android:textAllCaps="true"
-            android:text="@string/label_secure_by" />
+            android:drawablePadding="10dp"
+            android:gravity="center|start"
+            android:padding="0dp"
+            android:text="@string/label_secure_by"
+            android:textAllCaps="true" />
+
+        <View
+            android:layout_below="@+id/tvSecureByTelr"
+            android:layout_width="match_parent"
+            android:background="@color/gray_btn_bg_color"
+            android:layout_height="1dp" />
 
         <LinearLayout
+            android:id="@+id/txnProgressLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -38,7 +46,6 @@
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content" />-->
 
-
             <com.ulisfintech.telrpay.helper.GifImageView
                 android:id="@+id/gifImage"
                 android:layout_width="10dp"
@@ -47,11 +54,31 @@
 
             <TextView
                 android:id="@+id/tvPaymentStatus"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ems="18"
                 android:gravity="center"
                 android:padding="10dp"
                 android:text="@string/label_order_processing" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txnProgressLayout"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnDonePayment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:background="@drawable/btn_selector"
+                android:text="@string/label_done" />
 
         </LinearLayout>
 

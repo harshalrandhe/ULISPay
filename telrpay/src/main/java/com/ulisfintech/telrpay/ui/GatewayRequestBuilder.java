@@ -14,14 +14,15 @@ class GatewayRequestBuilder {
      * Check Order Status
      *
      * @param orderId    order id
+     * @param token    order token
      * @param headerBean API headers
      * @return API request
      */
-    GatewayRequest buildOrderStatusRequest(String orderId, HeaderBean headerBean) {
+    GatewayRequest buildOrderStatusRequest(String orderId, String token, HeaderBean headerBean) {
         GatewayRequest request = new GatewayRequest();
-        request.URL = BASE_ORDER_URL + "Details";
+        request.URL = BASE_ORDER_URL + "details";
         request.method = GatewayRequest.POST;
-        request.payload = new OrderStatusPayload(new OrderIdBean(orderId));
+        request.payload = new OrderIdBean(orderId, token);
         request.extraHeaders = getHeaders(headerBean);
         return request;
     }

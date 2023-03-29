@@ -209,11 +209,11 @@ public class PaymentViewModel extends ViewModel {
 
     /**
      * Check Order Status
-     *
-     * @param headerBean API Headers
+     *  @param headerBean API Headers
      * @param orderId    Order Id
+     * @param token    token
      */
-    void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId) {
+    void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId, String token) {
 
         if (progressDialog == null) {
             progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
@@ -226,7 +226,7 @@ public class PaymentViewModel extends ViewModel {
             statusCounter++;
         }
 
-        GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, headerBean);
+        GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, token, headerBean);
         netBuilder.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
@@ -239,13 +239,13 @@ public class PaymentViewModel extends ViewModel {
                         OrderStatusResponse.class);
 
                 if (orderStatusResponse != null && orderStatusResponse.getData() != null) {
-                    if (orderStatusResponse.getData().getOrder_status().equalsIgnoreCase(
+                    if (orderStatusResponse.getData().getOrder_details().getStatus().equalsIgnoreCase(
                             APIConstant.ORDER_STATUS_CREATED)) {
 
                         if (statusCounter < 5) {
                             // Check order status on every second
                             new Handler().postDelayed(() -> {
-                                checkOrderStatusAsync(context, headerBean, orderId);
+                                checkOrderStatusAsync(context, headerBean, orderId, token);
                             }, 2000);
                         } else {
                             statusCounter = 0;
@@ -263,8 +263,7 @@ public class PaymentViewModel extends ViewModel {
                                     .setConfirmClickListener(sweetAlertDialog -> {
                                         sweetAlertDialog.dismiss();
                                         //Retry API
-                                        checkOrderStatusAsync(context, headerBean, orderId);
-
+                                        checkOrderStatusAsync(context, headerBean, orderId, token);
                                     })
                                     .show();
                         }
@@ -293,7 +292,7 @@ public class PaymentViewModel extends ViewModel {
                         .setConfirmClickListener(sweetAlertDialog -> {
                             sweetAlertDialog.dismiss();
                             //Retry API
-                            checkOrderStatusAsync(context, headerBean, orderId);
+                            checkOrderStatusAsync(context, headerBean, orderId, token);
 
                         })
                         .show();

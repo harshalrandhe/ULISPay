@@ -3,18 +3,39 @@ package com.ulisfintech.telrpay.ui;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebMessagePort;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ulisfintech.telrpay.R;
 import com.ulisfintech.telrpay.databinding.ActivityWebCheckoutBinding;
+import com.ulisfintech.telrpay.helper.AppConstants;
 import com.ulisfintech.telrpay.helper.OrderResponse;
+import com.ulisfintech.telrpay.helper.SyncMessage;
+
+import androidx.webkit.JavaScriptReplyProxy;
+import androidx.webkit.WebMessageCompat;
+import androidx.webkit.WebViewCompat;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWebView.Listener {
 
@@ -31,7 +52,7 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
          */
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getColor(R.color.purple_200));
+        window.setStatusBarColor(getColor(R.color.material_deep_teal_50));
 
         onNewIntent(getIntent());
     }
@@ -48,10 +69,29 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
             binding.webView.setListener(this, this);
             binding.webView.setMixedContentAllowed(false);
             binding.webView.loadUrl(orderResponse.getPayment_link());
-//            binding.webView.loadUrl("https://ulis.live:8080/initiate/ORD20240307005/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmRlcl9pZCI6Ik9SRDIwMjQwMzA3MDA1IiwiYW1vdW50IjoiMzY2LjQ1IiwiY3VycmVuY3kiOiJBRUQiLCJyZXR1cm5fdXJsIjoiaHR0cHM6Ly9kZXYudGxyLmZlLnVsaXMubGl2ZS9tZXJjaGFudC9wYXltZW50L3N0YXR1cyIsImVudiI6ImxpdmUiLCJtZXJjaGFudF9pZCI6MSwiaWF0IjoxNjc5NDY5MzgzLCJleHAiOjE2Nzk1NTU3ODN9.7txCmPNHWTNsGsyELEroT2Z9mRhkq-uZ64jfPnS8xJ4");
+//            binding.webView.loadUrl("https://ulis.live:8080");
+
+            HashSet allowedOriginRules = new HashSet(List.of("https://ulis.live:8080"));
+            // Add WebMessageListeners.
+            WebViewCompat.addWebMessageListener(binding.webView, "replyObject", allowedOriginRules,
+                    new ReplyMessageListener());
+
         }
     }
 
+    private static class ReplyMessageListener implements WebViewCompat.WebMessageListener {
+
+        @Override
+        public void onPostMessage(@NonNull WebView view, WebMessageCompat message, @NonNull Uri sourceOrigin,
+                                  boolean isMainFrame, @NonNull JavaScriptReplyProxy replyProxy) {
+
+            Log.e("onPostMessage....", message.getData());
+
+            if (message.getData().equals("initialization")) {
+
+            }
+        }
+    }
     @SuppressLint("NewApi")
     @Override
     public void onResume() {
@@ -76,13 +116,29 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     }
 
     @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
+        if (binding.webView.canGoBack()) {
+            binding.webView.goBack();
+        } else {
+            finish();
+        }
+    }
+
+    @Override
     public void onPageStarted(String url, Bitmap favicon) {
         Log.e("onPageStarted...", url);
+        binding.progressBar.setVisibility(View.VISIBLE);
+        if(url.equalsIgnoreCase("https://ulis.live:8080/result")){
+            //PostBack
+            setResponseAndExit("Transaction complete", true);
+        }
     }
 
     @Override
     public void onPageFinished(String url) {
         Log.e("onPageFinished...", url);
+        binding.progressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -90,6 +146,7 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         Log.e("onPageError...", errorCode + "");
         Log.e("onPageError...", description);
         Log.e("onPageError...", failingUrl);
+        binding.progressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -104,10 +161,87 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     }
 
     private static class CheckoutWebClient extends WebViewClient {
+
+        private boolean flag;
+
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    URL aURL = null;
+//                    InputStream inputStream = null;
+//                    try {
+//
+//                        aURL = new URL(url);
+//                        URLConnection conn = aURL.openConnection();
+//                        conn.connect();
+//                        inputStream = conn.getInputStream();
+//
+//                        // read inputstream to get the json..
+//                        ByteArrayOutputStream result = new ByteArrayOutputStream();
+//                        byte[] buffer = new byte[1024];
+//                        for (int length; (length = inputStream.read(buffer)) != -1; ) {
+//                            result.write(buffer, 0, length);
+//                        }
+//
+//                        // StandardCharsets.UTF_8.name() > JDK 7
+//                        String response =  result.toString("UTF-8");
+//                        Log.e("<<Url>>", url);
+//                        Log.e("<<Response>>", response);
+//
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }).start();
+
             view.loadUrl(url);
+
             return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            if (url.contains("form.html")) {
+                flag = true;
+            }
+        }
+    }
+
+    /**
+     * Post Result With Response Back
+     *
+     * @param message transaction status message
+     * @param status  transaction status
+     */
+    private void setResponseAndExit(String message, boolean status) {
+        SyncMessage syncMessage = new SyncMessage();
+        syncMessage.data = null;
+        syncMessage.message = message;
+        syncMessage.status = status;
+        //Intent
+        postResultBack(syncMessage);
+    }
+
+    /**
+     * Post result back to the merchant activity
+     *
+     * @param response product order data
+     */
+    private void postResultBack(SyncMessage response) {
+        Intent intent = getIntent();
+        intent.putExtra(AppConstants.EXTRA_TXN_RESULT, response);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    static class MessageEvent {
+        @JavascriptInterface
+        public void shareData(String data) {
+            Log.e(">>>>>>>", data);
         }
     }
 }
