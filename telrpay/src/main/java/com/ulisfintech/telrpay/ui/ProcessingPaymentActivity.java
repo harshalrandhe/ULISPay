@@ -145,9 +145,10 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
 
             if (orderResponse.getStatus().equalsIgnoreCase("fail")) {
                 binding.tvPaymentStatus.setTextColor(getColor(R.color.red_btn_bg_pressed_color));
-                binding.tvPaymentStatus.setText(getString(R.string.label_order_failed));
+//                binding.tvPaymentStatus.setText(getString(R.string.label_order_failed));
+                binding.tvPaymentStatus.setText(orderResponse.getMessage());
                 new Handler().postDelayed(() -> {
-                    setResponseAndExit(getString(R.string.label_order_failed), false);
+                    setResponseAndExit(orderResponse.getMessage(), false);
                 }, 1500);
             } else {
                 binding.tvPaymentStatus.setTextColor(getColor(R.color.material_deep_teal_50));
@@ -168,7 +169,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
      */
     private Observer<? super OrderStatusBean> checkOrderStatusObserver() {
         return orderStatusBean -> {
-            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
+            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
 
 //                orderStatusBean.setMessage("Transaction is successful!");
 
@@ -197,6 +198,18 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                 //Show
                 showTransactionReceipt(syncMessage);
 
+            } else if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_CANCELLED)) {
+
+                SyncMessage syncMessage = new SyncMessage();
+                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
+                syncMessage.transactionId = "";
+                syncMessage.orderStatusBean = orderStatusBean;
+                syncMessage.message = "Transaction cancelled!";
+                syncMessage.status = false;
+
+                //Show
+                showTransactionReceipt(syncMessage);
+
             }
 
 //            isMobilePaymentRunning = false;
@@ -214,7 +227,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                         if (syncMessage != null && syncMessage.status) {
 
                             // Call API
-                            checkOrderStatus(orderRes.getOrder_id(), orderRes.getToken());
+                            checkOrderStatus(orderRes.getData().getOrder_id(), orderRes.getData().getToken());
 
                         }
                     }

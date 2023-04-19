@@ -3,19 +3,16 @@ package com.ulisfintech.telrpay.ui;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebMessagePort;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ulisfintech.telrpay.R;
@@ -23,23 +20,12 @@ import com.ulisfintech.telrpay.databinding.ActivityWebCheckoutBinding;
 import com.ulisfintech.telrpay.helper.AppConstants;
 import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.SyncMessage;
-
-import androidx.webkit.JavaScriptReplyProxy;
-import androidx.webkit.WebMessageCompat;
-import androidx.webkit.WebViewCompat;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import com.ulisfintech.telrpay.ui.order.MerchantUrls;
 
 public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWebView.Listener {
 
     private ActivityWebCheckoutBinding binding;
+    private MerchantUrls merchantUrls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +39,12 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(getColor(R.color.material_deep_teal_50));
+
+        // Set Merchant Urls
+        merchantUrls = new MerchantUrls();
+        merchantUrls.setSuccess("https://ulis.live/status.php");
+        merchantUrls.setCancel("https://ulis.live/cancel.php");
+        merchantUrls.setFailure("https://ulis.live/failed.php");
 
         onNewIntent(getIntent());
     }
@@ -68,30 +60,17 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
             binding.webView.setWebViewClient(new CheckoutWebClient());
             binding.webView.setListener(this, this);
             binding.webView.setMixedContentAllowed(false);
-            binding.webView.loadUrl(orderResponse.getPayment_link());
+            binding.webView.loadUrl(orderResponse.getData().getPayment_link());
 //            binding.webView.loadUrl("https://ulis.live:8080");
 
-            HashSet allowedOriginRules = new HashSet(List.of("https://ulis.live:8080"));
+//            HashSet allowedOriginRules = new HashSet(List.of("https://ulis.live:8080"));
             // Add WebMessageListeners.
-            WebViewCompat.addWebMessageListener(binding.webView, "replyObject", allowedOriginRules,
-                    new ReplyMessageListener());
+//            WebViewCompat.addWebMessageListener(binding.webView, "replyObject", allowedOriginRules,
+//                    new ReplyMessageListener());
 
         }
     }
 
-    private static class ReplyMessageListener implements WebViewCompat.WebMessageListener {
-
-        @Override
-        public void onPostMessage(@NonNull WebView view, WebMessageCompat message, @NonNull Uri sourceOrigin,
-                                  boolean isMainFrame, @NonNull JavaScriptReplyProxy replyProxy) {
-
-            Log.e("onPostMessage....", message.getData());
-
-            if (message.getData().equals("initialization")) {
-
-            }
-        }
-    }
     @SuppressLint("NewApi")
     @Override
     public void onResume() {
@@ -129,16 +108,20 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     public void onPageStarted(String url, Bitmap favicon) {
         Log.e("onPageStarted...", url);
         binding.progressBar.setVisibility(View.VISIBLE);
-        if(url.equalsIgnoreCase("https://ulis.live:8080/result")){
-            //PostBack
-            setResponseAndExit("Transaction complete", true);
-        }
     }
 
     @Override
     public void onPageFinished(String url) {
         Log.e("onPageFinished...", url);
         binding.progressBar.setVisibility(View.GONE);
+        new Handler().postDelayed(() -> {
+            if(url.equalsIgnoreCase(merchantUrls.getSuccess()) ||
+                    url.equalsIgnoreCase(merchantUrls.getCancel()) ||
+                    url.equalsIgnoreCase(merchantUrls.getFailure())){
+                //PostBack
+                setResponseAndExit("Transaction complete", true);
+            }
+        }, 1000);
     }
 
     @Override

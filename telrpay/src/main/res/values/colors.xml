@@ -10,7 +10,7 @@
     <color name="silver">#f0f0f1</color>
     <color name="silver_100">#f3eeee</color>
 
-
+    <color name="shadow_start_color">#37000000</color>
     <color name="float_transparent">#00000000</color>
     <color name="sweet_dialog_bg_color">#FFFFFF</color>
     <color name="button_text_color">#FFFFFF</color>

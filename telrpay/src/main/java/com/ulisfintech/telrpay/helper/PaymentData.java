@@ -2,10 +2,13 @@ package com.ulisfintech.telrpay.helper;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
 
 import com.google.gson.annotations.Expose;
 import com.ulisfintech.telrpay.ui.order.BillingDetails;
 import com.ulisfintech.telrpay.ui.order.CustomerDetails;
+import com.ulisfintech.telrpay.ui.order.MerchantUrls;
+import com.ulisfintech.telrpay.ui.order.OrderDetails;
 import com.ulisfintech.telrpay.ui.order.ProductDetails;
 import com.ulisfintech.telrpay.ui.order.ShippingDetails;
 
@@ -19,15 +22,15 @@ public class PaymentData implements Parcelable {
     private BillingDetails billing_details;
     @Expose
     private ShippingDetails shipping_details;
-
     @Expose
-    private int paymentType;
-
+    private OrderDetails order_details;
+    @Expose
+    private MerchantUrls merchant_urls;
+    @Expose
+    private TransactionBean transaction;
     private String merchantKey;
     private String merchantSecret;
     private ProductBean productBean;
-    private String description;
-    private String returnUrl;
 
     public PaymentData() {
 
@@ -38,12 +41,12 @@ public class PaymentData implements Parcelable {
         customer_details = in.readParcelable(CustomerDetails.class.getClassLoader());
         billing_details = in.readParcelable(BillingDetails.class.getClassLoader());
         shipping_details = in.readParcelable(ShippingDetails.class.getClassLoader());
-        paymentType = in.readInt();
+        order_details = in.readParcelable(OrderDetails.class.getClassLoader());
+        merchant_urls = in.readParcelable(MerchantUrls.class.getClassLoader());
+        transaction = in.readParcelable(TransactionBean.class.getClassLoader());
         merchantKey = in.readString();
         merchantSecret = in.readString();
         productBean = in.readParcelable(ProductBean.class.getClassLoader());
-        description = in.readString();
-        returnUrl = in.readString();
     }
 
     @Override
@@ -52,12 +55,12 @@ public class PaymentData implements Parcelable {
         dest.writeParcelable(customer_details, flags);
         dest.writeParcelable(billing_details, flags);
         dest.writeParcelable(shipping_details, flags);
-        dest.writeInt(paymentType);
+        dest.writeParcelable(order_details, flags);
+        dest.writeParcelable(merchant_urls, flags);
+        dest.writeParcelable(transaction, flags);
         dest.writeString(merchantKey);
         dest.writeString(merchantSecret);
         dest.writeParcelable(productBean, flags);
-        dest.writeString(description);
-        dest.writeString(returnUrl);
     }
 
     @Override
@@ -109,13 +112,30 @@ public class PaymentData implements Parcelable {
         this.shipping_details = shipping_details;
     }
 
-    public int getPaymentType() {
-        return paymentType;
+    public OrderDetails getOrder_details() {
+        return order_details;
     }
 
-    public void setPaymentType(int paymentType) {
-        this.paymentType = paymentType;
+    public void setOrder_details(OrderDetails order_details) {
+        this.order_details = order_details;
     }
+
+    public MerchantUrls getMerchant_urls() {
+        return merchant_urls;
+    }
+
+    public void setMerchant_urls(MerchantUrls merchant_urls) {
+        this.merchant_urls = merchant_urls;
+    }
+
+    public TransactionBean getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(TransactionBean transaction) {
+        this.transaction = transaction;
+    }
+
 
     public String getMerchantKey() {
         return merchantKey;
@@ -141,19 +161,4 @@ public class PaymentData implements Parcelable {
         this.productBean = productBean;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getReturnUrl() {
-        return returnUrl;
-    }
-
-    public void setReturnUrl(String returnUrl) {
-        this.returnUrl = returnUrl;
-    }
 }

@@ -1,5 +1,7 @@
 package com.ulisfintech.telrpay.ui;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +33,7 @@ class GatewayRequestBuilder {
      * Request
      * Create Order
      *
-     * @param orderBean initial product data for order
+     * @param orderBean  initial product data for order
      * @return place order or create order request
      */
     GatewayRequest buildCreateOrderRequest(OrderBean orderBean) {
@@ -39,6 +41,7 @@ class GatewayRequestBuilder {
         request.URL = BASE_ORDER_URL + "create";
         request.method = GatewayRequest.POST;
         request.payload = new OrderPayload(orderBean);
+//        request.payload = new OrderPayload(jsonObject);
         request.extraHeaders = getHeaders(orderBean.getHeaders());
         return request;
     }

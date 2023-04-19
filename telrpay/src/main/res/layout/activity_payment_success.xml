@@ -50,15 +50,6 @@
             android:orientation="vertical"
             android:padding="5dp">
 
-<!--            <androidx.cardview.widget.CardView-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="30dp"-->
-<!--                android:layout_marginTop="10dp"-->
-<!--                android:layout_marginEnd="30dp"-->
-<!--                android:layout_marginBottom="20dp"-->
-<!--                app:cardElevation="10dp">-->
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -85,11 +76,6 @@
                         android:layout_weight="1" />
                 </LinearLayout>
 
-                <!--                <View-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="1dp"-->
-                <!--                    android:background="@color/cardview_shadow_start_color" />-->
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -109,11 +95,6 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1" />
                 </LinearLayout>
-
-                <!--                <View-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="1dp"-->
-                <!--                    android:background="@color/cardview_shadow_start_color" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -137,11 +118,6 @@
                         android:maxLines="1" />
                 </LinearLayout>
 
-                <!--                <View-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="1dp"-->
-                <!--                    android:background="@color/cardview_shadow_start_color" />-->
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -162,11 +138,6 @@
                         android:layout_weight="1" />
                 </LinearLayout>
 
-                <!--                <View-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="1dp"-->
-                <!--                    android:background="@color/cardview_shadow_start_color" />-->
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -183,9 +154,9 @@
                         android:id="@+id/tvOrderId"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
-                        android:textAllCaps="true"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        android:textAllCaps="true" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -204,14 +175,12 @@
                         android:id="@+id/tvTransactionId"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
-                        android:textAllCaps="false"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        android:textAllCaps="false" />
                 </LinearLayout>
 
             </LinearLayout>
-
-<!--            </androidx.cardview.widget.CardView>-->
 
         </LinearLayout>
 

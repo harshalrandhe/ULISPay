@@ -1,8 +1,10 @@
 package com.ulisfintech.telrpay.ui;
 
 import com.google.gson.annotations.Expose;
+import com.ulisfintech.telrpay.helper.TransactionBean;
 import com.ulisfintech.telrpay.ui.order.BillingDetails;
 import com.ulisfintech.telrpay.ui.order.CustomerDetails;
+import com.ulisfintech.telrpay.ui.order.MerchantUrls;
 import com.ulisfintech.telrpay.ui.order.OrderDetails;
 import com.ulisfintech.telrpay.ui.order.ShippingDetails;
 
@@ -20,6 +22,9 @@ class OrderBean {
     private int mobile_sdk;
     @Expose
     private MerchantUrls merchant_urls;
+
+    @Expose
+    private TransactionBean transaction;
 
     private HeaderBean headerBean;
 
@@ -77,5 +82,13 @@ class OrderBean {
 
     public void setMerchant_urls(MerchantUrls merchant_urls) {
         this.merchant_urls = merchant_urls;
+    }
+
+    public TransactionBean getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(TransactionBean transaction) {
+        this.transaction = transaction;
     }
 }

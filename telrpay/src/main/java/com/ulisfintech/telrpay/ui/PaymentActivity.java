@@ -28,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.ulisfintech.telrpay.BuildConfig;
 import com.ulisfintech.telrpay.R;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
@@ -35,6 +36,8 @@ import com.ulisfintech.telrpay.databinding.ActivityPaymentBinding;
 import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
+
+import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -245,7 +248,7 @@ public class PaymentActivity extends AppCompatActivity {
         if (isSharePaymentRunning) {
             isSharePaymentRunning = false;
             //
-            checkOrderStatus(this.orderResponse.getOrder_id());
+            checkOrderStatus(this.orderResponse.getData().getOrder_id());
         }
 
         createCardView();
@@ -381,7 +384,7 @@ public class PaymentActivity extends AppCompatActivity {
                 syncMessage.transactionId = transactionResponseBean.getTransaction_id();
                 syncMessage.transactionResponseBean = transactionResponseBean;
 
-                if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
+                if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
 
                     syncMessage.message = "Transaction is successful!";
                     syncMessage.status = true;
@@ -504,7 +507,7 @@ public class PaymentActivity extends AppCompatActivity {
      */
     private Observer<? super OrderStatusBean> checkOrderStatusObserver() {
         return orderStatusBean -> {
-            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
+            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
 
 //                orderStatusBean.setMessage("Transaction is successful!");
 
@@ -642,8 +645,8 @@ public class PaymentActivity extends AppCompatActivity {
         paymentRequestBean.setPostalcode("123456");
 
         if (orderResponse != null) {
-            paymentRequestBean.setToken(orderResponse.getToken());
-            paymentRequestBean.setOrder_id(orderResponse.getOrder_id());
+            paymentRequestBean.setToken(orderResponse.getData().getToken());
+            paymentRequestBean.setOrder_id(orderResponse.getData().getOrder_id());
         }
 
         if (paymentData != null) {
@@ -676,7 +679,7 @@ public class PaymentActivity extends AppCompatActivity {
                 .setConfirmClickListener(sweetAlertDialog -> {
                     if (paymentData != null) {
                         //Recreate order
-                        paymentViewModel.createOrderAsync(this, paymentData);
+                        paymentViewModel.createOrderAsync(this, paymentData, new JSONObject());
                     }
                 }).setCancelText("Cancel")
                 .setCancelClickListener(Dialog::dismiss)
@@ -763,7 +766,7 @@ public class PaymentActivity extends AppCompatActivity {
                     SyncMessage syncMessage = new SyncMessage();
                     if (result.getData() != null) {
                         OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
-                        syncMessage.orderId = orderResponse.getOrder_id();
+                        syncMessage.orderId = orderResponse.getData().getOrder_id();
                         syncMessage.orderResponse = orderResponse;
                         syncMessage.transactionId = null;
                     }

@@ -11,11 +11,14 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.ulisfintech.telrpay.R;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
-import com.ulisfintech.telrpay.ui.order.OrderDetails;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class PaymentViewModel extends ViewModel {
@@ -24,8 +27,8 @@ public class PaymentViewModel extends ViewModel {
     private final MutableLiveData<OrderResponse> orderResponseMutableLiveData;
     private final MutableLiveData<TransactionResponseBean> transactionResponseBeanMutableLiveData;
     private final MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
-    private SweetAlertDialog progressDialog;
     private final NetBuilder netBuilder;
+    private SweetAlertDialog progressDialog;
     private int statusCounter;
 
     public PaymentViewModel() {
@@ -77,20 +80,29 @@ public class PaymentViewModel extends ViewModel {
      */
     public void setIntent(Context context, Intent intent) {
 
-        PaymentData paymentData = intent.getParcelableExtra(PaymentActivity.PAYMENT_REQUEST);
+        try {
+
+            String paymentDataStr = intent.getStringExtra(PaymentActivity.PAYMENT_REQUEST);
+
+            PaymentData paymentData = new Gson().fromJson(paymentDataStr, PaymentData.class);
+            JSONObject jsonObject = new JSONObject(paymentDataStr);
 
 //        Log.e("<<Intent>>", new Gson().toJson(paymentData));
-
 //        String vendorMobile = paymentData.getProductDetails().getVendorMobile();
 //        String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
 //        paymentData.setVendorMobile(strMobile);
-        //Update
-        paymentDataMutableLiveData.setValue(paymentData);
 
-        /**
-         *  Place New Order
-         */
-        createOrderAsync(context, paymentData);
+            //Update
+            paymentDataMutableLiveData.setValue(paymentData);
+
+            /**
+             *  Place New Order
+             */
+            createOrderAsync(context, paymentData, jsonObject);
+
+        } catch (JSONException err) {
+            Log.d("Error", "Invalid parameters!");
+        }
     }
 
     /**
@@ -114,7 +126,8 @@ public class PaymentViewModel extends ViewModel {
      *
      * @param paymentData merchant details
      */
-    void createOrderAsync(Context context, PaymentData paymentData) {
+    void createOrderAsync(Context context, PaymentData paymentData, JSONObject jsonObject) {
+
 
         OrderBean orderBean = new OrderBean();
 
@@ -126,23 +139,12 @@ public class PaymentViewModel extends ViewModel {
         orderBean.setShipping_details(paymentData.getShipping_details());
         // Set Order From Mobile SDK
         orderBean.setMobile_sdk(1);
-
-        //Set Order Details
-        OrderDetails orderDetails = new OrderDetails();
-        orderDetails.setOrder_id("ORD" + System.currentTimeMillis());
-        orderDetails.setAmount(paymentData.getProductDetails().getProductPrice());
-        orderDetails.setCurrency(paymentData.getProductDetails().getCurrency());
-        orderDetails.setDescription(paymentData.getDescription());
-        orderDetails.setReturn_url(paymentData.getReturnUrl());
-        orderBean.setOrder_details(orderDetails);
-
-
+        // Set Order Details
+        orderBean.setOrder_details(paymentData.getOrder_details());
         // Set Merchant Urls
-        MerchantUrls merchantUrls = new MerchantUrls();
-        merchantUrls.setSuccess("https://ulis.live/Development/TLR/sandbox/Tabby/status.php");
-        merchantUrls.setCancel("https://ulis.live/Development/TLR/sandbox/Tabby/status.php");
-        merchantUrls.setFailure("https://ulis.live/Development/TLR/sandbox/Tabby/status.php");
-        orderBean.setMerchant_urls(merchantUrls);
+        orderBean.setMerchant_urls(paymentData.getMerchant_urls());
+        // Set Transaction
+        orderBean.setTransaction(paymentData.getTransaction());
 
         // Set Headers
         HeaderBean headerBean = new HeaderBean();
@@ -175,7 +177,7 @@ public class PaymentViewModel extends ViewModel {
                 Gson gson = new Gson();
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
                 if (orderResponse != null) {
-                    orderResponse.setPaymentType(paymentData.getPaymentType());
+//                    orderResponse.setPaymentType(paymentData.getPaymentType());
                     orderResponseMutableLiveData.setValue(orderResponse);
                 }
             }
@@ -209,9 +211,10 @@ public class PaymentViewModel extends ViewModel {
 
     /**
      * Check Order Status
-     *  @param headerBean API Headers
+     *
+     * @param headerBean API Headers
      * @param orderId    Order Id
-     * @param token    token
+     * @param token      token
      */
     void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId, String token) {
 
@@ -231,16 +234,17 @@ public class PaymentViewModel extends ViewModel {
             @Override
             public void onSuccess(GatewayMap response) {
 
-                Log.e("<<URL>>", request.URL);
-                Log.e("<<RESPONSE>>", response.toString());
-
                 Gson gson = new Gson();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", gson.toJson(response));
+
                 OrderStatusResponse orderStatusResponse = gson.fromJson(gson.toJson(response),
                         OrderStatusResponse.class);
 
                 if (orderStatusResponse != null && orderStatusResponse.getData() != null) {
                     if (orderStatusResponse.getData().getOrder_details().getStatus().equalsIgnoreCase(
-                            APIConstant.ORDER_STATUS_CREATED)) {
+                            APIConstant.ORDER_STATUS_PENDING)) {
 
                         if (statusCounter < 5) {
                             // Check order status on every second
@@ -356,7 +360,7 @@ public class PaymentViewModel extends ViewModel {
     /**
      * UPI Payment Transaction
      *
-     * @param context            calling activity context
+     * @param context               calling activity context
      * @param upiPaymentRequestBean UPI payment request
      */
     void proceedToUPIPaymentAsync(Context context, UPIPaymentRequestBean upiPaymentRequestBean) {

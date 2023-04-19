@@ -46,7 +46,7 @@ public class UPIPinActivity extends AppCompatActivity {
                 syncMessage.transactionId = transactionResponseBean.getTransaction_id();
                 syncMessage.transactionResponseBean = transactionResponseBean;
 
-                if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_COMPLETED)) {
+                if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
 
                     syncMessage.message = "Transaction is successful!";
                     syncMessage.status = true;
@@ -132,8 +132,8 @@ public class UPIPinActivity extends AppCompatActivity {
         upiPaymentRequestBean.setType(PAYMENT_TYPE_UPI_PAY);
 
         if (orderResponse != null) {
-            upiPaymentRequestBean.setToken(orderResponse.getToken());
-            upiPaymentRequestBean.setOrder_id(orderResponse.getOrder_id());
+            upiPaymentRequestBean.setToken(orderResponse.getData().getToken());
+            upiPaymentRequestBean.setOrder_id(orderResponse.getData().getOrder_id());
         }
 
         if (paymentData != null) {

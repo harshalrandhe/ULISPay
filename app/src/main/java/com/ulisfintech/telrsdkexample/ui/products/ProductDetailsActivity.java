@@ -17,19 +17,26 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.telrpay.helper.AppConstants;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
+import com.ulisfintech.telrpay.helper.TransactionBean;
 import com.ulisfintech.telrpay.ui.Gateway;
 import com.ulisfintech.telrpay.ui.GatewaySecureCallback;
 import com.ulisfintech.telrpay.ui.order.BillingDetails;
 import com.ulisfintech.telrpay.ui.order.CustomerDetails;
+import com.ulisfintech.telrpay.ui.order.MerchantUrls;
+import com.ulisfintech.telrpay.ui.order.OrderDetails;
 import com.ulisfintech.telrpay.ui.order.ProductDetails;
 import com.ulisfintech.telrpay.ui.order.ShippingDetails;
 import com.ulisfintech.telrsdkexample.BuildConfig;
 import com.ulisfintech.telrsdkexample.R;
 import com.ulisfintech.telrsdkexample.databinding.ActivityProductDetailsBinding;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ProductDetailsActivity extends AppCompatActivity implements CompoundButton
         .OnCheckedChangeListener, GatewaySecureCallback {
@@ -90,7 +97,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             productDetails.setVendorMobile("1122334455");
             productDetails.setProductName(productBean.getName());
             productDetails.setProductPrice(productBean.getPrice());
-            productDetails.setCurrency("USD");
+            productDetails.setCurrency("AED");
             productDetails.setImage(productBean.getImg());
             paymentData.setProductDetails(productDetails);
 
@@ -120,8 +127,21 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             shippingDetails.setPin("440001");
             paymentData.setShipping_details(shippingDetails);
 
-            paymentData.setDescription("Mobile Payment");
-            paymentData.setReturnUrl("https://dev.tlr.fe.ulis.live/merchant/payment/status");
+            //Set Order Details
+            OrderDetails orderDetails = new OrderDetails();
+            orderDetails.setOrder_id("ORD" + System.currentTimeMillis());
+//            orderDetails.setOrder_id("ORD1680084434213");
+            orderDetails.setAmount(paymentData.getProductDetails().getProductPrice());
+            orderDetails.setCurrency(paymentData.getProductDetails().getCurrency());
+            orderDetails.setDescription("Mobile Payment");
+            orderDetails.setReturn_url("https://dev.tlr.fe.ulis.live/merchant/payment/status");
+            paymentData.setOrder_details(orderDetails);
+
+            MerchantUrls merchantUrls = new MerchantUrls();
+            merchantUrls.setSuccess("https://ulis.live/status.php");
+            merchantUrls.setCancel("https://ulis.live/cancel.php");
+            merchantUrls.setFailure("https://ulis.live/failed.php");
+            paymentData.setMerchant_urls(merchantUrls);
 
             paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
             paymentData.setMerchantSecret(BuildConfig.MERCHANT_PASSWORD);
@@ -130,15 +150,24 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),
                     com.ulisfintech.telrpay.helper.ProductBean.class));
 
+            paymentData.setTransaction(new TransactionBean("ECOM"));
+
             if (binding.radioTelrPay.isChecked()) {
 
-                paymentData.setPaymentType(AppConstants.PAYMENT_TYPE_TAP_AND_PAY);
+//                paymentData.setPaymentType(AppConstants.PAYMENT_TYPE_TAP_AND_PAY);
+
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = new JSONObject(gson.toJson(paymentData));
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
 
                 /**
                  * Start payment receiver
                  */
                 try {
-                    Gateway.startReceivingPaymentActivity(this, paymentData);
+                    Gateway.startReceivingPaymentActivity(this, jsonObject);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -176,7 +205,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
     @Override
     public void onTransactionComplete(SyncMessage syncMessage) {
-        Log.e(this.getClass().getName(), new Gson().toJson(syncMessage));
+        Log.e("onTransactionComplete: ", new Gson().toJson(syncMessage));
         if (syncMessage.status) {
             new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
                     .setTitleText("SUCCESS")
