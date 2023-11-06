@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
+import com.ulisfintech.telrpay.ui.order.MerchantUrls;
 import com.ulisfintech.telrpay.ui.order.OrderResponseBean;
 
 public class OrderResponse extends BaseResponse implements Parcelable {
@@ -17,6 +18,10 @@ public class OrderResponse extends BaseResponse implements Parcelable {
     private String next_step;
     private ProductBean productBean;
 
+    private MerchantUrls merchantUrls;
+
+    private String returnUrl;
+
     public OrderResponse() {
 
     }
@@ -26,6 +31,8 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         paymentType = in.readInt();
         next_step = in.readString();
         productBean = in.readParcelable(ProductBean.class.getClassLoader());
+        merchantUrls = in.readParcelable(MerchantUrls.class.getClassLoader());
+        returnUrl = in.readString();
     }
 
     @Override
@@ -34,6 +41,8 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         dest.writeInt(paymentType);
         dest.writeString(next_step);
         dest.writeParcelable(productBean, flags);
+        dest.writeParcelable(merchantUrls, flags);
+        dest.writeString(returnUrl);
     }
 
     @Override
@@ -83,5 +92,21 @@ public class OrderResponse extends BaseResponse implements Parcelable {
 
     public void setProductBean(ProductBean productBean) {
         this.productBean = productBean;
+    }
+
+    public MerchantUrls getMerchantUrls() {
+        return merchantUrls;
+    }
+
+    public void setMerchantUrls(MerchantUrls merchantUrls) {
+        this.merchantUrls = merchantUrls;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 }

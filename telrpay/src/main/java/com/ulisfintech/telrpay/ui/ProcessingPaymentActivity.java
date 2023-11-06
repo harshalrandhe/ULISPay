@@ -134,7 +134,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                 // In case of any exception
                 binding.btnDonePayment.setVisibility(View.VISIBLE);
                 binding.tvPaymentStatus.setTextColor(getColor(R.color.red_btn_bg_pressed_color));
-                binding.gifImage.setGifImageResource(R.drawable.alarm);
+                binding.gifImage.setGifImageResource(R.drawable.warning_circle);
                 binding.tvPaymentStatus.setText(getString(R.string.label_order_failed_retry));
 
 //                Intent intent = new Intent(this, WebCheckoutActivity.class);
@@ -153,6 +153,8 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
             } else {
                 binding.tvPaymentStatus.setTextColor(getColor(R.color.material_deep_teal_50));
                 this.orderResponse = orderResponse;
+                orderResponse.setReturnUrl(this.paymentData.getOrder_details().getReturn_url());
+                orderResponse.setMerchantUrls(this.paymentData.getMerchant_urls());
                 isOrderCreated = true;
 
                 Intent intent = new Intent(this, WebCheckoutActivity.class);

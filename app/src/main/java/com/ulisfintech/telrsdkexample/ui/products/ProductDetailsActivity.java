@@ -102,9 +102,9 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             paymentData.setProductDetails(productDetails);
 
             CustomerDetails customerDetails = new CustomerDetails();
-            customerDetails.setName("Pawan Kushwaha");
-            customerDetails.setEmail("golu.r@ulistechnology.com");
-            customerDetails.setMobile("9011240343");
+            customerDetails.setName("PayTM USER");
+            customerDetails.setEmail("rasibas152@kameili.com");
+            customerDetails.setMobile("5353453533");
             paymentData.setCustomer_details(customerDetails);
 
             // Set Billing Details
@@ -114,33 +114,32 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             billingDetails.setCity("Nagpur");
             billingDetails.setCountry("India");
             billingDetails.setProvince("Maharashtra");
-            billingDetails.setPin("440001");
+            billingDetails.setPin("");
             paymentData.setBilling_details(billingDetails);
 
             // Set Shipping Details
             ShippingDetails shippingDetails = new ShippingDetails();
-            shippingDetails.setAddress_line1("Wardhman nagar ,nagpur");
+            shippingDetails.setAddress_line1("");
             shippingDetails.setAddress_line2("");
-            shippingDetails.setCity("Nagpur");
-            shippingDetails.setCountry("India");
-            shippingDetails.setProvince("Maharashtra");
-            shippingDetails.setPin("440001");
+            shippingDetails.setCity("");
+            shippingDetails.setCountry("");
+            shippingDetails.setProvince("");
+            shippingDetails.setPin("");
             paymentData.setShipping_details(shippingDetails);
 
             //Set Order Details
             OrderDetails orderDetails = new OrderDetails();
             orderDetails.setOrder_id("ORD" + System.currentTimeMillis());
-//            orderDetails.setOrder_id("ORD1680084434213");
             orderDetails.setAmount(paymentData.getProductDetails().getProductPrice());
             orderDetails.setCurrency(paymentData.getProductDetails().getCurrency());
             orderDetails.setDescription("Mobile Payment");
-            orderDetails.setReturn_url("https://dev.tlr.fe.ulis.live/merchant/payment/status");
+            orderDetails.setReturn_url("https://ulis.live:8081/status");
             paymentData.setOrder_details(orderDetails);
 
             MerchantUrls merchantUrls = new MerchantUrls();
-            merchantUrls.setSuccess("https://ulis.live/status.php");
-            merchantUrls.setCancel("https://ulis.live/cancel.php");
-            merchantUrls.setFailure("https://ulis.live/failed.php");
+            merchantUrls.setSuccess("https://ulis.live:8081/status");
+            merchantUrls.setCancel("https://ulis.live:8081/status");
+            merchantUrls.setFailure("https://ulis.live:8081/status");
             paymentData.setMerchant_urls(merchantUrls);
 
             paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
@@ -150,13 +149,13 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),
                     com.ulisfintech.telrpay.helper.ProductBean.class));
 
-            paymentData.setTransaction(new TransactionBean("ECOM"));
+            paymentData.setTransaction(new TransactionBean("ecom"));
 
             if (binding.radioTelrPay.isChecked()) {
 
 //                paymentData.setPaymentType(AppConstants.PAYMENT_TYPE_TAP_AND_PAY);
 
-                JSONObject jsonObject = null;
+                JSONObject jsonObject;
                 try {
                     jsonObject = new JSONObject(gson.toJson(paymentData));
                 } catch (JSONException e) {

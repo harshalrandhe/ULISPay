@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -26,6 +27,7 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
 
     private ActivityWebCheckoutBinding binding;
     private MerchantUrls merchantUrls;
+    private String returnUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +42,6 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(getColor(R.color.material_deep_teal_50));
 
-        // Set Merchant Urls
-        merchantUrls = new MerchantUrls();
-        merchantUrls.setSuccess("https://ulis.live/status.php");
-        merchantUrls.setCancel("https://ulis.live/cancel.php");
-        merchantUrls.setFailure("https://ulis.live/failed.php");
 
         onNewIntent(getIntent());
     }
@@ -56,10 +53,14 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         if (intent != null) {
 
             OrderResponse orderResponse = intent.getParcelableExtra(PaymentActivity.ORDER_RESPONSE);
+            // Set Merchant Urls
+            this.merchantUrls = orderResponse.getMerchantUrls();
+            this.returnUrl = orderResponse.getReturnUrl();
 
             binding.webView.setWebViewClient(new CheckoutWebClient());
             binding.webView.setListener(this, this);
             binding.webView.setMixedContentAllowed(false);
+            binding.webView.clearCache(true);
             binding.webView.loadUrl(orderResponse.getData().getPayment_link());
 //            binding.webView.loadUrl("https://ulis.live:8080");
 
@@ -114,14 +115,10 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     public void onPageFinished(String url) {
         Log.e("onPageFinished...", url);
         binding.progressBar.setVisibility(View.GONE);
-        new Handler().postDelayed(() -> {
-            if(url.equalsIgnoreCase(merchantUrls.getSuccess()) ||
-                    url.equalsIgnoreCase(merchantUrls.getCancel()) ||
-                    url.equalsIgnoreCase(merchantUrls.getFailure())){
-                //PostBack
-                setResponseAndExit("Transaction complete", true);
-            }
-        }, 1000);
+        if(url.equalsIgnoreCase(this.returnUrl)){
+            //PostBack
+            setResponseAndExit("Transaction complete", true);
+        }
     }
 
     @Override
@@ -219,6 +216,7 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         intent.putExtra(AppConstants.EXTRA_TXN_RESULT, response);
         setResult(RESULT_OK, intent);
         finish();
+        Log.e("Payment.....", "Finished called.....");
     }
 
     static class MessageEvent {

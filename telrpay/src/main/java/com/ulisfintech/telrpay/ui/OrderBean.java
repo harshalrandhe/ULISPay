@@ -18,8 +18,8 @@ class OrderBean {
     private ShippingDetails shipping_details;
     @Expose
     private OrderDetails order_details;
-    @Expose
-    private int mobile_sdk;
+//    @Expose
+//    private int mobile_sdk;
     @Expose
     private MerchantUrls merchant_urls;
 
@@ -68,13 +68,13 @@ class OrderBean {
         this.headerBean = headerBean;
     }
 
-    public int getMobile_sdk() {
-        return mobile_sdk;
-    }
-
-    public void setMobile_sdk(int mobile_sdk) {
-        this.mobile_sdk = mobile_sdk;
-    }
+//    public int getMobile_sdk() {
+//        return mobile_sdk;
+//    }
+//
+//    public void setMobile_sdk(int mobile_sdk) {
+//        this.mobile_sdk = mobile_sdk;
+//    }
 
     public MerchantUrls getMerchant_urls() {
         return merchant_urls;

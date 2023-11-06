@@ -138,7 +138,7 @@ public class PaymentViewModel extends ViewModel {
         // Set Shipping Details
         orderBean.setShipping_details(paymentData.getShipping_details());
         // Set Order From Mobile SDK
-        orderBean.setMobile_sdk(1);
+//        orderBean.setMobile_sdk(1);
         // Set Order Details
         orderBean.setOrder_details(paymentData.getOrder_details());
         // Set Merchant Urls
