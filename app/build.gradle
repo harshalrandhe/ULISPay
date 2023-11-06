@@ -6,9 +6,9 @@ apply plugin: 'kotlin-android'
 android {
     compileSdk 33
 
-    def apikeyPropertiesFile = rootProject.file("apikey.properties")
-    def apikeyProperties = new Properties()
-    apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+//    def apikeyPropertiesFile = rootProject.file("apikey.properties")
+//    def apikeyProperties = new Properties()
+//    apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
 
     defaultConfig {
         applicationId "com.ulisfintech.telrpayexample"
@@ -20,8 +20,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // should correspond to key/value pairs inside the file
-        buildConfigField("String", "MERCHANT_KEY", apikeyProperties['MERCHANT_KEY'])
-        buildConfigField("String", "MERCHANT_PASSWORD", apikeyProperties['MERCHANT_PASSWORD'])
+//        buildConfigField("String", "MERCHANT_KEY", apikeyProperties['MERCHANT_KEY'])
+//        buildConfigField("String", "MERCHANT_PASSWORD", apikeyProperties['MERCHANT_PASSWORD'])
     }
 
     buildTypes {

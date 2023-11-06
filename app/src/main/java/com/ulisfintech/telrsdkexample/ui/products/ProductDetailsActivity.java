@@ -17,9 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
-import com.ulisfintech.telrpay.helper.AppConstants;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
 import com.ulisfintech.telrpay.helper.TransactionBean;
@@ -31,7 +29,6 @@ import com.ulisfintech.telrpay.ui.order.MerchantUrls;
 import com.ulisfintech.telrpay.ui.order.OrderDetails;
 import com.ulisfintech.telrpay.ui.order.ProductDetails;
 import com.ulisfintech.telrpay.ui.order.ShippingDetails;
-import com.ulisfintech.telrsdkexample.BuildConfig;
 import com.ulisfintech.telrsdkexample.R;
 import com.ulisfintech.telrsdkexample.databinding.ActivityProductDetailsBinding;
 
@@ -142,8 +139,10 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             merchantUrls.setFailure("https://ulis.live:8081/status");
             paymentData.setMerchant_urls(merchantUrls);
 
-            paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
-            paymentData.setMerchantSecret(BuildConfig.MERCHANT_PASSWORD);
+//            paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
+//            paymentData.setMerchantSecret(BuildConfig.MERCHANT_PASSWORD);
+            paymentData.setMerchantKey("live-P762B55IY");
+            paymentData.setMerchantSecret("sec-4C6E4V5DL");
 
             Gson gson = new Gson();
             paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),
