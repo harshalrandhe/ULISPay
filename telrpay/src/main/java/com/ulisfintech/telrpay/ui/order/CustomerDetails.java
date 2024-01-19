@@ -13,20 +13,24 @@ public class CustomerDetails implements Parcelable {
     private String email;
     @Expose
     private String mobile;
+    @Expose
+    private String mobile_code;
 
     public CustomerDetails() {
     }
 
-    public CustomerDetails(String name, String email, String mobile) {
+    public CustomerDetails(String name, String email, String mobile, String mobile_code) {
         this.name = name;
         this.email = email;
         this.mobile = mobile;
+        this.mobile_code = mobile_code;
     }
 
     protected CustomerDetails(Parcel in) {
         name = in.readString();
         email = in.readString();
         mobile = in.readString();
+        mobile_code = in.readString();
     }
 
     @Override
@@ -34,6 +38,7 @@ public class CustomerDetails implements Parcelable {
         dest.writeString(name);
         dest.writeString(email);
         dest.writeString(mobile);
+        dest.writeString(mobile_code);
     }
 
     @Override
@@ -75,5 +80,13 @@ public class CustomerDetails implements Parcelable {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getMobile_code() {
+        return mobile_code;
+    }
+
+    public void setMobile_code(String mobile_code) {
+        this.mobile_code = mobile_code;
     }
 }

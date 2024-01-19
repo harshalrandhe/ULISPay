@@ -1,7 +1,5 @@
 package com.ulisfintech.telrpay.ui;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,17 +25,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.ulisfintech.telrpay.BuildConfig;
 import com.ulisfintech.telrpay.R;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.telrpay.databinding.ActivityPaymentBinding;
 import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
 import com.ulisfintech.telrpay.helper.SyncMessage;
-
-import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -47,32 +40,44 @@ import java.net.URL;
 public class PaymentActivity extends AppCompatActivity {
 
     public static final String PAYMENT_REQUEST = "com.ulisfintech.telrpay.android.request";
-    static final String ORDER_RESPONSE = "com.ulisfintech.telrpay.android.orderResponse";
-    static final String ORDER_MESSAGE = "com.ulisfintech.telrpay.android.orderMessage";
-    static final String TRANSACTION_MESSAGE = "com.ulisfintech.telrpay.android.transactionMessage";
     /**
      * The ACS Result data after performing 3DS
      */
     public static final String EXTRA_TXN_RESULT = "com.ulisfintech.telrpay.android.TXN_RESULT";
+    static final String ORDER_RESPONSE = "com.ulisfintech.telrpay.android.orderResponse";
+    static final String ORDER_MESSAGE = "com.ulisfintech.telrpay.android.orderMessage";
+    static final String TRANSACTION_MESSAGE = "com.ulisfintech.telrpay.android.transactionMessage";
     private static final int TIMEOUT_TIMER = 300000;
     private static final int INTERVAL = 1000;
-
+    private final String PAYMENT_TYPE_CARD_PAY = "card_pay";
+    /**
+     * Transaction Result Launcher
+     */
+    ActivityResultLauncher<Intent> successResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null) {
+                        SyncMessage syncMessage = result.getData().getParcelableExtra(TRANSACTION_MESSAGE);
+                        //Intent
+                        postResultBack(syncMessage);
+                    }
+                }
+            }
+    );
     private ActivityPaymentBinding binding;
     private PaymentViewModel paymentViewModel;
     private PaymentData paymentData;
     private OrderResponse orderResponse;
     private SweetAlertDialog progressDialog;
-    private final String PAYMENT_TYPE_CARD_PAY = "card_pay";
     private boolean intentFromCreate;
     private boolean isScanNow;
     private boolean isSharePaymentRunning;
     private boolean isCardPaymentRunning;
     private boolean isMobilePaymentRunning;
     private boolean isUPIPaymentRunning;
+
     private boolean isOrderCreated;
     private boolean isSessionExpire;
-
-
     private CountDownTimer countDownTimer;
     private SdkUtils sdkUtils;
 
@@ -216,13 +221,6 @@ public class PaymentActivity extends AppCompatActivity {
          */
         paymentViewModel.getOrderStatusBeanMutableLiveData().observe(this, checkOrderStatusObserver());
 
-        /**
-         * Observer
-         * Check Transaction status
-         * @transactionResponseBean transaction data
-         */
-        paymentViewModel.getTransactionResponseBeanMutableLiveData().observe(this, transactionStatusObserver());
-
 
         progressDialog = sdkUtils.createProgressDialog(this);
 
@@ -350,75 +348,6 @@ public class PaymentActivity extends AppCompatActivity {
         binding.cardsExpandableLayout.addView(parent);
     }
 
-    private static class CardCVVTextWatcher implements TextWatcher {
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    }
-
-    /**
-     * Observer
-     * Check Transaction status
-     */
-    private Observer<? super TransactionResponseBean> transactionStatusObserver() {
-        return transactionResponseBean -> {
-
-            sdkUtils.setHapticEffect(binding.getRoot());
-
-            if (transactionResponseBean != null) {
-
-                SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = transactionResponseBean.getOrder_id();
-                syncMessage.transactionId = transactionResponseBean.getTransaction_id();
-                syncMessage.transactionResponseBean = transactionResponseBean;
-
-                if (transactionResponseBean.getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
-
-                    syncMessage.message = "Transaction is successful!";
-                    syncMessage.status = true;
-                    //Show
-                    showTransactionReceipt(syncMessage);
-
-                } else {
-
-                    syncMessage.message = "Transaction is failed!";
-                    syncMessage.status = false;
-                    //Show
-                    showTransactionReceipt(syncMessage);
-                }
-            } else {
-                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                        .setTitleText("Payment")
-                        .setContentText("Payment not processed, please try again!")
-                        .setConfirmText("Retry")
-                        .setConfirmClickListener(sweetAlertDialog -> {
-                            sweetAlertDialog.dismiss();
-                            onNewIntent(getIntent());
-                        })
-                        .setCancelText("Cancel")
-                        .setCancelClickListener(sweetAlertDialog -> {
-                            sweetAlertDialog.dismiss();
-                            onBackPressed();
-                        })
-                        .show();
-            }
-
-            isCardPaymentRunning = false;
-        };
-    }
-
     /**
      * Observer
      * Intent Data Observer
@@ -452,6 +381,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     /**
      * Download Image
+     *
      * @param path Image path
      */
     public void downloadImageFromPath(String path) {
@@ -493,8 +423,6 @@ public class PaymentActivity extends AppCompatActivity {
 
             isOrderCreated = true;
 
-            //Dialog
-//            showSelectPaymentMethodDialog();
 
             startSessions();
 
@@ -507,85 +435,36 @@ public class PaymentActivity extends AppCompatActivity {
      */
     private Observer<? super OrderStatusBean> checkOrderStatusObserver() {
         return orderStatusBean -> {
-            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
 
-//                orderStatusBean.setMessage("Transaction is successful!");
+            TransactionResponseBean responseBean = orderStatusBean.getTransactions().get(0);
 
-                SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
-                syncMessage.transactionId = "";
-                syncMessage.orderStatusBean = orderStatusBean;
+            SyncMessage syncMessage = new SyncMessage();
+            syncMessage.orderId = orderStatusBean.getOrder_id();
+            syncMessage.transactionId = responseBean.getTransaction_id();
+            syncMessage.orderStatusBean = orderStatusBean;
+
+            if (responseBean.getGateway_code().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
                 syncMessage.message = "Transaction is successful!";
                 syncMessage.status = true;
-
-                //Show
-                showTransactionReceipt(syncMessage);
-
-            } else if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
-
-//                sdkUtils.errorAlert(this, "Transaction failed!, please try again", true);
-//                orderStatusBean.setMessage("Transaction failed!");
-
-                SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
-                syncMessage.transactionId = "";
-                syncMessage.orderStatusBean = orderStatusBean;
+            } else if (responseBean.getGateway_code().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
                 syncMessage.message = "Transaction failed!";
                 syncMessage.status = false;
-
-                //Show
-                showTransactionReceipt(syncMessage);
-
+            } else if (responseBean.getGateway_code().equalsIgnoreCase(APIConstant.ORDER_STATUS_CANCELLED)) {
+                syncMessage.message = "Transaction cancelled!";
+                syncMessage.status = false;
+            } else if (responseBean.getGateway_code().equalsIgnoreCase(APIConstant.ORDER_STATUS_DECLINED)) {
+                syncMessage.message = "Transaction declined!";
+                syncMessage.status = false;
+            } else {
+                syncMessage.message = "Pending";
+                syncMessage.status = false;
             }
+
+            //Show
+            showTransactionReceipt(syncMessage);
 
             isMobilePaymentRunning = false;
         };
-    }
-
-    /**
-     * Dialog
-     * Show Payment Method
-     */
-    private void showSelectPaymentMethodDialog() {
-        sdkUtils.showSelectPaymentMethodDialog(this, new SdkUtils.PaymentOptionListener() {
-            @Override
-            public void onTapAndPay() {
-                //
-            }
-
-            @Override
-            public void onSharePay() {
-                String packageName = BuildConfig.FRIEND;
-                if (sdkUtils.isPackageInstalled(PaymentActivity.this, packageName)) {
-                    //
-                    startSharePayment(packageName, orderResponse);
-                } else {
-                    String msg = "Application is not currently installed.";
-                    sdkUtils.errorAlert(PaymentActivity.this, msg);
-                }
-            }
-        });
-    }
-
-    /**
-     * Process Payment
-     * Start share payment
-     *
-     * @param packageName   payment application package name
-     * @param orderResponse product order data
-     */
-    private void startSharePayment(String packageName, OrderResponse orderResponse) {
-
-        binding.paymentMethodLabel.setText(getString(R.string.share_pay));
-//        binding.ivScanCardPoster.setVisibility(View.GONE);
-        orderResponse.setProductBean(paymentData.getProductBean());
-        Intent intentForPackage = getPackageManager().getLaunchIntentForPackage(packageName);
-        intentForPackage.putExtra(ORDER_MESSAGE, new Gson().toJson(orderResponse));
-        intentForPackage.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intentForPackage.setAction("receive_data_from_artha");
-        startActivity(intentForPackage);
-        isSharePaymentRunning = true;
-        stopSessionTimer();
     }
 
     private void stopSessionTimer() {
@@ -605,85 +484,6 @@ public class PaymentActivity extends AppCompatActivity {
             paymentViewModel.setIntent(this, intent);
 
         }
-    }
-
-    /**
-     * Payment API Call
-     */
-    private void paymentAPICall() {
-
-
-        if (!isOrderCreated) {
-            showOrderIsNotCreated();
-            return;
-        }
-
-        sdkUtils.setHapticEffect(binding.getRoot());
-
-        isCardPaymentRunning = true;
-        stopSessionTimer();
-
-        String cardNumber = "";
-        String expiredDate = "";
-        String cardType = "";
-
-        PaymentRequestBean paymentRequestBean = new PaymentRequestBean();
-        //Card Details
-        paymentRequestBean.setName("");
-        paymentRequestBean.setCard_number(cardNumber);
-        paymentRequestBean.setExpiration_date(expiredDate);
-//        paymentRequestBean.setCvv("");
-        //Payment Description
-        paymentRequestBean.setDescription("Card Pay");
-        paymentRequestBean.setType(PAYMENT_TYPE_CARD_PAY);
-        //Address Details
-        paymentRequestBean.setAddress1("Address1");
-        paymentRequestBean.setAddress2("Address2");
-        paymentRequestBean.setCity("New York");
-        paymentRequestBean.setState("CF");
-        paymentRequestBean.setCountry("USA");
-        paymentRequestBean.setPostalcode("123456");
-
-        if (orderResponse != null) {
-            paymentRequestBean.setToken(orderResponse.getData().getToken());
-            paymentRequestBean.setOrder_id(orderResponse.getData().getOrder_id());
-        }
-
-        if (paymentData != null) {
-            //Headers
-            HeaderBean headerBean = new HeaderBean();
-            headerBean.setXusername(APIConstant.X_USERNAME);
-            headerBean.setXpassword(APIConstant.X_PASSWORD);
-            headerBean.setMerchant_key(paymentData.getMerchantKey());
-            headerBean.setMerchant_secret(paymentData.getMerchantSecret());
-            paymentRequestBean.setHeaders(headerBean);
-        }
-
-        paymentRequestBean.setSource("sdk");
-
-        //API Call
-        paymentViewModel.proceedToPaymentAsync(PaymentActivity.this, paymentRequestBean);
-    }
-
-
-    /**
-     * Dialog
-     * Order is not created.
-     * Recreate order
-     */
-    private void showOrderIsNotCreated() {
-        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                .setTitleText("Order")
-                .setContentText("Order is not place yet, please place order and try again!")
-                .setConfirmText("Recreate order")
-                .setConfirmClickListener(sweetAlertDialog -> {
-                    if (paymentData != null) {
-                        //Recreate order
-                        paymentViewModel.createOrderAsync(this, paymentData, new JSONObject());
-                    }
-                }).setCancelText("Cancel")
-                .setCancelClickListener(Dialog::dismiss)
-                .show();
     }
 
     /**
@@ -747,55 +547,6 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     /**
-     * Result Launcher
-     * UPI Payment result launcher
-     */
-    ActivityResultLauncher<Intent> upiPaymentResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-
-                    SyncMessage syncMessage = null;
-                    if (result.getData() != null) {
-                        syncMessage = result.getData().getParcelableExtra(PaymentActivity.EXTRA_TXN_RESULT);
-                    }
-                    //Show
-                    showTransactionReceipt(syncMessage);
-
-                } else {
-
-                    SyncMessage syncMessage = new SyncMessage();
-                    if (result.getData() != null) {
-                        OrderResponse orderResponse = result.getData().getParcelableExtra(ORDER_MESSAGE);
-                        syncMessage.orderId = orderResponse.getData().getOrder_id();
-                        syncMessage.orderResponse = orderResponse;
-                        syncMessage.transactionId = null;
-                    }
-                    syncMessage.message = "Transaction is canceled!";
-                    syncMessage.status = false;
-
-                    //Show
-                    showTransactionReceipt(syncMessage);
-                }
-
-                isUPIPaymentRunning = false;
-            });
-
-    /**
-     * Transaction Result Launcher
-     */
-    ActivityResultLauncher<Intent> successResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        SyncMessage syncMessage = result.getData().getParcelableExtra(TRANSACTION_MESSAGE);
-                        //Intent
-                        postResultBack(syncMessage);
-                    }
-                }
-            }
-    );
-
-    /**
      * Transaction Receipt Screen
      *
      * @param syncMessage transaction data
@@ -832,5 +583,23 @@ public class PaymentActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_TXN_RESULT, response);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private static class CardCVVTextWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
     }
 }

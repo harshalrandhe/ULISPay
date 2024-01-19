@@ -33,6 +33,21 @@
     <string name="LOADING">Loading...</string>
     <string name="label_do_not_press_back">Please do not press the back button until the transactions has been complete</string>
     <string name="dot_uni_codes">••••••</string>
+
+    <string name="label_txn_reference">TRANSACTION REFERENCE</string>
+    <string name="label_invoice_number">INVOICE NUMBER</string>
+    <string name="label_txn_type">TRANSACTION TYPE</string>
+    <string name="label_txn_amount">AMOUNT</string>
+    <string name="label_txn_status">STATUS</string>
+    <string name="label_txn_description">DESCRIPTION</string>
+    <string name="label_txn_time">TIME(UTC)</string>
+    <string name="label_auth_code">AUTHORISATION CODE</string>
+    <string name="label_card">CARD</string>
+    <string name="label_email_address">EMAIL ADDRESS</string>
+    <string name="label_phone_number">PHONE NUMBER</string>
+    <string name="label_country">COUNTRY</string>
+
+
     <string name="label_vendor_name">Vendor Name</string>
     <string name="label_mobile">Mobile</string>
     <string name="label_product_name">Product Name</string>

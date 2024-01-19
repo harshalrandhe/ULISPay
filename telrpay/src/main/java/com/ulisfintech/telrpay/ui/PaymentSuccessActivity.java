@@ -63,8 +63,24 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 binding.ivError.setVisibility(View.VISIBLE);
                 binding.gifImage.setVisibility(View.GONE);
             }
-            binding.tvOrderId.setText(syncMessage.orderId == null ? "-" : syncMessage.orderId);
-            binding.tvTransactionId.setText(syncMessage.transactionId == null ? "-" : syncMessage.transactionId);
+
+            TransactionResponseBean txnBean = syncMessage.orderStatusBean.getTransactions().get(0);
+            OrderStatusBean statusBean = syncMessage.orderStatusBean;
+            CustomerDetailsResponse customerDetails = syncMessage.orderStatusBean.getCustomer_details();
+
+            binding.tvTxnReference.setText(txnBean.getTransaction_id() == null ? "-" : txnBean.getTransaction_id());
+            binding.tvInvoiceNumber.setText(txnBean.getTransaction_id() == null ? "-" : txnBean.getTransaction_id());
+            binding.tvTxnType.setText(txnBean.getType() == null ? "-" : txnBean.getType());
+            binding.tvTxnAmount.setText(txnBean.getAmount() == null ? "-" : txnBean.getAmount());
+            binding.tvTxnStatus.setText(txnBean.getGateway_code() == null ? "-" : txnBean.getGateway_code());
+            binding.tvDescription.setText(statusBean.getDescription() == null ? "-" : statusBean.getDescription());
+            binding.tvTxnTime.setText(txnBean.getDate_time() == null ? "-" : txnBean.getDate_time());
+            binding.tvAuthCode.setText(statusBean.getAuthcode() == null ? "-" : statusBean.getAuthcode());
+            binding.tvCard.setText(statusBean.getCard_brand() + "\n" + statusBean.getAccount_identifier());
+            binding.tvEmailAddress.setText(customerDetails.getEmail() == null ? "-" : customerDetails.getEmail());
+            binding.tvPhoneNumber.setText(customerDetails.getMobile_no() == null ? "-" : customerDetails.getMobile_no());
+            binding.tvCountry.setText(customerDetails.getBilling_address().getCountry() == null ? "-" : customerDetails.getBilling_address().getCountry());
+
         }
     }
 
@@ -87,13 +103,8 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 return;
             }
             this.paymentData = paymentData;
-            String mobile = paymentData.getProductDetails().getVendorMobile();
-            String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
-            binding.tvVendorName.setText(paymentData.getProductDetails().getVendorName());
-            binding.tvVendorMobile.setText(strMobile);
-                binding.tvProductName.setText(paymentData.getProductDetails().getProductName());
-            String price = paymentData.getProductDetails().getCurrency() + " " + paymentData.getProductDetails().getProductPrice();
-            binding.tvProductPrice.setText(price);
+//            String mobile = paymentData.getProductDetails().getVendorMobile();
+//            String strMobile = "XXXXXXXX" + mobile.substring(mobile.length() - 2);
         };
     }
 }

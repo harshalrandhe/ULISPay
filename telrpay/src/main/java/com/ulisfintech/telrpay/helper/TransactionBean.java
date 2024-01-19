@@ -13,16 +13,32 @@ public class TransactionBean implements Parcelable {
     @Expose
     @SerializedName("class")
     private String classname;
+    @Expose
+    @SerializedName("integration")
+    private String integration;
 
     public TransactionBean() {
     }
 
-    public TransactionBean(String classname) {
+    public TransactionBean(String classname, String integration) {
         this.classname = classname;
+        this.integration = integration;
     }
 
     protected TransactionBean(Parcel in) {
         classname = in.readString();
+        integration = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(classname);
+        dest.writeString(integration);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<TransactionBean> CREATOR = new Creator<TransactionBean>() {
@@ -45,13 +61,11 @@ public class TransactionBean implements Parcelable {
         this.classname = classname;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getIntegration() {
+        return integration;
     }
 
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(classname);
+    public void setIntegration(String integration) {
+        this.integration = integration;
     }
 }

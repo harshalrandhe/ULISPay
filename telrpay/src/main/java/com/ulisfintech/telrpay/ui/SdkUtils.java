@@ -1,7 +1,5 @@
 package com.ulisfintech.telrpay.ui;
 
-import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -22,7 +20,6 @@ import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -93,22 +90,22 @@ public class SdkUtils {
         return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
     }
 
-     String getLocalIpAddress() {
-         try {
-             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
-                  en.hasMoreElements();) {
-                 NetworkInterface intf = en.nextElement();
-                 for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-                     InetAddress inetAddress = enumIpAddr.nextElement();
-                     if (!inetAddress.isLoopbackAddress()) {
-                         return inetAddress.getHostAddress();
-                     }
-                 }
-             }
-         } catch (Exception ex) {
-             Log.e("IP Address", ex.toString());
-         }
-         return "";
+    String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+                 en.hasMoreElements(); ) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Log.e("IP Address", ex.toString());
+        }
+        return "";
     }
 
 

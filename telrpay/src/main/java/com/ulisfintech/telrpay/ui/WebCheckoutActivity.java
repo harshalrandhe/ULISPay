@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,7 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     private ActivityWebCheckoutBinding binding;
     private MerchantUrls merchantUrls;
     private String returnUrl;
+    private CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +42,13 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
          */
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getColor(R.color.material_deep_teal_50));
+        window.setStatusBarColor(getColor(R.color.teal_700));
 
+
+        binding.btnRedirecting.setOnClickListener(v -> {
+            //PostBack
+            setResponseAndExit();
+        });
 
         onNewIntent(getIntent());
     }
@@ -77,21 +84,21 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     public void onResume() {
         super.onResume();
         binding.webView.onResume();
-        // ...
     }
 
     @SuppressLint("NewApi")
     @Override
     public void onPause() {
         binding.webView.onPause();
-        // ...
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
         binding.webView.onDestroy();
-        // ...
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
         super.onDestroy();
     }
 
@@ -109,6 +116,10 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
     public void onPageStarted(String url, Bitmap favicon) {
         Log.e("onPageStarted...", url);
         binding.progressBar.setVisibility(View.VISIBLE);
+        if(url.equalsIgnoreCase(
+                "https://ulis.live:8081/error?m=Transaction%20is%20already%20being%20processed.")){
+            setResponseAndExit();
+        }
     }
 
     @Override
@@ -116,8 +127,8 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         Log.e("onPageFinished...", url);
         binding.progressBar.setVisibility(View.GONE);
         if(url.equalsIgnoreCase(this.returnUrl)){
-            //PostBack
-            setResponseAndExit("Transaction complete", true);
+            binding.layoutRedirecting.setVisibility(View.VISIBLE);
+            startTimer();
         }
     }
 
@@ -135,6 +146,19 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
         Log.e("onDownloadRequested...", url);
     }
 
+    private void startTimer(){
+        countDownTimer = new CountDownTimer(10000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                binding.tvRedirecting.setText("Screen redirect in " + millisUntilFinished / 1000 + " seconds");
+            }
+
+            public void onFinish() {
+                setResponseAndExit();
+            }
+        }.start();
+    }
+
     @Override
     public void onExternalPageRequest(String url) {
         Log.e("onExternalPageRequest...", url);
@@ -146,40 +170,7 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    URL aURL = null;
-//                    InputStream inputStream = null;
-//                    try {
-//
-//                        aURL = new URL(url);
-//                        URLConnection conn = aURL.openConnection();
-//                        conn.connect();
-//                        inputStream = conn.getInputStream();
-//
-//                        // read inputstream to get the json..
-//                        ByteArrayOutputStream result = new ByteArrayOutputStream();
-//                        byte[] buffer = new byte[1024];
-//                        for (int length; (length = inputStream.read(buffer)) != -1; ) {
-//                            result.write(buffer, 0, length);
-//                        }
-//
-//                        // StandardCharsets.UTF_8.name() > JDK 7
-//                        String response =  result.toString("UTF-8");
-//                        Log.e("<<Url>>", url);
-//                        Log.e("<<Response>>", response);
-//
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }).start();
-
             view.loadUrl(url);
-
             return true;
         }
 
@@ -193,15 +184,12 @@ public class WebCheckoutActivity extends AppCompatActivity implements AdvancedWe
 
     /**
      * Post Result With Response Back
-     *
-     * @param message transaction status message
-     * @param status  transaction status
      */
-    private void setResponseAndExit(String message, boolean status) {
+    private void setResponseAndExit() {
         SyncMessage syncMessage = new SyncMessage();
         syncMessage.data = null;
-        syncMessage.message = message;
-        syncMessage.status = status;
+        syncMessage.message = "Transaction complete";
+        syncMessage.status = true;
         //Intent
         postResultBack(syncMessage);
     }

@@ -15,7 +15,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.6"
+            android:layout_weight="0.4"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -54,7 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -65,11 +65,11 @@
                         style="@style/tv_transaction_success_label_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/label_vendor_name" />
+                        android:layout_weight="1"
+                        android:text="@string/label_txn_reference" />
 
                     <TextView
-                        android:id="@+id/tvVendorName"
+                        android:id="@+id/tvTxnReference"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -85,11 +85,11 @@
                         style="@style/tv_transaction_success_label_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/label_mobile" />
+                        android:layout_weight="1"
+                        android:text="@string/label_invoice_number" />
 
                     <TextView
-                        android:id="@+id/tvVendorMobile"
+                        android:id="@+id/tvInvoiceNumber"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -105,11 +105,11 @@
                         style="@style/tv_transaction_success_label_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/label_product_name" />
+                        android:layout_weight="1"
+                        android:text="@string/label_txn_type" />
 
                     <TextView
-                        android:id="@+id/tvProductName"
+                        android:id="@+id/tvTxnType"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -127,11 +127,11 @@
                         style="@style/tv_transaction_success_label_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/label_product_price" />
+                        android:layout_weight="1"
+                        android:text="@string/label_txn_amount" />
 
                     <TextView
-                        android:id="@+id/tvProductPrice"
+                        android:id="@+id/tvTxnAmount"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -147,11 +147,31 @@
                         style="@style/tv_transaction_success_label_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/label_order_id" />
+                        android:layout_weight="1"
+                        android:text="@string/label_txn_status" />
 
                     <TextView
-                        android:id="@+id/tvOrderId"
+                        android:id="@+id/tvTxnStatus"
+                        style="@style/tv_transaction_success_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/tv_transaction_success_label_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_txn_description" />
+
+                    <TextView
+                        android:id="@+id/tvDescription"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -168,11 +188,116 @@
                         style="@style/tv_transaction_success_label_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:text="@string/label_transaction_id" />
+                        android:layout_weight="1"
+                        android:text="@string/label_txn_time" />
 
                     <TextView
-                        android:id="@+id/tvTransactionId"
+                        android:id="@+id/tvTxnTime"
+                        style="@style/tv_transaction_success_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/tv_transaction_success_label_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_auth_code" />
+
+                    <TextView
+                        android:id="@+id/tvAuthCode"
+                        style="@style/tv_transaction_success_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/tv_transaction_success_label_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_card" />
+
+                    <TextView
+                        android:id="@+id/tvCard"
+                        style="@style/tv_transaction_success_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/tv_transaction_success_label_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_email_address" />
+
+                    <TextView
+                        android:id="@+id/tvEmailAddress"
+                        style="@style/tv_transaction_success_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/tv_transaction_success_label_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_phone_number" />
+
+                    <TextView
+                        android:id="@+id/tvPhoneNumber"
+                        style="@style/tv_transaction_success_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/tv_transaction_success_label_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_country" />
+
+                    <TextView
+                        android:id="@+id/tvCountry"
                         style="@style/tv_transaction_success_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -186,8 +311,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
             android:gravity="bottom"
             android:orientation="vertical">
 

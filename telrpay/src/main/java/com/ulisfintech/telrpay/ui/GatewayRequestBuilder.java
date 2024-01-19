@@ -22,9 +22,9 @@ class GatewayRequestBuilder {
      */
     GatewayRequest buildOrderStatusRequest(String orderId, String token, HeaderBean headerBean) {
         GatewayRequest request = new GatewayRequest();
-        request.URL = BASE_ORDER_URL + "details";
+        request.URL = BASE_ORDER_URL + "transaction-details-print";
         request.method = GatewayRequest.POST;
-        request.payload = new OrderIdBean(orderId, token);
+        request.payload = new OrderIdBean(orderId);
         request.extraHeaders = getHeaders(headerBean);
         return request;
     }
@@ -43,38 +43,6 @@ class GatewayRequestBuilder {
         request.payload = new OrderPayload(orderBean);
 //        request.payload = new OrderPayload(jsonObject);
         request.extraHeaders = getHeaders(orderBean.getHeaders());
-        return request;
-    }
-
-    /**
-     * Request
-     * Buy order
-     *
-     * @param bean payment data
-     * @return payment request
-     */
-    GatewayRequest buildPaymentRequest(PaymentRequestBean bean) {
-        GatewayRequest request = new GatewayRequest();
-        request.URL = BASE_ORDER_URL + "Pay";
-        request.method = GatewayRequest.POST;
-        request.payload = new PaymentPayload(bean);
-        request.extraHeaders = getHeaders(bean.getHeaders());
-        return request;
-    }
-
-    /**
-     * Request
-     * Buy using UPI order
-     *
-     * @param bean payment data
-     * @return payment request
-     */
-    GatewayRequest buildUPIPaymentRequest(UPIPaymentRequestBean bean) {
-        GatewayRequest request = new GatewayRequest();
-        request.URL = BASE_ORDER_URL + "Pay";
-        request.method = GatewayRequest.POST;
-        request.payload = new PaymentPayload(bean);
-        request.extraHeaders = getHeaders(bean.getHeaders());
         return request;
     }
 

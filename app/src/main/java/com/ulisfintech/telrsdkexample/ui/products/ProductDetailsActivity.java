@@ -102,6 +102,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             customerDetails.setName("PayTM USER");
             customerDetails.setEmail("rasibas152@kameili.com");
             customerDetails.setMobile("5353453533");
+            customerDetails.setMobile_code("91");
             paymentData.setCustomer_details(customerDetails);
 
             // Set Billing Details
@@ -141,14 +142,14 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
 
 //            paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
 //            paymentData.setMerchantSecret(BuildConfig.MERCHANT_PASSWORD);
-            paymentData.setMerchantKey("live-P762B55IY");
-            paymentData.setMerchantSecret("sec-4C6E4V5DL");
+            paymentData.setMerchantKey("live-SH10ZQM18IQ");
+            paymentData.setMerchantSecret("sec-IW101K818CW");
 
             Gson gson = new Gson();
             paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),
                     com.ulisfintech.telrpay.helper.ProductBean.class));
 
-            paymentData.setTransaction(new TransactionBean("ecom"));
+            paymentData.setTransaction(new TransactionBean("ecom", "MOBILESDK"));
 
             if (binding.radioTelrPay.isChecked()) {
 

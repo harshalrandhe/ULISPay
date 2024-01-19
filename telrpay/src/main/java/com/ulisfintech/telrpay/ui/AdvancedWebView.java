@@ -110,10 +110,8 @@ public class AdvancedWebView extends WebView {
 
     @SuppressLint("NewApi")
     protected static void setAllowAccessFromFileUrls(final WebSettings webSettings, final boolean allowed) {
-        if (Build.VERSION.SDK_INT >= 16) {
-            webSettings.setAllowFileAccessFromFileURLs(allowed);
-            webSettings.setAllowUniversalAccessFromFileURLs(allowed);
-        }
+        webSettings.setAllowFileAccessFromFileURLs(allowed);
+        webSettings.setAllowUniversalAccessFromFileURLs(allowed);
     }
 
     protected static String makeUrlUnique(final String url) {
@@ -167,13 +165,7 @@ public class AdvancedWebView extends WebView {
      * @return whether file uploads can be used
      */
     public static boolean isFileUploadAvailable(final boolean needsCorrectMimeType) {
-        if (Build.VERSION.SDK_INT == 19) {
-            final String platformVersion = (Build.VERSION.RELEASE == null) ? "" : Build.VERSION.RELEASE;
-
-            return !needsCorrectMimeType && (platformVersion.startsWith("4.4.3") || platformVersion.startsWith("4.4.4"));
-        } else {
-            return true;
-        }
+        return true;
     }
 
     /**
@@ -191,15 +183,10 @@ public class AdvancedWebView extends WebView {
      */
     @SuppressLint("NewApi")
     public static boolean handleDownload(final Context context, final String fromUrl, final String toFilename) {
-        if (Build.VERSION.SDK_INT < 9) {
-            throw new RuntimeException("Method requires API level 9 or above");
-        }
 
         final Request request = new Request(Uri.parse(fromUrl));
-        if (Build.VERSION.SDK_INT >= 11) {
-            request.allowScanningByMediaScanner();
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        }
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, toFilename);
 
         final DownloadManager dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
@@ -207,9 +194,7 @@ public class AdvancedWebView extends WebView {
             try {
                 dm.enqueue(request);
             } catch (SecurityException e) {
-                if (Build.VERSION.SDK_INT >= 11) {
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-                }
+                request.setNotificationVisibility(Request.VISIBILITY_VISIBLE);
                 dm.enqueue(request);
             }
 
@@ -226,9 +211,6 @@ public class AdvancedWebView extends WebView {
 
     @SuppressLint("NewApi")
     private static boolean openAppSettings(final Context context, final String packageName) {
-        if (Build.VERSION.SDK_INT < 9) {
-            throw new RuntimeException("Method requires API level 9 or above");
-        }
 
         try {
             final Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -301,7 +283,7 @@ public class AdvancedWebView extends WebView {
     protected void setGeolocationDatabasePath() {
         final Activity activity;
 
-        if (mFragment != null && mFragment.get() != null && Build.VERSION.SDK_INT >= 11 && mFragment.get().getActivity() != null) {
+        if (mFragment != null && mFragment.get() != null && mFragment.get().getActivity() != null) {
             activity = mFragment.get().getActivity();
         } else if (mActivity != null && mActivity.get() != null) {
             activity = mActivity.get();
@@ -407,15 +389,13 @@ public class AdvancedWebView extends WebView {
                             if (intent.getDataString() != null) {
                                 dataUris = new Uri[]{Uri.parse(intent.getDataString())};
                             } else {
-                                if (Build.VERSION.SDK_INT >= 16) {
-                                    if (intent.getClipData() != null) {
-                                        final int numSelectedFiles = intent.getClipData().getItemCount();
+                                if (intent.getClipData() != null) {
+                                    final int numSelectedFiles = intent.getClipData().getItemCount();
 
-                                        dataUris = new Uri[numSelectedFiles];
+                                    dataUris = new Uri[numSelectedFiles];
 
-                                        for (int i = 0; i < numSelectedFiles; i++) {
-                                            dataUris[i] = intent.getClipData().getItemAt(i).getUri();
-                                        }
+                                    for (int i = 0; i < numSelectedFiles; i++) {
+                                        dataUris[i] = intent.getClipData().getItemAt(i).getUri();
                                     }
                                 }
                             }
@@ -503,9 +483,7 @@ public class AdvancedWebView extends WebView {
 
     @SuppressLint("NewApi")
     public void setThirdPartyCookiesEnabled(final boolean enabled) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            CookieManager.getInstance().setAcceptThirdPartyCookies(this, enabled);
-        }
+        CookieManager.getInstance().setAcceptThirdPartyCookies(this, enabled);
     }
 
     public void setMixedContentAllowed(final boolean allowed) {
@@ -515,9 +493,7 @@ public class AdvancedWebView extends WebView {
     @SuppressWarnings("static-method")
     @SuppressLint("NewApi")
     protected void setMixedContentAllowed(final WebSettings webSettings, final boolean allowed) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            webSettings.setMixedContentMode(allowed ? WebSettings.MIXED_CONTENT_ALWAYS_ALLOW : WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        }
+        webSettings.setMixedContentMode(allowed ? WebSettings.MIXED_CONTENT_ALWAYS_ALLOW : WebSettings.MIXED_CONTENT_NEVER_ALLOW);
     }
 
     public void setDesktopMode(final boolean enabled) {
@@ -565,17 +541,9 @@ public class AdvancedWebView extends WebView {
         webSettings.setBuiltInZoomControls(false);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        if (Build.VERSION.SDK_INT < 18) {
-            webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        }
         webSettings.setDatabaseEnabled(true);
-        if (Build.VERSION.SDK_INT < 19) {
-            webSettings.setDatabasePath(databaseDir);
-        }
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
-        }
+        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
         setThirdPartyCookiesEnabled(true);
 
@@ -1273,14 +1241,12 @@ public class AdvancedWebView extends WebView {
         i.addCategory(Intent.CATEGORY_OPENABLE);
 
         if (allowMultiple) {
-            if (Build.VERSION.SDK_INT >= 18) {
-                i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            }
+            i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         }
 
         i.setType(mUploadableFileTypes);
 
-        if (mFragment != null && mFragment.get() != null && Build.VERSION.SDK_INT >= 11) {
+        if (mFragment != null && mFragment.get() != null) {
             mFragment.get().startActivityForResult(Intent.createChooser(i, getFileUploadPromptLabel()), mRequestCodeFilePicker);
         } else if (mActivity != null && mActivity.get() != null) {
             mActivity.get().startActivityForResult(Intent.createChooser(i, getFileUploadPromptLabel()), mRequestCodeFilePicker);
@@ -1331,7 +1297,8 @@ public class AdvancedWebView extends WebView {
             }
 
             final List<String> alternativeBrowsers = Arrays.asList(ALTERNATIVE_BROWSERS);
-            final List<ApplicationInfo> apps = context.getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+            final List<ApplicationInfo> apps = context.getPackageManager()
+                    .getInstalledApplications(PackageManager.GET_META_DATA);
 
             for (ApplicationInfo app : apps) {
                 if (!app.enabled) {

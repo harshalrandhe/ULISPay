@@ -15,6 +15,10 @@ class OrderIdBean {
     public OrderIdBean() {
     }
 
+    public OrderIdBean(String order_id) {
+        this.order_id = order_id;
+    }
+
     public OrderIdBean(String order_id, String token) {
         this.order_id = order_id;
         this.token = token;

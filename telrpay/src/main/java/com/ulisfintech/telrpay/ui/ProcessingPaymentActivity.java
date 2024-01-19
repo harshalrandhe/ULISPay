@@ -23,10 +23,45 @@ import com.ulisfintech.telrpay.helper.SyncMessage;
 
 public class ProcessingPaymentActivity extends AppCompatActivity {
 
+    /**
+     * Transaction Success Result Launcher
+     */
+    ActivityResultLauncher<Intent> successResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null) {
+                        SyncMessage syncMessage = result.getData().getParcelableExtra(PaymentActivity.TRANSACTION_MESSAGE);
+                        //Intent
+                        postResultBack(syncMessage);
+                    }
+                }
+            }
+    );
     private ActivityProcessingPaymentBinding binding;
     private PaymentViewModel paymentViewModel;
     private SdkUtils sdkUtils;
     private PaymentData paymentData;
+    ActivityResultLauncher<Intent> mStartForResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent intent = result.getData();
+                    if (intent != null) {
+                        SyncMessage syncMessage = intent.getParcelableExtra(AppConstants.EXTRA_TXN_RESULT);
+                        OrderResponse orderRes = intent.getParcelableExtra(PaymentActivity.ORDER_RESPONSE);
+                        if (syncMessage != null && syncMessage.status) {
+
+                            // Call API
+                            checkOrderStatus(orderRes.getData().getOrder_id(), orderRes.getData().getToken());
+
+                        }
+                    }
+                    // Handle the Intent
+//                    setResponseAndExit(getString(R.string.label_txn_success), false);
+                } else {
+                    setResponseAndExit(getString(R.string.label_order_failed), false);
+                }
+            });
     private OrderResponse orderResponse;
     private boolean isOrderCreated;
 
@@ -88,7 +123,6 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
         }
 
     }
-
 
     /**
      * Observer
@@ -164,88 +198,62 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
         };
     }
 
-
     /**
      * Observer Method
      * Check order status
      */
     private Observer<? super OrderStatusBean> checkOrderStatusObserver() {
         return orderStatusBean -> {
-            if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
 
-//                orderStatusBean.setMessage("Transaction is successful!");
+            if (orderStatusBean != null) {
 
-                SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
-                syncMessage.transactionId = "";
-                syncMessage.orderStatusBean = orderStatusBean;
-                syncMessage.message = "Transaction is successful!";
-                syncMessage.status = true;
+                if (orderStatusBean.getTransactions().size() > 0) {
 
-                //Show
-                showTransactionReceipt(syncMessage);
+                    TransactionResponseBean transactionResponseBean = orderStatusBean.getTransactions().get(0);
+                    String status = transactionResponseBean.getGateway_code();
 
-            } else if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
+                    SyncMessage syncMessage = new SyncMessage();
+                    syncMessage.orderId = orderStatusBean.getOrder_id();
+                    syncMessage.transactionId = transactionResponseBean.getTransaction_id();
+                    syncMessage.orderStatusBean = orderStatusBean;
 
-//                sdkUtils.errorAlert(this, "Transaction failed!, please try again", true);
-//                orderStatusBean.setMessage("Transaction failed!");
+                    if (status.equalsIgnoreCase(APIConstant.ORDER_STATUS_AUTHORISED)) {
+                        syncMessage.message = "Transaction is successful!";
+                        syncMessage.status = true;
+                    } else if (status.equalsIgnoreCase(APIConstant.ORDER_STATUS_FAILED)) {
+                        syncMessage.message = "Transaction is failed!";
+                        syncMessage.status = false;
+                    } else if (status.equalsIgnoreCase(APIConstant.ORDER_STATUS_CANCELLED)) {
+                        syncMessage.message = "Transaction is cancelled!";
+                        syncMessage.status = false;
+                    } else if (status.equalsIgnoreCase(APIConstant.ORDER_STATUS_DECLINED)) {
+                        syncMessage.message = "Transaction is declined!";
+                        syncMessage.status = false;
+                    } else {
+                        syncMessage.message = "Pending!";
+                        syncMessage.status = false;
+                    }
 
-                SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
-                syncMessage.transactionId = "";
-                syncMessage.orderStatusBean = orderStatusBean;
-                syncMessage.message = "Transaction failed!";
-                syncMessage.status = false;
+                    //Show
+                    showTransactionReceipt(syncMessage);
+                }else{
 
-                //Show
-                showTransactionReceipt(syncMessage);
-
-            } else if (orderStatusBean.getOrder_details().getStatus().equalsIgnoreCase(APIConstant.ORDER_STATUS_CANCELLED)) {
-
-                SyncMessage syncMessage = new SyncMessage();
-                syncMessage.orderId = orderStatusBean.getOrder_details().getOrder_id();
-                syncMessage.transactionId = "";
-                syncMessage.orderStatusBean = orderStatusBean;
-                syncMessage.message = "Transaction cancelled!";
-                syncMessage.status = false;
-
-                //Show
-                showTransactionReceipt(syncMessage);
-
+                    SyncMessage syncMessage = new SyncMessage();
+                    syncMessage.message = "Transaction error!";
+                    syncMessage.status = false;
+                    //Show
+                    showTransactionReceipt(syncMessage);
+                }
             }
-
-//            isMobilePaymentRunning = false;
         };
     }
-
-    ActivityResultLauncher<Intent> mStartForResult = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent intent = result.getData();
-                    if (intent != null) {
-                        SyncMessage syncMessage = intent.getParcelableExtra(AppConstants.EXTRA_TXN_RESULT);
-                        OrderResponse orderRes = intent.getParcelableExtra(PaymentActivity.ORDER_RESPONSE);
-                        if (syncMessage != null && syncMessage.status) {
-
-                            // Call API
-                            checkOrderStatus(orderRes.getData().getOrder_id(), orderRes.getData().getToken());
-
-                        }
-                    }
-                    // Handle the Intent
-//                    setResponseAndExit(getString(R.string.label_txn_success), false);
-                }else{
-                    setResponseAndExit(getString(R.string.label_order_failed), false);
-                }
-            });
 
     /**
      * API Call
      * Check Order status
      *
      * @param orderId Order id
-     * @param token Order token
+     * @param token   Order token
      */
     private void checkOrderStatus(String orderId, String token) {
         if (paymentData != null) {
@@ -271,22 +279,6 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
         intent.putExtra(PaymentActivity.TRANSACTION_MESSAGE, syncMessage);
         successResultLauncher.launch(intent);
     }
-
-
-    /**
-     * Transaction Success Result Launcher
-     */
-    ActivityResultLauncher<Intent> successResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        SyncMessage syncMessage = result.getData().getParcelableExtra(PaymentActivity.TRANSACTION_MESSAGE);
-                        //Intent
-                        postResultBack(syncMessage);
-                    }
-                }
-            }
-    );
 
     /**
      * Post Result With Response Back

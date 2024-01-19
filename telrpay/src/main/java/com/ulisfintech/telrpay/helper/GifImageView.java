@@ -47,9 +47,10 @@ public class GifImageView extends View {
     private void init() {
         setFocusable(true);
         mMovie = Movie.decodeStream(mInputStream);
-        mWidth = mMovie.width();
-        mHeight = mMovie.height();
-
+        if (mMovie != null) {
+            mWidth = mMovie.width();
+            mHeight = mMovie.height();
+        }
         requestLayout();
     }
 
