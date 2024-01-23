@@ -238,11 +238,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                     showTransactionReceipt(syncMessage);
                 }else{
 
-                    SyncMessage syncMessage = new SyncMessage();
-                    syncMessage.message = "Transaction error!";
-                    syncMessage.status = false;
-                    //Show
-                    showTransactionReceipt(syncMessage);
+                    setResponseAndExit("Transaction error!", false);
                 }
             }
         };
