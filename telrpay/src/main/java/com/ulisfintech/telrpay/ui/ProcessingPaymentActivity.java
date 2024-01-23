@@ -236,10 +236,22 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
 
                     //Show
                     showTransactionReceipt(syncMessage);
-                }else{
+                } else {
 
-                    setResponseAndExit("Transaction error!", false);
+                    SyncMessage syncMessage = new SyncMessage();
+                    syncMessage.orderStatusBean = orderStatusBean;
+                    syncMessage.message = "Transaction error!";
+                    syncMessage.status = false;
+                    //Intent
+                    postResultBack(syncMessage);
                 }
+            } else {
+                SyncMessage syncMessage = new SyncMessage();
+                syncMessage.data = null;
+                syncMessage.message = "Error! processing transaction";
+                syncMessage.status = false;
+                //Intent
+                postResultBack(syncMessage);
             }
         };
     }
