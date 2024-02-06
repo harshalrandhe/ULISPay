@@ -1,7 +1,5 @@
 package com.ulisfintech.telrpay.ui;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,15 +14,32 @@ class GatewayRequestBuilder {
      * Check Order Status
      *
      * @param orderId    order id
-     * @param token    order token
+     * @param endPoint      order status api url
      * @param headerBean API headers
      * @return API request
      */
-    GatewayRequest buildOrderStatusRequest(String orderId, String token, HeaderBean headerBean) {
+    GatewayRequest buildOrderStatusRequest(String orderId, String endPoint, HeaderBean headerBean) {
         GatewayRequest request = new GatewayRequest();
-        request.URL = BASE_ORDER_URL + "transaction-details-print";
+        request.URL = BASE_ORDER_URL + endPoint;
         request.method = GatewayRequest.POST;
         request.payload = new OrderIdBean(orderId);
+        request.extraHeaders = getHeaders(headerBean);
+        return request;
+    }
+
+    /**
+     * Check order details
+     *
+     * @param orderId    order id
+     * @param token      order token
+     * @param headerBean API headers
+     * @return API request
+     */
+    GatewayRequest buildOrderDetailsRequest(String orderId, String token, HeaderBean headerBean) {
+        GatewayRequest request = new GatewayRequest();
+        request.URL = BASE_ORDER_URL + "details";
+        request.method = GatewayRequest.POST;
+        request.payload = new OrderIdBean(orderId, token);
         request.extraHeaders = getHeaders(headerBean);
         return request;
     }
@@ -33,7 +48,7 @@ class GatewayRequestBuilder {
      * Request
      * Create Order
      *
-     * @param orderBean  initial product data for order
+     * @param orderBean initial product data for order
      * @return place order or create order request
      */
     GatewayRequest buildCreateOrderRequest(OrderBean orderBean) {

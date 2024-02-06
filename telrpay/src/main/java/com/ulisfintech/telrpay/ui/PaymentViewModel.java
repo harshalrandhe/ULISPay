@@ -14,6 +14,7 @@ import com.ulisfintech.telrpay.R;
 import com.ulisfintech.telrpay.SweetAlert.SweetAlertDialog;
 import com.ulisfintech.telrpay.helper.OrderResponse;
 import com.ulisfintech.telrpay.helper.PaymentData;
+import com.ulisfintech.telrpay.ui.order.OrderDetailsAPIResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -143,6 +144,8 @@ public class PaymentViewModel extends ViewModel {
         headerBean.setIp(new SdkUtils().getMyIp(context));
         orderBean.setHeaders(headerBean);
 
+        Log.e("<<REQUEST>>", new Gson().toJson(orderBean));
+
         GatewayRequest request = new GatewayRequestBuilder().buildCreateOrderRequest(orderBean);
         netBuilder.call(request, new GatewayCallback() {
 
@@ -180,6 +183,83 @@ public class PaymentViewModel extends ViewModel {
      */
     void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId, String token) {
 
+        //Order Details
+        checkOrderDetailsAsync(context, headerBean, orderId, token);
+    }
+
+
+    /**
+     * Check Order Details
+     *
+     * @param headerBean API Headers
+     * @param orderId    Order Id
+     * @param token      token
+     */
+    void checkOrderDetailsAsync(Context context, HeaderBean headerBean, String orderId, String token) {
+
+        if (progressDialog == null) {
+            progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+            progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            progressDialog.setTitleText("Transaction details");
+            progressDialog.setContentText("Do not press back button...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        } else {
+            statusCounter++;
+        }
+
+        GatewayRequest request = new GatewayRequestBuilder().buildOrderDetailsRequest(orderId, token, headerBean);
+        netBuilder.call(request, new GatewayCallback() {
+            @Override
+            public void onSuccess(GatewayMap response) {
+
+                Gson gson = new Gson();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", gson.toJson(response));
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                OrderDetailsAPIResponse orderDetailsResponse = gson.fromJson(gson.toJson(response.get("data")),
+                        OrderDetailsAPIResponse.class);
+
+                String endPoint = "transaction-details-print";
+                if (orderDetailsResponse != null) {
+                    if (orderDetailsResponse.getOrder_details().getEnv().equalsIgnoreCase("test")) {
+                        endPoint = "test/transaction-details-print";
+                    }
+
+                }
+                //API Call
+                checkOrderStatus(context, headerBean, orderId, token, endPoint);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<ERROR>>", throwable.getMessage());
+
+                String endPoint = "transaction-details-print";
+                //API Call
+                checkOrderStatus(context, headerBean, orderId,token, endPoint);
+            }
+        });
+    }
+
+
+    /**
+     * Check Order Details
+     *
+     * @param headerBean API Headers
+     * @param orderId    Order Id
+     * @param token   order token
+     * @param endPoint   url
+     */
+    void checkOrderStatus(Context context, HeaderBean headerBean, String orderId, String token, String endPoint) {
+
         if (progressDialog == null) {
             progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
             progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
@@ -191,7 +271,7 @@ public class PaymentViewModel extends ViewModel {
             statusCounter++;
         }
 
-        GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, token, headerBean);
+        GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, endPoint, headerBean);
         netBuilder.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
@@ -208,7 +288,7 @@ public class PaymentViewModel extends ViewModel {
 
                 if (orderStatusResponse != null && orderStatusResponse.getData() != null) {
                     orderStatusBeanMutableLiveData.setValue(orderStatusResponse.getData());
-                }else{
+                } else {
                     orderStatusBeanMutableLiveData.setValue(null);
                 }
             }
@@ -231,7 +311,6 @@ public class PaymentViewModel extends ViewModel {
                             sweetAlertDialog.dismiss();
                             //Retry API
                             checkOrderStatusAsync(context, headerBean, orderId, token);
-
                         }).setCancelClickListener(sweetAlertDialog -> {
                             sweetAlertDialog.dismiss();
                             orderStatusBeanMutableLiveData.setValue(null);

@@ -85,7 +85,7 @@ class NetBuilder {
 
         // log request data
 //       logger.logRequest(c, requestData);
-        Log.e("<<Request>>", requestData);
+//        Log.e("<<Request>>", requestData);
 
         // write request data
         if (requestData != null) {
@@ -159,7 +159,7 @@ class NetBuilder {
         // add extra headers
         if (request.extraHeaders != null) {
             for (String key : request.extraHeaders.keySet()) {
-                Log.e("header...", key + " / " + request.extraHeaders.get(key));
+//                Log.e("header...", key + " / " + request.extraHeaders.get(key));
                 httpsURLConnection.setRequestProperty(key, request.extraHeaders.get(key));
             }
         }
