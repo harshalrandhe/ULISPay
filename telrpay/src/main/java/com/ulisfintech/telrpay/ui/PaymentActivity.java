@@ -508,8 +508,10 @@ public class PaymentActivity extends AppCompatActivity {
             headerBean.setXpassword(APIConstant.X_PASSWORD);
             headerBean.setMerchant_key(paymentData.getMerchantKey());
             headerBean.setMerchant_secret(paymentData.getMerchantSecret());
+
+            String env = "";
             //Call
-            paymentViewModel.checkOrderStatusAsync(PaymentActivity.this, headerBean, orderId, orderId);
+            paymentViewModel.checkOrderStatusAsync(PaymentActivity.this, headerBean, orderId, orderId, env);
         }
     }
 

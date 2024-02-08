@@ -69,9 +69,9 @@ public class PaymentSuccessActivity extends AppCompatActivity {
             CustomerDetailsResponse customerDetails = syncMessage.orderStatusBean.getCustomer_details();
 
             binding.tvTxnReference.setText(txnBean.getTransaction_id() == null ? "-" : txnBean.getTransaction_id());
-            binding.tvInvoiceNumber.setText(txnBean.getTransaction_id() == null ? "-" : txnBean.getTransaction_id());
+            binding.tvInvoiceNumber.setText(statusBean.getOrder_id() == null ? "-" : statusBean.getOrder_id());
             binding.tvTxnType.setText(txnBean.getType() == null ? "-" : txnBean.getType());
-            binding.tvTxnAmount.setText(txnBean.getAmount() == null ? "-" : txnBean.getAmount());
+            binding.tvTxnAmount.setText(statusBean.getTotal_amount() == null ? "-" : statusBean.getTotal_amount());
             binding.tvTxnStatus.setText(txnBean.getGateway_code() == null ? "-" : txnBean.getGateway_code());
             binding.tvDescription.setText(statusBean.getDescription() == null ? "-" : statusBean.getDescription());
             binding.tvTxnTime.setText(txnBean.getDate_time() == null ? "-" : txnBean.getDate_time());

@@ -158,7 +158,10 @@ public class PaymentViewModel extends ViewModel {
                 Gson gson = new Gson();
                 OrderResponse orderResponse = gson.fromJson(gson.toJson(response), OrderResponse.class);
                 if (orderResponse != null) {
-                    orderResponseMutableLiveData.setValue(orderResponse);
+                    //Order Details
+                    checkOrderDetailsAsync(context, headerBean, orderResponse);
+                } else {
+                    orderResponseMutableLiveData.setValue(null);
                 }
             }
 
@@ -180,33 +183,37 @@ public class PaymentViewModel extends ViewModel {
      * @param headerBean API Headers
      * @param orderId    Order Id
      * @param token      token
+     * @param env
      */
-    void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId, String token) {
+    void checkOrderStatusAsync(Context context, HeaderBean headerBean, String orderId, String token, String env) {
 
-        //Order Details
-        checkOrderDetailsAsync(context, headerBean, orderId, token);
+        //API Call
+        checkOrderStatus(context, headerBean, orderId, token, env);
     }
 
 
     /**
      * Check Order Details
      *
-     * @param headerBean API Headers
-     * @param orderId    Order Id
-     * @param token      token
+     * @param context       Calling activity context
+     * @param headerBean    API Headers
+     * @param orderResponse created order response
      */
-    void checkOrderDetailsAsync(Context context, HeaderBean headerBean, String orderId, String token) {
+    void checkOrderDetailsAsync(Context context, HeaderBean headerBean, OrderResponse orderResponse) {
 
         if (progressDialog == null) {
             progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
             progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-            progressDialog.setTitleText("Transaction details");
+            progressDialog.setTitleText("Processing your order");
             progressDialog.setContentText("Do not press back button...");
             progressDialog.setCancelable(false);
             progressDialog.show();
         } else {
             statusCounter++;
         }
+
+        String orderId = orderResponse.getData().getOrder_id();
+        String token = orderResponse.getData().getToken();
 
         GatewayRequest request = new GatewayRequestBuilder().buildOrderDetailsRequest(orderId, token, headerBean);
         netBuilder.call(request, new GatewayCallback() {
@@ -223,15 +230,12 @@ public class PaymentViewModel extends ViewModel {
                 OrderDetailsAPIResponse orderDetailsResponse = gson.fromJson(gson.toJson(response.get("data")),
                         OrderDetailsAPIResponse.class);
 
-                String endPoint = "transaction-details-print";
-                if (orderDetailsResponse != null) {
-                    if (orderDetailsResponse.getOrder_details().getEnv().equalsIgnoreCase("test")) {
-                        endPoint = "test/transaction-details-print";
-                    }
 
+                if (orderDetailsResponse != null) {
+                    orderResponse.setEnv(orderDetailsResponse.getOrder_details().getEnv());
                 }
-                //API Call
-                checkOrderStatus(context, headerBean, orderId, token, endPoint);
+
+                orderResponseMutableLiveData.setValue(orderResponse);
             }
 
             @Override
@@ -244,7 +248,7 @@ public class PaymentViewModel extends ViewModel {
 
                 String endPoint = "transaction-details-print";
                 //API Call
-                checkOrderStatus(context, headerBean, orderId,token, endPoint);
+                checkOrderStatus(context, headerBean, orderId, token, endPoint);
             }
         });
     }
@@ -255,10 +259,15 @@ public class PaymentViewModel extends ViewModel {
      *
      * @param headerBean API Headers
      * @param orderId    Order Id
-     * @param token   order token
-     * @param endPoint   url
+     * @param token      order token
+     * @param env        Application Mode(Live/Test)
      */
-    void checkOrderStatus(Context context, HeaderBean headerBean, String orderId, String token, String endPoint) {
+    void checkOrderStatus(Context context, HeaderBean headerBean, String orderId, String token, String env) {
+
+        String endPoint = "transaction-details-print";
+        if (env.equalsIgnoreCase("test")) {
+            endPoint = "test/transaction-details-print";
+        }
 
         if (progressDialog == null) {
             progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
@@ -310,7 +319,7 @@ public class PaymentViewModel extends ViewModel {
                         .setConfirmClickListener(sweetAlertDialog -> {
                             sweetAlertDialog.dismiss();
                             //Retry API
-                            checkOrderStatusAsync(context, headerBean, orderId, token);
+                            checkOrderStatusAsync(context, headerBean, orderId, token, env);
                         }).setCancelClickListener(sweetAlertDialog -> {
                             sweetAlertDialog.dismiss();
                             orderStatusBeanMutableLiveData.setValue(null);

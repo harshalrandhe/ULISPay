@@ -22,6 +22,8 @@ public class OrderResponse extends BaseResponse implements Parcelable {
 
     private String returnUrl;
 
+    private String env;
+
     public OrderResponse() {
 
     }
@@ -33,6 +35,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         productBean = in.readParcelable(ProductBean.class.getClassLoader());
         merchantUrls = in.readParcelable(MerchantUrls.class.getClassLoader());
         returnUrl = in.readString();
+        env = in.readString();
     }
 
     @Override
@@ -43,6 +46,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         dest.writeParcelable(productBean, flags);
         dest.writeParcelable(merchantUrls, flags);
         dest.writeString(returnUrl);
+        dest.writeString(env);
     }
 
     @Override
@@ -108,5 +112,13 @@ public class OrderResponse extends BaseResponse implements Parcelable {
 
     public void setReturnUrl(String returnUrl) {
         this.returnUrl = returnUrl;
+    }
+
+    public String getEnv() {
+        return env;
+    }
+
+    public void setEnv(String env) {
+        this.env = env;
     }
 }

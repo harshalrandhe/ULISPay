@@ -52,7 +52,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                         if (syncMessage != null && syncMessage.status) {
 
                             // Call API
-                            checkOrderStatus(orderRes.getData().getOrder_id(), orderRes.getData().getToken());
+                            checkOrderStatus(orderRes.getData().getOrder_id(), orderRes.getData().getToken(), orderRes.getEnv());
 
                         }
                     }
@@ -262,8 +262,9 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
      *
      * @param orderId Order id
      * @param token   Order token
+     * @param env
      */
-    private void checkOrderStatus(String orderId, String token) {
+    private void checkOrderStatus(String orderId, String token, String env) {
         if (paymentData != null) {
             HeaderBean headerBean = new HeaderBean();
             headerBean.setXusername(APIConstant.X_USERNAME);
@@ -272,7 +273,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
             headerBean.setMerchant_secret(paymentData.getMerchantSecret());
             headerBean.setIp(sdkUtils.getMyIp(this));
             //Call
-            paymentViewModel.checkOrderStatusAsync(this, headerBean, orderId, token);
+            paymentViewModel.checkOrderStatusAsync(this, headerBean, orderId, token, env);
         }
     }
 
