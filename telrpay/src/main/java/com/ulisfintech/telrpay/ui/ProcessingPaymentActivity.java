@@ -52,7 +52,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                         if (syncMessage != null && syncMessage.status) {
 
                             // Call API
-                            checkOrderStatus(orderRes.getData().getOrder_id(), orderRes.getData().getToken(), orderRes.getEnv());
+                            checkOrderStatus(orderRes);
 
                         }
                     }
@@ -170,10 +170,6 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
                 binding.tvPaymentStatus.setTextColor(getColor(R.color.red_btn_bg_pressed_color));
                 binding.gifImage.setGifImageResource(R.drawable.warning_circle);
                 binding.tvPaymentStatus.setText(getString(R.string.label_order_failed_retry));
-
-//                Intent intent = new Intent(this, WebCheckoutActivity.class);
-//                intent.putExtra(PaymentActivity.ORDER_RESPONSE, orderResponse);
-//                mStartForResult.launch(intent);
                 return;
             }
 
@@ -260,11 +256,14 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
      * API Call
      * Check Order status
      *
-     * @param orderId Order id
-     * @param token   Order token
-     * @param env
+     * @param orderRes order response
+     *
      */
-    private void checkOrderStatus(String orderId, String token, String env) {
+    private void checkOrderStatus(OrderResponse orderRes) {
+        String orderId = orderRes.getData().getOrder_id();
+        String token = orderRes.getData().getToken();
+        String env = orderRes.getEnv();
+        String region = orderRes.getRegion();
         if (paymentData != null) {
             HeaderBean headerBean = new HeaderBean();
             headerBean.setXusername(APIConstant.X_USERNAME);
@@ -272,6 +271,7 @@ public class ProcessingPaymentActivity extends AppCompatActivity {
             headerBean.setMerchant_key(paymentData.getMerchantKey());
             headerBean.setMerchant_secret(paymentData.getMerchantSecret());
             headerBean.setIp(sdkUtils.getMyIp(this));
+            headerBean.setRegion(region);
             //Call
             paymentViewModel.checkOrderStatusAsync(this, headerBean, orderId, token, env);
         }

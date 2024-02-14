@@ -1,7 +1,6 @@
 package com.ulisfintech.telrpay.helper;
 
 
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,6 +22,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
     private String returnUrl;
 
     private String env;
+    private String region;
 
     public OrderResponse() {
 
@@ -36,6 +36,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         merchantUrls = in.readParcelable(MerchantUrls.class.getClassLoader());
         returnUrl = in.readString();
         env = in.readString();
+        region = in.readString();
     }
 
     @Override
@@ -47,6 +48,7 @@ public class OrderResponse extends BaseResponse implements Parcelable {
         dest.writeParcelable(merchantUrls, flags);
         dest.writeString(returnUrl);
         dest.writeString(env);
+        dest.writeString(region);
     }
 
     @Override
@@ -120,5 +122,13 @@ public class OrderResponse extends BaseResponse implements Parcelable {
 
     public void setEnv(String env) {
         this.env = env;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 }

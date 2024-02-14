@@ -94,6 +94,7 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             productDetails.setVendorMobile("1122334455");
             productDetails.setProductName(productBean.getName());
             productDetails.setProductPrice(productBean.getPrice());
+//            productDetails.setCurrency("SAR");
             productDetails.setCurrency("AED");
             productDetails.setImage(productBean.getImg());
             paymentData.setProductDetails(productDetails);
@@ -131,21 +132,23 @@ public class ProductDetailsActivity extends AppCompatActivity implements Compoun
             orderDetails.setAmount(paymentData.getProductDetails().getProductPrice());
             orderDetails.setCurrency(paymentData.getProductDetails().getCurrency());
             orderDetails.setDescription("Mobile Payment");
-            orderDetails.setReturn_url("https://ulis.live:8081/status");
+            orderDetails.setReturn_url("https://ulis.live:8082/status");
             paymentData.setOrder_details(orderDetails);
 
             MerchantUrls merchantUrls = new MerchantUrls();
-            merchantUrls.setSuccess("https://ulis.live:8081/status");
-            merchantUrls.setCancel("https://ulis.live:8081/status");
-            merchantUrls.setFailure("https://ulis.live:8081/status");
+            merchantUrls.setSuccess("https://ulis.live:8082/status");
+            merchantUrls.setCancel("https://ulis.live:8082/status");
+            merchantUrls.setFailure("https://ulis.live:8082/status");
             paymentData.setMerchant_urls(merchantUrls);
 
 //            paymentData.setMerchantKey(BuildConfig.MERCHANT_KEY);
 //            paymentData.setMerchantSecret(BuildConfig.MERCHANT_PASSWORD);
-            paymentData.setMerchantKey("live-SH10ZQM18IQ");
-            paymentData.setMerchantSecret("sec-IW101K818CW");
-//            paymentData.setMerchantKey("test-ZR1OGP6NR");
-//            paymentData.setMerchantSecret("sec-3P1LHI6GR");
+//            paymentData.setMerchantKey("live-SH10ZQM18IQ");
+//            paymentData.setMerchantSecret("sec-IW101K818CW");
+            paymentData.setMerchantKey("test-ZR1OGP6NR");
+            paymentData.setMerchantSecret("sec-3P1LHI6GR");
+//            paymentData.setMerchantKey("live-4B1QTZ138S");
+//            paymentData.setMerchantSecret("sec-HV18UG13PD");
 
             Gson gson = new Gson();
             paymentData.setProductBean(gson.fromJson(gson.toJson(productBean),

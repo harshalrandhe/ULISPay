@@ -27,7 +27,6 @@ public class PaymentViewModel extends ViewModel {
     private final MutableLiveData<OrderStatusBean> orderStatusBeanMutableLiveData;
     private final NetBuilder netBuilder;
     private SweetAlertDialog progressDialog;
-    private int statusCounter;
 
     public PaymentViewModel() {
         netBuilder = new NetBuilder();
@@ -77,18 +76,10 @@ public class PaymentViewModel extends ViewModel {
             PaymentData paymentData = new Gson().fromJson(paymentDataStr, PaymentData.class);
             JSONObject jsonObject = new JSONObject(paymentDataStr);
 
-//        Log.e("<<Intent>>", new Gson().toJson(paymentData));
-//        String vendorMobile = paymentData.getProductDetails().getVendorMobile();
-//        String strMobile = "XXXXXXXX" + vendorMobile.substring(vendorMobile.length() - 2);
-//        paymentData.setVendorMobile(strMobile);
-
             //Update
             paymentDataMutableLiveData.setValue(paymentData);
-
-            /**
-             *  Place New Order
-             */
-            createOrderAsync(context, paymentData, jsonObject);
+            // API Call
+            startProcessingPayment(context, paymentData);
 
         } catch (JSONException err) {
             Log.d("Error", "Invalid parameters!");
@@ -112,11 +103,94 @@ public class PaymentViewModel extends ViewModel {
     }
 
     /**
+     * Start processing payment
+     * 1. Check merchant region UAE or KSA
+     * 2. Create payment order
+     * 3. Check order status
+     *
+     * @param context     calling activity context
+     * @param paymentData order request
+     */
+    private void startProcessingPayment(Context context, PaymentData paymentData) {
+
+        // Set Headers
+        HeaderBean headerBean = new HeaderBean();
+        headerBean.setXusername(APIConstant.X_USERNAME);
+        headerBean.setXpassword(APIConstant.X_PASSWORD);
+        headerBean.setMerchant_key(paymentData.getMerchantKey());
+        headerBean.setMerchant_secret(paymentData.getMerchantSecret());
+        headerBean.setIp(new SdkUtils().getMyIp(context));
+        // API Call
+        checkMerchantRegion(context, headerBean, paymentData);
+    }
+
+
+    /**
+     * Check Merchant Region
+     * and process payment according to region
+     * (UAE & KSA) are run on different port
+     *
+     * @param context     calling activity context
+     * @param headerBean  merchant key and secret
+     * @param paymentData order request
+     */
+    void checkMerchantRegion(Context context, HeaderBean headerBean, PaymentData paymentData) {
+
+
+        GatewayRequest request = new GatewayRequestBuilder().buildCheckRegionRequest(headerBean);
+        netBuilder.call(request, new GatewayCallback() {
+            @Override
+            public void onSuccess(GatewayMap response) {
+
+                Gson gson = new Gson();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<RESPONSE>>", gson.toJson(response));
+
+                //TODO: handle API response
+
+                RegionResponse regionResponse = gson.fromJson(gson.toJson(response.get("data")), RegionResponse.class);
+
+                String region = regionResponse.getRegion();
+
+                // Place New Order
+                createOrderAsync(context, regionResponse.getRegion(), paymentData);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                Log.e("<<URL>>", request.URL);
+                Log.e("<<ERROR>>", throwable.getMessage());
+
+                new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+                        .setTitleText("ERROR!")
+                        .setContentText(context.getString(R.string.network_error_message))
+                        .setCancelText("Cancel")
+                        .setCancelClickListener(Dialog::dismiss)
+                        .setConfirmText("Retry")
+                        .setConfirmClickListener(sweetAlertDialog -> {
+                            sweetAlertDialog.dismiss();
+                            //Retry API
+                            checkMerchantRegion(context, headerBean, paymentData);
+                        }).setCancelClickListener(sweetAlertDialog -> {
+                            sweetAlertDialog.dismiss();
+                            orderStatusBeanMutableLiveData.setValue(null);
+                        })
+                        .show();
+            }
+        });
+    }
+
+    /**
      * Create Payment Order
      *
+     * @param region
      * @param paymentData merchant details
      */
-    void createOrderAsync(Context context, PaymentData paymentData, JSONObject jsonObject) {
+    void createOrderAsync(Context context, String region, PaymentData paymentData) {
 
         OrderBean orderBean = new OrderBean();
 
@@ -142,6 +216,7 @@ public class PaymentViewModel extends ViewModel {
         headerBean.setMerchant_key(paymentData.getMerchantKey());
         headerBean.setMerchant_secret(paymentData.getMerchantSecret());
         headerBean.setIp(new SdkUtils().getMyIp(context));
+        headerBean.setRegion(region);
         orderBean.setHeaders(headerBean);
 
         Log.e("<<REQUEST>>", new Gson().toJson(orderBean));
@@ -201,16 +276,7 @@ public class PaymentViewModel extends ViewModel {
      */
     void checkOrderDetailsAsync(Context context, HeaderBean headerBean, OrderResponse orderResponse) {
 
-        if (progressDialog == null) {
-            progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
-            progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-            progressDialog.setTitleText("Processing your order");
-            progressDialog.setContentText("Do not press back button...");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        } else {
-            statusCounter++;
-        }
+        showProgress(context, "Processing your order","Do not press back button...");
 
         String orderId = orderResponse.getData().getOrder_id();
         String token = orderResponse.getData().getToken();
@@ -220,20 +286,21 @@ public class PaymentViewModel extends ViewModel {
             @Override
             public void onSuccess(GatewayMap response) {
 
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
                 Gson gson = new Gson();
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<RESPONSE>>", gson.toJson(response));
 
-                if (progressDialog.isShowing()) progressDialog.dismiss();
-
                 OrderDetailsAPIResponse orderDetailsResponse = gson.fromJson(gson.toJson(response.get("data")),
                         OrderDetailsAPIResponse.class);
-
 
                 if (orderDetailsResponse != null) {
                     orderResponse.setEnv(orderDetailsResponse.getOrder_details().getEnv());
                 }
+
+                orderResponse.setRegion(headerBean.getRegion());
 
                 orderResponseMutableLiveData.setValue(orderResponse);
             }
@@ -269,28 +336,19 @@ public class PaymentViewModel extends ViewModel {
             endPoint = "test/transaction-details-print";
         }
 
-        if (progressDialog == null) {
-            progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
-            progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
-            progressDialog.setTitleText("Transaction");
-            progressDialog.setContentText("Do not press back button...");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        } else {
-            statusCounter++;
-        }
+        showProgress(context, "Transaction","Do not press back button...");
 
         GatewayRequest request = new GatewayRequestBuilder().buildOrderStatusRequest(orderId, endPoint, headerBean);
         netBuilder.call(request, new GatewayCallback() {
             @Override
             public void onSuccess(GatewayMap response) {
 
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
                 Gson gson = new Gson();
 
                 Log.e("<<URL>>", request.URL);
                 Log.e("<<RESPONSE>>", gson.toJson(response));
-
-                if (progressDialog.isShowing()) progressDialog.dismiss();
 
                 OrderStatusResponse orderStatusResponse = gson.fromJson(gson.toJson(response),
                         OrderStatusResponse.class);
@@ -327,5 +385,16 @@ public class PaymentViewModel extends ViewModel {
                         .show();
             }
         });
+    }
+
+    private void showProgress(Context context, String title, String message) {
+        if (progressDialog == null) {
+            progressDialog = new SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE);
+            progressDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+            progressDialog.setTitleText(title);
+            progressDialog.setContentText(message);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
     }
 }

@@ -123,7 +123,7 @@ class NetBuilder {
         }
 
         // otherwise, create a gateway exception and throw it
-        String message = (String) response.get("error.explanation");
+        String message = (String) response.get("message");
         if (message == null) {
             message = "An error occurred";
         }

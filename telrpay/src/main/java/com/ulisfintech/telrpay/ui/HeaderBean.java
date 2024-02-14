@@ -7,6 +7,7 @@ class HeaderBean {
     private String merchant_key;
     private String merchant_secret;
     private String ip;
+    private String region;
 
     public String getXusername() {
         return xusername;
@@ -46,5 +47,13 @@ class HeaderBean {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 }
